@@ -87,9 +87,6 @@
   "back": {
     "message": "ተመለስ"
   },
-  "backToAll": {
-    "message": "ወደ ሁሉም ተመለስ"
-  },
   "backupApprovalInfo": {
     "message": "መሳሪያዎ ቢጠፋ፣ የይለፍ ቃልዎን ቢረሱ፣ MetaMask እንደገና መጫን ቢያስፈልግዎ ወይም በሌላ መሳሪያ ወደ ቋትዎ ለመድረስ ቢፈልጉ ይህ ሚስጥራዊ ኮድ ቋትዎን መልሶ ለማግኘት ያስፈልጋል።"
   },
@@ -117,12 +114,6 @@
   },
   "browserNotSupported": {
     "message": "ማሰሺያዎት አልተደገፈም..."
-  },
-  "buyWithWyre": {
-    "message": "$1 በ Wyre ይግዙ"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre ክሬዲት ካርድ ተጠቅመው $1 በቀጥታ በ MetaMask መለያዎ ላይ እንዲያስቀምጡ ያስችልዎታል።"
   },
   "bytes": {
     "message": "ባይት"
@@ -154,20 +145,17 @@
   "connect": {
     "message": "ይገናኙ"
   },
-  "connectHardwareWallet": {
-    "message": "ከሃርድዌር ቋት ጋር ይገናኙ"
-  },
   "connectingTo": {
     "message": "ከ $1ጋር መገናኘት"
   },
   "connectingToGoerli": {
     "message": "ከ Goerli የሙከራ አውታረ መረብ ጋር መገናኘት"
   },
+  "connectingToLineaGoerli": {
+    "message": "ከ Linea Goerli የሙከራ አውታረ መረብ ጋር መገናኘት"
+  },
   "connectingToMainnet": {
     "message": "ከዋናው የ Ethereum አውታረ መረብ ጋር መገናኘት"
-  },
-  "continueToWyre": {
-    "message": "ወደ Wyre ይቀጥሉ"
   },
   "contractDeployment": {
     "message": "የኮንትራት ስምሪት"
@@ -193,9 +181,6 @@
   "create": {
     "message": "ፍጠር"
   },
-  "createAccount": {
-    "message": "መለያ ፍጠር"
-  },
   "createPassword": {
     "message": "የይለፍ ቃል ፍጠር"
   },
@@ -216,9 +201,6 @@
   },
   "delete": {
     "message": "ሰርዝ"
-  },
-  "deleteAccount": {
-    "message": "መለያን ሰርዝ"
   },
   "deleteNetwork": {
     "message": "አውታረ መረብ ይሰረዝ?"
@@ -318,13 +300,6 @@
   "general": {
     "message": "አጠቃላይ"
   },
-  "getEther": {
-    "message": "Ether ያግኙ"
-  },
-  "getEtherFromFaucet": {
-    "message": "Ether ከቧንቧ በ$1ያግኙ",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "የ Goerli የሙከራ አውታረ መረብ"
   },
@@ -416,6 +391,9 @@
   "likeToImportTokens": {
     "message": "እነዚህን ተለዋጭ ስሞች ለማከል ይፈልጋሉ?"
   },
+  "lineaGoerli": {
+    "message": "የ Linea Goerli የሙከራ አውታረ መረብ"
+  },
   "links": {
     "message": "ማስፈንጠሪያዎች"
   },
@@ -448,9 +426,6 @@
   },
   "mustSelectOne": {
     "message": "ቢያንስ 1 ተለዋጭ ስም መምረጥ አለብዎ።"
-  },
-  "myAccounts": {
-    "message": "የእኔ መለያዎች"
   },
   "needImportFile": {
     "message": "የሚያስመጡትን ፋይል መምረጥ አለብዎት።",
@@ -576,9 +551,6 @@
   "readdToken": {
     "message": "በመለያ አማራጮችዎ ምናሌ ውስጥ ወደ “ተለዋጭ ስም አክል” በመግባት ለወደፊቱ ይህን ተለዋጭ ስም መልሰው ማከል ይችላሉ።"
   },
-  "recents": {
-    "message": "የቅርብ ጊዜያት"
-  },
   "recipientAddressPlaceholder": {
     "message": "ፍለጋ፣ ለሕዝብ ክፍት የሆነ አድራሻ (0x), ወይም ENS"
   },
@@ -673,12 +645,6 @@
   "settings": {
     "message": "ቅንብሮች"
   },
-  "showAdvancedGasInline": {
-    "message": "የላቁ የነዳጅ ቁጥጥሮች"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "በላክ እና አረጋግጥ ማያዎች ላይ የነዳጅ ዋጋን ለማሳየትና ቁጥጥሮችን ለመገደብ ይህን ይምረጡ።"
-  },
   "showFiatConversionInTestnets": {
     "message": "ልወጣን በ Testnets ላይ አሳይ"
   },
@@ -742,32 +708,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "ምልክቱ 11 ቁምፊዎች ወይም ከዚያ ያነሰ መሆን አለበት።"
   },
-  "syncWithMobile": {
-    "message": "ከሞባይል ጋር አሳምር"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "ይህን ኮድ ስካን ሲያደርጉ ሌላ ሰው የእርስዎን ማያ እየተመለከተ አለመሆኑን ያረጋግጡ"
-  },
-  "syncWithMobileComplete": {
-    "message": "ውሂብዎ በሚገባ ተሳምሯል። በ MetaMask የሞባይል መተግበሪያ ይደሰቱ!"
-  },
-  "syncWithMobileDesc": {
-    "message": "መለያዎችዎንና መረጃዎችዎን ከሞባይል መሳሪያዎ ጋር ያሳምሩ። የ MetaMask የሞባይል መተግበሪያን ይክፈቱ፣ ወደ \"ቅንብሮች\" ይሂዱና \"ከማሰሺያ ቅጥያ አሳምር\" የሚለውን ይንኩ"
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "የ MetaMask የሞባይል መተግበሪያን ለመጀመሪያ ጊዜ ገና እየከፈቱ ከሆነ፣ በስልክዎ ላይ ያሉትን ቅደም ተከተሎች ብቻ ይከተሉ።"
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "ይህን ኮድ በ MetaMask የሞባይል መተግበሪያዎ ስካን ያድርጉ"
-  },
-  "syncWithMobileTitle": {
-    "message": "ከሞባይል ጋር አሳምር"
-  },
   "terms": {
     "message": "የአጠቃቀም ደንቦች"
-  },
-  "testFaucet": {
-    "message": "የሙከራ ቧንቧ"
   },
   "tips": {
     "message": "መረጃዎች"
@@ -832,15 +774,8 @@
   "transfer": {
     "message": "ያስተላልፉ"
   },
-  "transferBetweenAccounts": {
-    "message": "በመለያዎች መካከል አስተላልፍ"
-  },
   "transferFrom": {
     "message": "የማዛወሪያ ቅጽ"
-  },
-  "troubleTokenBalances": {
-    "message": "የተለዋጭ ስም ቀሪ ሂሳብዎን ስንጭን ችግር አጋጥሞናል። ማየት ይችላሉ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "እንደገና ሞክር"
@@ -886,9 +821,6 @@
   },
   "userName": {
     "message": "የተጣቃሚ ስም"
-  },
-  "viewAccount": {
-    "message": "መለያን ይመልከቱ"
   },
   "viewContact": {
     "message": "ዕውቂያን ይመልከቱ"

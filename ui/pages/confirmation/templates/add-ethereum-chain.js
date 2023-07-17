@@ -2,11 +2,11 @@ import { ethErrors } from 'eth-rpc-errors';
 import React from 'react';
 import { infuraProjectId } from '../../../../shared/constants/network';
 import {
-  SEVERITIES,
+  Severity,
   TypographyVariant,
-  TEXT_ALIGN,
-  DISPLAY,
-  FLEX_DIRECTION,
+  TextAlign,
+  Display,
+  FlexDirection,
   AlignItems,
   JustifyContent,
   BackgroundColor,
@@ -14,10 +14,11 @@ import {
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import ZENDESK_URLS from '../../../helpers/constants/zendesk-url';
 import fetchWithCache from '../../../../shared/lib/fetch-with-cache';
+import { jsonRpcRequest } from '../../../../shared/modules/rpc.utils';
 
 const UNRECOGNIZED_CHAIN = {
   id: 'UNRECOGNIZED_CHAIN',
-  severity: SEVERITIES.WARNING,
+  severity: Severity.Warning,
   content: {
     element: 'span',
     children: {
@@ -31,6 +32,7 @@ const UNRECOGNIZED_CHAIN = {
 
 const MISMATCHED_CHAIN_RECOMMENDATION = {
   id: 'MISMATCHED_CHAIN_RECOMMENDATION',
+  severity: Severity.Warning,
   content: {
     element: 'span',
     children: {
@@ -61,7 +63,7 @@ const MISMATCHED_CHAIN_RECOMMENDATION = {
 
 const MISMATCHED_NETWORK_NAME = {
   id: 'MISMATCHED_NETWORK_NAME',
-  severity: SEVERITIES.WARNING,
+  severity: Severity.Warning,
   content: {
     element: 'span',
     children: {
@@ -75,7 +77,7 @@ const MISMATCHED_NETWORK_NAME = {
 
 const MISMATCHED_NETWORK_SYMBOL = {
   id: 'MISMATCHED_NETWORK_SYMBOL',
-  severity: SEVERITIES.DANGER,
+  severity: Severity.Danger,
   content: {
     element: 'span',
     children: {
@@ -89,13 +91,41 @@ const MISMATCHED_NETWORK_SYMBOL = {
 
 const MISMATCHED_NETWORK_RPC = {
   id: 'MISMATCHED_NETWORK_RPC',
-  severity: SEVERITIES.DANGER,
+  severity: Severity.Danger,
   content: {
     element: 'span',
     children: {
       element: 'MetaMaskTranslation',
       props: {
         translationKey: 'mismatchedRpcUrl',
+      },
+    },
+  },
+};
+
+const MISMATCHED_NETWORK_RPC_CHAIN_ID = {
+  id: 'MISMATCHED_NETWORK_RPC_CHAIN_ID',
+  severity: Severity.Danger,
+  content: {
+    element: 'span',
+    children: {
+      element: 'MetaMaskTranslation',
+      props: {
+        translationKey: 'mismatchedRpcChainId',
+      },
+    },
+  },
+};
+
+const ERROR_CONNECTING_TO_RPC = {
+  id: 'ERROR_CONNECTING_TO_RPC',
+  severity: Severity.Danger,
+  content: {
+    element: 'span',
+    children: {
+      element: 'MetaMaskTranslation',
+      props: {
+        translationKey: 'errorWhileConnectingToRPC',
       },
     },
   },
@@ -154,7 +184,7 @@ function getState(pendingApproval) {
 
 function getValues(pendingApproval, t, actions, history) {
   const originIsMetaMask = pendingApproval.origin === 'metamask';
-
+  const customRpcUrl = pendingApproval.requestData.rpcUrl;
   return {
     content: [
       {
@@ -162,8 +192,8 @@ function getValues(pendingApproval, t, actions, history) {
         element: 'Box',
         key: 'network-box',
         props: {
-          textAlign: TEXT_ALIGN.CENTER,
-          display: DISPLAY.FLEX,
+          textAlign: TextAlign.Center,
+          display: Display.Flex,
           justifyContent: JustifyContent.center,
           marginTop: 4,
           marginBottom: 2,
@@ -180,6 +210,7 @@ function getValues(pendingApproval, t, actions, history) {
           },
         ],
       },
+
       {
         element: 'Typography',
         key: 'title',
@@ -287,8 +318,8 @@ function getValues(pendingApproval, t, actions, history) {
           variant: TypographyVariant.H7,
           boxProps: {
             margin: originIsMetaMask ? [0, 8] : 0,
-            display: DISPLAY.FLEX,
-            flexDirection: FLEX_DIRECTION.COLUMN,
+            display: Display.Flex,
+            flexDirection: FlexDirection.Column,
             alignItems: AlignItems.center,
           },
         },
@@ -318,7 +349,7 @@ function getValues(pendingApproval, t, actions, history) {
             [t('chainId')]: parseInt(pendingApproval.requestData.chainId, 16),
             [t('currencySymbol')]: pendingApproval.requestData.ticker,
             [t('blockExplorerUrl')]:
-              pendingApproval.requestData.blockExplorerUrl,
+              pendingApproval.requestData.rpcPrefs.blockExplorerUrl,
           },
           prefaceKeys: [
             t('networkName'),
@@ -331,15 +362,48 @@ function getValues(pendingApproval, t, actions, history) {
     ],
     cancelText: t('cancel'),
     submitText: t('approveButtonText'),
+    loadingText: t('addingCustomNetwork'),
     onSubmit: async () => {
+      let endpointChainId;
+      try {
+        endpointChainId = await jsonRpcRequest(customRpcUrl, 'eth_chainId');
+      } catch (err) {
+        console.error(
+          `Request for method 'eth_chainId on ${customRpcUrl} failed`,
+        );
+        return [ERROR_CONNECTING_TO_RPC];
+      }
+
+      if (pendingApproval.requestData.chainId !== endpointChainId) {
+        console.error(
+          `Chain ID returned by RPC URL ${customRpcUrl} does not match ${endpointChainId}`,
+        );
+        return [MISMATCHED_NETWORK_RPC_CHAIN_ID];
+      }
+
       await actions.resolvePendingApproval(
         pendingApproval.id,
         pendingApproval.requestData,
       );
       if (originIsMetaMask) {
-        actions.addCustomNetwork(pendingApproval.requestData);
+        const networkConfigurationId = await actions.upsertNetworkConfiguration(
+          {
+            ...pendingApproval.requestData,
+            nickname: pendingApproval.requestData.chainName,
+          },
+          {
+            setActive: false,
+            source: pendingApproval.requestData.source,
+          },
+        );
+        await actions.setNewNetworkAdded({
+          networkConfigurationId,
+          nickname: pendingApproval.requestData.chainName,
+        });
+
         history.push(DEFAULT_ROUTE);
       }
+      return [];
     },
     onCancel: () =>
       actions.rejectPendingApproval(

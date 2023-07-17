@@ -72,9 +72,6 @@
   "connectingToMainnet": {
     "message": "เชื่อมต่อกับเครือข่าย Ethereum หลัก"
   },
-  "continueToWyre": {
-    "message": "ไปที่ Wyre"
-  },
   "contractDeployment": {
     "message": "การติดตั้งสัญญา"
   },
@@ -89,9 +86,6 @@
   },
   "create": {
     "message": "สร้าง"
-  },
-  "createAccount": {
-    "message": "สร้างบัญชี"
   },
   "currencyConversion": {
     "message": "การแปลงสกุลเงิน"
@@ -163,13 +157,6 @@
   },
   "general": {
     "message": "ทั่วไป"
-  },
-  "getEther": {
-    "message": "รับอีเธอร์"
-  },
-  "getEtherFromFaucet": {
-    "message": "รับอีเธอร์ที่ปล่อยจาก $1",
-    "description": "Displays network name for Ether faucet"
   },
   "here": {
     "message": "ที่นี่",
@@ -246,9 +233,6 @@
   },
   "mustSelectOne": {
     "message": "ต้องเลือกอย่างน้อย 1 โทเค็น"
-  },
-  "myAccounts": {
-    "message": "บัญชีของฉัน"
   },
   "needImportFile": {
     "message": "คุณต้องเลือกไฟล์ที่จะนำเข้า",
@@ -354,9 +338,6 @@
   "settings": {
     "message": "การตั้งค่า"
   },
-  "showAdvancedGasInline": {
-    "message": "การควบคุม Gas ขั้นสูง"
-  },
   "showPrivateKeys": {
     "message": "แสดงคีย์ส่วนตัว"
   },
@@ -390,14 +371,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "สัญลักษณ์จะต้องมีความยาว 11 ตัวอักษร"
   },
-  "syncWithMobileComplete": {
-    "message": "ซิงค์ข้อมูลของคุณเรียบร้อยแล้ว ใช้แอพ MetaMask ให้สนุกนะ!"
-  },
   "terms": {
     "message": "ข้อตกลงในการใช้งาน"
-  },
-  "testFaucet": {
-    "message": "ตัวแจกจ่ายเพื่อการทดสอบ"
   },
   "to": {
     "message": "ถึง"
@@ -416,13 +391,6 @@
   },
   "transactionDropped": {
     "message": "ธุรกรรมถูกยกเลิกเมื่อ $2"
-  },
-  "transferBetweenAccounts": {
-    "message": "โอนระหว่างบัญชีของฉัน"
-  },
-  "troubleTokenBalances": {
-    "message": "เรามีปัญหาในการโหลดยอดโทเค็นคงเหลือของคุณ คุณสามารถดูได้ที่นี่",
-    "description": "Followed by a link (here) to view token balances"
   },
   "typePassword": {
     "message": "พิมพ์รหัสผ่านของคุณ"
@@ -444,9 +412,6 @@
   },
   "usedByClients": {
     "message": "ถูกใช้งานโดยหลายไคลเอนท์"
-  },
-  "viewAccount": {
-    "message": "ดูบัญชี"
   },
   "visitWebSite": {
     "message": "เยี่ยมชมเว็บไซต์ของเรา"

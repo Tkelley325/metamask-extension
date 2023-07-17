@@ -93,9 +93,6 @@
   "back": {
     "message": "Atpakaļ"
   },
-  "backToAll": {
-    "message": "Atgriezties pie visiem"
-  },
   "backupApprovalInfo": {
     "message": "Šis slepenais kods ir nepieciešams, lai atjaunotu jūsu maku, ja pazaudējat ierīci, aizmirstat paroli, jāpārinstalē MetaMask vai vēlaties piekļūt makam no citas ierīces."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Jūsu pārlūkprogramma netiek atbalstīta..."
-  },
-  "buyWithWyre": {
-    "message": "Pirkt $1 ar Wyre"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre ļauj noguldīt $1 tieši jūsu MetaMask kontā, izmantojot kredītkarti."
   },
   "bytes": {
     "message": "Baiti"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Pievienošana"
   },
-  "connectHardwareWallet": {
-    "message": "Pieslēgt aparatūras maku"
-  },
   "connectingTo": {
     "message": "Pieslēdzas $1"
   },
   "connectingToGoerli": {
     "message": "Pieslēdzas Goerli testa tīklam"
   },
+  "connectingToLineaGoerli": {
+    "message": "Pieslēdzas Linea Goerli testa tīklam"
+  },
   "connectingToMainnet": {
     "message": "Savienojas ar galveno Ethereum tīklu"
-  },
-  "continueToWyre": {
-    "message": "Pāriet uz Wyre"
   },
   "contractDeployment": {
     "message": "Līgumu pielietošana"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Izveidot"
   },
-  "createAccount": {
-    "message": "Izveidot kontu"
-  },
   "createPassword": {
     "message": "Izveidot paroli"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Dzēst"
-  },
-  "deleteAccount": {
-    "message": "Dzēst kontu"
   },
   "deleteNetwork": {
     "message": "Dzēst tīklu?"
@@ -323,13 +305,6 @@
   "general": {
     "message": "Vispārīgi"
   },
-  "getEther": {
-    "message": "Saņemt Ether"
-  },
-  "getEtherFromFaucet": {
-    "message": "Vai vēlaties $1 iegūt Ether no krāna?",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Goerli testa tīkls"
   },
@@ -424,6 +399,9 @@
   "likeToImportTokens": {
     "message": "Vai vēlaties pievienot šos marķierus?"
   },
+  "lineaGoerli": {
+    "message": "Linea Goerli testa tīkls"
+  },
   "links": {
     "message": "Saites"
   },
@@ -459,9 +437,6 @@
   },
   "mustSelectOne": {
     "message": "Jāatlasa vismaz 1 marķieris."
-  },
-  "myAccounts": {
-    "message": "Mani konti"
   },
   "needImportFile": {
     "message": "Jums jāatlasa fails, ko importēt",
@@ -587,9 +562,6 @@
   "readdToken": {
     "message": "Jūs varat šo marķieri iestatīt atpakaļ nākotnē, konta opciju izvēlnē atverot \"Pievienot marķieri\"."
   },
-  "recents": {
-    "message": "Nesenie"
-  },
   "recipientAddressPlaceholder": {
     "message": "Meklēšana, publiskā adrese (0x) vai ENS"
   },
@@ -684,12 +656,6 @@
   "settings": {
     "message": "Iestatījumi"
   },
-  "showAdvancedGasInline": {
-    "message": "Papildu Gas vadīklas"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Atlasiet šo, lai parādītu Gas cenu un ierobežotu kontroles iespējas tieši sūtīšanas un apstiprināšanas ekrānos."
-  },
   "showFiatConversionInTestnets": {
     "message": "Rādīt konversiju testa tīklos"
   },
@@ -753,32 +719,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Simbolā nedrīkst būt vairāk par 11 rakstzīmēm."
   },
-  "syncWithMobile": {
-    "message": "Sinhronizēt ar tālruni"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Pārliecinieties, ka neviens cits neskatās jūsu ekrānā, kad skenējat šo kodu."
-  },
-  "syncWithMobileComplete": {
-    "message": "Jūsu dati sekmīgi sinhronizēti. Patīkamu MetaMask mobilās lietotnes lietošanu!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Jūs varat sinhronizēt savus kontus un informāciju ar mobilo ierīci. Atveriet MetaMask mobilo lietotni, ejiet uz \"Iestatījumi\" un pieskarieties pie \"Sinhronizēt no pārlūka paplašinājuma\""
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Ja esat pirmoreiz atvēris MetaMask mobilo lietotni, vienkārši sekojiet norādēm tālrunī."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Noskenējiet šo kodu ar MetaMask mobilo lietotni"
-  },
-  "syncWithMobileTitle": {
-    "message": "Sinhronizēt ar tālruni"
-  },
   "terms": {
     "message": "Lietošanas noteikumi"
-  },
-  "testFaucet": {
-    "message": "Testa krāns"
   },
   "tips": {
     "message": "Dzeramnauda"
@@ -843,15 +785,8 @@
   "transfer": {
     "message": "Pārsūtīt"
   },
-  "transferBetweenAccounts": {
-    "message": "Pārsūtīt starp saviem kontiem"
-  },
   "transferFrom": {
     "message": "Nosūtīt no"
-  },
-  "troubleTokenBalances": {
-    "message": "Mums neizdevās ielādēt marķieru bilanci. Varat tos skatīt",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Mēģināt vēlreiz"
@@ -897,9 +832,6 @@
   },
   "userName": {
     "message": "Lietotājvārds"
-  },
-  "viewAccount": {
-    "message": "Skatīt kontu"
   },
   "viewContact": {
     "message": "Skatīt līgumu"

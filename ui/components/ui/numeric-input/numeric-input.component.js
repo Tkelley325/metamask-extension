@@ -1,12 +1,12 @@
 import React from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import Typography from '../typography/typography';
 import {
   TextColor,
-  TypographyVariant,
+  TextVariant,
 } from '../../../helpers/constants/design-system';
 import { DECIMAL_REGEX } from '../../../../shared/constants/tokens';
+import { Text } from '../../component-library/text/deprecated';
 
 export default function NumericInput({
   detailText = '',
@@ -20,6 +20,7 @@ export default function NumericInput({
   placeholder,
   id,
   name,
+  inputRef,
 }) {
   return (
     <div
@@ -48,15 +49,16 @@ export default function NumericInput({
         placeholder={placeholder}
         id={id}
         name={name}
+        ref={inputRef}
       />
       {detailText && (
-        <Typography
+        <Text
           color={TextColor.textAlternative}
-          variant={TypographyVariant.H7}
+          variant={TextVariant.bodySm}
           as="span"
         >
           {detailText}
-        </Typography>
+        </Text>
       )}
     </div>
   );
@@ -80,4 +82,5 @@ NumericInput.propTypes = {
    * The id of the input element. Should be used with htmlFor with a label element.
    */
   id: PropTypes.string,
+  inputRef: PropTypes.object,
 };

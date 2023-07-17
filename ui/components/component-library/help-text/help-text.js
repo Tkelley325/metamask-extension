@@ -9,7 +9,7 @@ import {
   SEVERITIES,
 } from '../../../helpers/constants/design-system';
 
-import { Text } from '../text';
+import { Text } from '../text/deprecated';
 
 export const HelpText = ({
   severity,
@@ -47,7 +47,7 @@ export const HelpText = ({
 };
 HelpText.propTypes = {
   /**
-   * The color of the HelpText will be overridden if error is true
+   * The color of the HelpText will be overridden if there is a severity passed
    * Defaults to Color.textDefault
    */
   color: PropTypes.oneOf(Object.values(TextColor)),

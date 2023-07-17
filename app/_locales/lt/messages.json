@@ -93,9 +93,6 @@
   "back": {
     "message": "Grįžti"
   },
-  "backToAll": {
-    "message": "Atgal prie visų"
-  },
   "backupApprovalInfo": {
     "message": "Šis slaptas kodas reikalingas norint atkurti jūsų slaptažodinę, jeigu pamestumėte savo įrenginį, pamirštumėte savo slaptažodį, iš naujo įdiegtumėte „MetaMask“, taip pat norint pasiekti slaptažodinę iš kito įrenginio."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Jūsų naršyklė neatpažįstama..."
-  },
-  "buyWithWyre": {
-    "message": "Pirkti $1 su „Wyre“"
-  },
-  "buyWithWyreDescription": {
-    "message": "„Wyre“ leidžia naudotis kreditine kortele norint įnešti $1 tiesiai į jūsų „MetaMask“ paskyrą."
   },
   "bytes": {
     "message": "Baitai"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Prisijungti"
   },
-  "connectHardwareWallet": {
-    "message": "Susieti aparatinės įrangos slaptažodinę"
-  },
   "connectingTo": {
     "message": "Jungiamasi prie $1"
   },
   "connectingToGoerli": {
     "message": "Jungiamasi prie „Goerli“ bandomojo tinklo"
   },
+  "connectingToLineaGoerli": {
+    "message": "Jungiamasi prie „Linea“ bandomojo tinklo"
+  },
   "connectingToMainnet": {
     "message": "Jungiamasi prie pagrindinio „Ethereum“ tinklo"
-  },
-  "continueToWyre": {
-    "message": "Tęsti su „Wyre“"
   },
   "contractDeployment": {
     "message": "Sutarties išdėstymas"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Sukurti"
   },
-  "createAccount": {
-    "message": "Sukurti paskyrą"
-  },
   "createPassword": {
     "message": "Sukurti slaptažodį"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Ištrinti"
-  },
-  "deleteAccount": {
-    "message": "Šalinti paskyrą"
   },
   "deleteNetwork": {
     "message": "Panaikinti tinklą?"
@@ -327,13 +309,6 @@
   "general": {
     "message": "Bendra"
   },
-  "getEther": {
-    "message": "Gauti eterių"
-  },
-  "getEtherFromFaucet": {
-    "message": "Gaukite eterių iš čiaupo $1",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "„Goerli“ bandomasis tinklas"
   },
@@ -428,6 +403,9 @@
   "likeToImportTokens": {
     "message": "Ar norėtumėte pridėti šiuos žetonus?"
   },
+  "lineaGoerli": {
+    "message": "„Linea“ bandomasis tinklas"
+  },
   "links": {
     "message": "Nuorodos"
   },
@@ -463,9 +441,6 @@
   },
   "mustSelectOne": {
     "message": "Turite pasirinkti bent 1 žetoną."
-  },
-  "myAccounts": {
-    "message": "Mano paskyros"
   },
   "needImportFile": {
     "message": "Turite pasirinkti failą, kurį pageidaujate importuoti.",
@@ -591,9 +566,6 @@
   "readdToken": {
     "message": "Šį žetoną galite bet kada galite įtraukti ir vėl, tiesiog savo paskyros parinkčių meniu nueikite  į „Įtraukti žetoną“."
   },
-  "recents": {
-    "message": "Naujausi"
-  },
   "recipientAddressPlaceholder": {
     "message": "Ieška, viešieji adresai (0x) arba ENS"
   },
@@ -688,12 +660,6 @@
   "settings": {
     "message": "Nustatymai"
   },
-  "showAdvancedGasInline": {
-    "message": "Išplėstiniai dujų valdikliai"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Pasirinkite tai, kad būtų rodoma dujų kaina, ir ribokite valdymo elementus tiesiogiai siuntimo ir patvirtinimo ekranuose."
-  },
   "showFiatConversionInTestnets": {
     "message": "Rodyti keitimą „Testnet“"
   },
@@ -757,32 +723,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Simbolis turi būti ne ilgesnis nei 11 simbolių."
   },
-  "syncWithMobile": {
-    "message": "Sinchronizuoti su mobiliuoju"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Pasirūpinkite, kad jums nuskaitant šį kodą niekas nežiūrėtų į jūsų ekraną."
-  },
-  "syncWithMobileComplete": {
-    "message": "Jūsų duomenys sėkmingai sinchronizuoti. Mėgaukitės „MetaMask“ mobiliąja programa! "
-  },
-  "syncWithMobileDesc": {
-    "message": "Galite sinchronizuoti paskyrą ir informaciją su savo mobiliuoju įrenginiu. Atverkite „MetaMask“ mobiliąją programą, eikite į „Nuostatos“ ir palieskite „Sinchronizuoti iš naršyklės plėtinio“"
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Jeigu „MetaMask“ mobiliąją programą atveriate tik pirmą kartą, tiesiog sekite veiksmus telefone."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Nuskaitykite šį kodą su savo „MetaMask“ mobiliąja programa"
-  },
-  "syncWithMobileTitle": {
-    "message": "Sinchronizuoti su mobiliuoju"
-  },
   "terms": {
     "message": "Naudojimo sąlygos"
-  },
-  "testFaucet": {
-    "message": "Testuoti čiaupą"
   },
   "tips": {
     "message": "Arbatpinigiai"
@@ -847,15 +789,8 @@
   "transfer": {
     "message": "Pervesti"
   },
-  "transferBetweenAccounts": {
-    "message": "Perkėlimas tarp savo paskyrų"
-  },
   "transferFrom": {
     "message": "Pervedimas iš"
-  },
-  "troubleTokenBalances": {
-    "message": "Susidurta su sunkumais įkeliant jūsų žetonų likučius. Galite juos peržiūrėti ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Bandyti dar kartą"
@@ -901,9 +836,6 @@
   },
   "userName": {
     "message": "Vartotojo vardas"
-  },
-  "viewAccount": {
-    "message": "Žiūrėti paskyrą"
   },
   "viewContact": {
     "message": "Peržiūrėti kontaktą"

@@ -93,9 +93,6 @@
   "back": {
     "message": "Назад"
   },
-  "backToAll": {
-    "message": "Повернутися до всіх"
-  },
   "backupApprovalInfo": {
     "message": "Цей секретний код буде потрібен, щоб відновити ваш гаманець у разі втрати вашого пристрою, забуття паролю, потреби у перевстановленні MetaMask або виникнення бажання отримати доступ до вашого гаманця з іншого пристрою."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Ваш браузер не підтримується..."
-  },
-  "buyWithWyre": {
-    "message": "Купити $1 через Wyre"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre дає змогу використовувати кредитну картку для внесення валюти $1 безпосередньо у свій гаманець MetaMask."
   },
   "bytes": {
     "message": "Байти"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Під’єднатися"
   },
-  "connectHardwareWallet": {
-    "message": "Приєднайте апаратний гаманець"
-  },
   "connectingTo": {
     "message": "Під'єднуємось до $1"
   },
   "connectingToGoerli": {
     "message": "Підключення до тестової мережі Goerli"
   },
+  "connectingToLineaGoerli": {
+    "message": "Підключення до тестової мережі Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "З'єднуємось з Головною мережею Ethereum"
-  },
-  "continueToWyre": {
-    "message": "Продовжити у Wyre"
   },
   "contractDeployment": {
     "message": "Розгортання контракту"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Створити"
   },
-  "createAccount": {
-    "message": "Створити обліковий запис"
-  },
   "createPassword": {
     "message": "Створити пароль"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Видалити"
-  },
-  "deleteAccount": {
-    "message": "Видалити обліковий запис"
   },
   "deleteNetwork": {
     "message": "Видалити мережу?"
@@ -327,13 +309,6 @@
   "general": {
     "message": "Загальні"
   },
-  "getEther": {
-    "message": "Отримати Ефір"
-  },
-  "getEtherFromFaucet": {
-    "message": "Отримайте Ether з крану за $1",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Тестова мережа Goerli "
   },
@@ -428,6 +403,9 @@
   "likeToImportTokens": {
     "message": "Ви б хотіли додати ці токени?"
   },
+  "lineaGoerli": {
+    "message": "Тестова мережа Linea Goerli"
+  },
   "links": {
     "message": "Посилання"
   },
@@ -463,9 +441,6 @@
   },
   "mustSelectOne": {
     "message": "Слід вибрати хоча б 1 токен."
-  },
-  "myAccounts": {
-    "message": "Мої облікові записи"
   },
   "needImportFile": {
     "message": "Потрібно вибрати файл для імпорту.",
@@ -591,9 +566,6 @@
   "readdToken": {
     "message": "Ви можете знову додати цей токен у меню облікового запису у розділі “Додати токен”. "
   },
-  "recents": {
-    "message": "Останні"
-  },
   "recipientAddressPlaceholder": {
     "message": "Пошук, публічна адреса (0x), або ENS"
   },
@@ -688,12 +660,6 @@
   "settings": {
     "message": "Налаштування"
   },
-  "showAdvancedGasInline": {
-    "message": "Розширене керування газом"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Виберіть цей параметр, щоб відображати регулятори ціни й ліміту газу на екранах надсилання й підтвердження."
-  },
   "showFiatConversionInTestnets": {
     "message": "Показати бесіду у Testnet"
   },
@@ -757,32 +723,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Символ повинен містити 11 символів або менше."
   },
-  "syncWithMobile": {
-    "message": "Синхронізувати з мобільним пристроєм"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Переконайтесь, що ніхто не дивиться на ваш екран, коли скануєте цей код"
-  },
-  "syncWithMobileComplete": {
-    "message": "Ваші дані були успішно синхронізовані. Насолоджуйтесь мобільним застосунком MetaMask!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Ви можете синхронізувати ваші облікові записи та інформацію з вашим мобільним пристроєм. Відкрийте мобільний застосунок MetaMask, перейдіть до \"Налаштування\" та клацніть на \"Синхронізувати з розширення браузера\""
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Якщо ви відкрили мобільний застосунок MetaMask вперше, просто слідуйте крокам у вашому телефоні."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Відскануйте цей код за допомогою мобільної програми MetaMask"
-  },
-  "syncWithMobileTitle": {
-    "message": "Синхронізувати з мобільним"
-  },
   "terms": {
     "message": "Умови використання"
-  },
-  "testFaucet": {
-    "message": "Тестовий кран"
   },
   "tips": {
     "message": "Чайові"
@@ -847,15 +789,8 @@
   "transfer": {
     "message": "Передати"
   },
-  "transferBetweenAccounts": {
-    "message": "Передати між моїми обліковими записами"
-  },
   "transferFrom": {
     "message": "Передати від"
-  },
-  "troubleTokenBalances": {
-    "message": "В нас виникли складнощі при завантаженні ваших залишків токенів. Ви можете переглянути їх",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Повторити"
@@ -901,9 +836,6 @@
   },
   "userName": {
     "message": "Ім’я користувача"
-  },
-  "viewAccount": {
-    "message": "Переглянути обліковий запис"
   },
   "viewContact": {
     "message": "Переглянути контакт"

@@ -1,12 +1,12 @@
 import { Story, Canvas, ArgsTable } from '@storybook/addon-docs';
-import ActionableMessage from '../../ui/actionable-message';
-import { Text } from './text';
+
+import { Text } from '../text';
 
 # Text
 
-> This Text (fka Typography) component has breaking changes in variant options and the line heights associated to each variant.
-
 Good typography improves readability, legibility and hierarchy of information.
+
+> Contribute to improving the UI consistency of the extension by helping to replace the deprecated `<Typography>` with `<Text>`. [See details](#converting-from-typography-to-text)
 
 <Canvas>
   <Story id="components-componentlibrary-text--default-story" />
@@ -14,7 +14,7 @@ Good typography improves readability, legibility and hierarchy of information.
 
 ## Props
 
-The `Text` accepts all props below as well as all [Box](/docs/components-ui-box--default-story#props) component props
+The `Text` accepts all props below as well as all [Box](/docs/components-componentlibrary-box--docs#props) component props
 
 <ArgsTable of={Text} />
 
@@ -31,9 +31,12 @@ Use the `variant` prop and the `TextVariant` enum from `./ui/helpers/constants/d
 - TextVariant.bodyLgMedium (default renders as `p` tag)
 - TextVariant.bodyMd (default renders as `p` tag)
 - TextVariant.bodyMdBold (default renders as `p` tag)
+- TextVariant.bodyMdMedium (default renders as `p` tag)
 - TextVariant.bodySm (default renders as `p` tag)
+- TextVariant.bodySmMedium (default renders as `p` tag)
 - TextVariant.bodySmBold (default renders as `p` tag)
 - TextVariant.bodyXs (default renders as `p` tag)
+- TextVariant.bodyXsMedium (default renders as `p` tag)
 - TextVariant.inherit (default renders as `span` tag)
 
 <Canvas>
@@ -51,15 +54,18 @@ import { TextVariant } from '../../../helpers/constants/design-system';
 <Text variant={TextVariant.bodyLgMedium}>body-lg-medium</Text>
 <Text variant={TextVariant.bodyMd}>body-md</Text>
 <Text variant={TextVariant.bodyMdBold}>body-md-bold</Text>
+<Text variant={TextVariant.bodyMdMedium}>body-md-medium</Text>
 <Text variant={TextVariant.bodySm}>body-sm</Text>
+<Text variant={TextVariant.bodySmMedium}>body-sm-medium</Text>
 <Text variant={TextVariant.bodySmBold}>body-sm-bold</Text>
 <Text variant={TextVariant.bodyXs}>body-xs</Text>
+<Text variant={TextVariant.bodyXsMedium}>body-xs-medium</Text>
 <Text variant={TextVariant.inherit}>inherit</Text>
 ```
 
 ### Color
 
-Use the `color` prop and the `TextColor` object from `./ui/helpers/constants/design-system.js` to change the color of the `Text` component.
+Use the `color` prop and the `TextColor` enum from `./ui/helpers/constants/design-system.js` to change the color of the `Text` component.
 
 <Canvas>
   <Story id="components-componentlibrary-text--color-story" />
@@ -112,117 +118,117 @@ import { TextColor, BackgroundColor } from '../../../helpers/constants/design-sy
 
 ### Font Weight
 
-Use the `fontWeight` prop and the `FONT_WEIGHT` object from `./ui/helpers/constants/design-system.js` to change the font weight of the `Text` component. There are 3 font weights:
+Use the `fontWeight` prop and the `FontWeight` enum from `./ui/helpers/constants/design-system.js` to change the font weight of the `Text` component. There are 3 font weights:
 
-- `FONT_WEIGHT.NORMAL` = `normal` || `400`
-- `FONT_WEIGHT.MEDIUM` = `medium` || `500`
-- `FONT_WEIGHT.BOLD` = `bold` || `700`
+- `FontWeight.Normal` = `normal` || `400`
+- `FontWeight.Medium` = `medium` || `500`
+- `FontWeight.Bold` = `bold` || `700`
 
 <Canvas>
-  <Story id="components-componentlibrary-text--font-weight" />
+  <Story id="components-componentlibrary-text--font-weight-story" />
 </Canvas>
 
 ```jsx
 import { Text } from '../../component-library';
-import { FONT_WEIGHT } from '../../../helpers/constants/design-system';
+import { FontWeight } from '../../../helpers/constants/design-system';
 
-<Text fontWeight={FONT_WEIGHT.NORMAL}>
+<Text fontWeight={FontWeight.Normal}>
   normal
 </Text>
-<Text fontWeight={FONT_WEIGHT.MEDIUM}>
+<Text fontWeight={FontWeight.Medium}>
   medium
 </Text>
-<Text fontWeight={FONT_WEIGHT.BOLD}>
+<Text fontWeight={FontWeight.Bold}>
   bold
 </Text>
 ```
 
 ### Font Style
 
-Use the `fontStyle` prop and the `FONT_STYLE` object from `./ui/helpers/constants/design-system.js` to change the font style of the `Text` component. There are 2 font styles:
+Use the `fontStyle` prop and the `FontStyle` enum from `./ui/helpers/constants/design-system.js` to change the font style of the `Text` component. There are 2 font styles:
 
-- `FONT_STYLE.NORMAL`
-- `FONT_STYLE.ITALIC`
+- `FontStyle.Normal`
+- `FontStyle.Italic`
 
 <Canvas>
-  <Story id="components-componentlibrary-text--font-style" />
+  <Story id="components-componentlibrary-text--font-style-story" />
 </Canvas>
 
 ```jsx
 import { Text } from '../../component-library';
-import { FONT_STYLE } from '../../../helpers/constants/design-system';
+import { FontStyle } from '../../../helpers/constants/design-system';
 
-<Text fontStyle={FONT_STYLE.NORMAL}>
+<Text fontStyle={FontStyle.Normal}>
   normal
 </Text>
-<Text fontStyle={FONT_STYLE.ITALIC}>
+<Text fontStyle={FontStyle.Italic}>
   bold
 </Text>
 ```
 
 ### Text Transform
 
-Use the `textTransform` prop and the `TEXT_TRANSFORM` object from `./ui/helpers/constants/design-system.js` to change the text alignment of the `Text` component
+Use the `textTransform` prop and the `TextTransform` enum from `./ui/helpers/constants/design-system.ts` to change the text alignment of the `Text` component
 
 <Canvas>
-  <Story id="components-componentlibrary-text--text-transform" />
+  <Story id="components-componentlibrary-text--text-transform-story" />
 </Canvas>
 
 ```jsx
 import { Text } from '../../component-library';
-import { TEXT_TRANSFORM } from '../../../helpers/constants/design-system';
+import { TextTransform } from '../../../helpers/constants/design-system';
 
-<Text textAlign={TEXT_TRANSFORM.UPPERCASE}>
+<Text textAlign={TextTransform.Uppercase}>
   uppercase
 </Text>
-<Text textAlign={TEXT_TRANSFORM.LOWERCASE}>
+<Text textAlign={TextTransform.Lowercase}>
   lowercase
 </Text>
-<Text textAlign={TEXT_TRANSFORM.CAPITALIZE}>
+<Text textAlign={TextTransform.Capitalize}>
   capitalize
 </Text>
 ```
 
 ### Text Align
 
-Use the `textAlign` prop and the `TEXT_ALIGN` object from `./ui/helpers/constants/design-system.js` to change the text alignment of the `Text` component
+Use the `textAlign` prop and the `TextAlign` enum from `./ui/helpers/constants/design-system.ts` to change the text alignment of the `Text` component
 
 <Canvas>
-  <Story id="components-componentlibrary-text--text-align" />
+  <Story id="components-componentlibrary-text--text-align-story" />
 </Canvas>
 
 ```jsx
 import { Text } from '../../component-library';
-import { TEXT_ALIGN } from '../../../helpers/constants/design-system';
+import { TextAlign } from '../../../helpers/constants/design-system';
 
-<Text textAlign={TEXT_ALIGN.LEFT}>
+<Text textAlign={TextAlign.Left}>
   left
 </Text>
-<Text textAlign={TEXT_ALIGN.CENTER}>
+<Text textAlign={TextAlign.Center}>
   center
 </Text>
-<Text textAlign={TEXT_ALIGN.RIGHT}>
+<Text textAlign={TextAlign.Right}>
   right
 </Text>
-<Text textAlign={TEXT_ALIGN.JUSTIFY}>
+<Text textAlign={TextAlign.Justify}>
   justify
 </Text>
-<Text textAlign={TEXT_ALIGN.END}>
+<Text textAlign={TextAlign.End}>
   end
 </Text>
 ```
 
 ### Overflow Wrap
 
-Use the `overflowWrap` prop and the `OVERFLOW_WRAP` object from `./ui/helpers/constants/design-system.js` to change the overflow wrap of the `Text` component
+Use the `overflowWrap` prop and the `OverflowWrap` enum from `./ui/helpers/constants/design-system.ts` to change the overflow wrap of the `Text` component
 
 <Canvas>
-  <Story id="components-componentlibrary-text--overflow-wrap" />
+  <Story id="components-componentlibrary-text--overflow-wrap-story" />
 </Canvas>
 
 ```jsx
 import { Text } from '../../component-library';
-import { OVERFLOW_WRAP } from '../../../helpers/constants/design-system';
+import { OverflowWrap } from '../../../helpers/constants/design-system';
 
 <div
   style={{
@@ -231,11 +237,11 @@ import { OVERFLOW_WRAP } from '../../../helpers/constants/design-system';
     display: 'block',
   }}
 >
-  <Text overflowWrap={OVERFLOW_WRAP.NORMAL}>
-    {OVERFLOW_WRAP.NORMAL}: 0x39013f961c378f02c2b82a6e1d31e9812786fd9d
+  <Text overflowWrap={OverflowWrap.Normal}>
+    {OverflowWrap.Normal}: 0x39013f961c378f02c2b82a6e1d31e9812786fd9d
   </Text>
-  <Text overflowWrap={OVERFLOW_WRAP.BREAK_WORD}>
-    {OVERFLOW_WRAP.BREAK_WORD}: 0x39013f961c378f02c2b82a6e1d31e9812786fd9d
+  <Text overflowWrap={OverflowWrap.BreakWord}>
+    {OverflowWrap.BreakWord}: 0x39013f961c378f02c2b82a6e1d31e9812786fd9d
   </Text>
 </div>;
 ```
@@ -267,12 +273,15 @@ import { Text } from '../../component-library';
 
 Use the `as` prop to change the root html element of the `Text` component
 
+You can also utilize the `ValidTag` enum from `./text.types` to ensure that you are using a valid html element
+
 <Canvas>
   <Story id="components-componentlibrary-text--as" />
 </Canvas>
 
 ```jsx
-import { Text } from '../../component-library';
+import { Display } from '../../../helpers/constants/design-system';
+import { Text } from '../../component-library'
 
 <Text as="dd">dd</Text>
 <Text as="div">div</Text>
@@ -286,9 +295,12 @@ import { Text } from '../../component-library';
 <Text as="h6">h6</Text>
 <Text as="li">li</Text>
 <Text as="p">p</Text>
-<Text as="span">span</Text>
-<Text as="strong">strong</Text>
-<Text as="input" placeholder="input"></Text>
+<Text display={Display.Block} as="span">span</Text>
+<Text display={Display.Block} as="strong">strong</Text>
+<Text as="ul">ul</Text>
+<Text as="label">label</Text>
+<Text as="header">header</Text>
+<Text as="input" placeholder="input" />
 ```
 
 Renders the html:
@@ -308,34 +320,54 @@ Renders the html:
 <p>p</p>
 <span>span</span>
 <strong>strong</strong>
+<ul>
+  ul
+</ul>
+<label>label</label>
+<header>header</header>
 <input placeholder="input" />
 ```
 
 ### Text Direction
 
-Use the `textDirection` prop and the `TEXT_DIRECTIONS` object from `./text.constants.js` to change the text direction of `Text`
+Use the `textDirection` prop and the `TextDirection` enum from `./text.types` to change the text direction of `Text`
 
 <Canvas>
-  <Story id="components-componentlibrary-text--text-direction" />
+  <Story id="components-componentlibrary-text--text-direction-story" />
 </Canvas>
 
 ```jsx
-import { Text, TEXT_DIRECTIONS } from '../../component-library';
+import { Text, TextDirection } from '../../component-library';
 
-<Text textDirection={TEXT_DIRECTIONS.LEFT_TO_RIGHT}>
+<Text textDirection={TextDirection.LeftToRight}>
   This is left to right (ltr) for English and most languages
 </Text>
-<Text textDirection={TEXT_DIRECTIONS.RIGHT_TO_LEFT}>
+<Text textDirection={TextDirection.RightToLeft}>
   This is right to left (rtl) for use with other laguanges such as Arabic. This Enlgish example is incorrect usage.
 </Text>
-<Text textDirection={TEXT_DIRECTIONS.AUTO}>
+<Text textDirection={TextDirection.Auto}>
   Let the user agent decide with the auto option
 </Text>
 ```
 
-### Box Props
+### Strong
 
-Use any valid box props [Box](/?path=/story/components-ui-box--default-story) component props to the Text component.
+Using the `as` prop with the value of `strong` will render the `Text` component as a `strong` element and any `strong` emlements used within a `Text` component will be supported with bold styles.
+
+<Canvas>
+  <Story id="components-componentlibrary-text--strong" />
+</Canvas>
+
+```jsx
+import { Text } from '../../component-library';
+
+<Text as="strong">
+  This is an as="strong" demo.
+</Text>
+<Text>
+  This is a <strong>strong element</strong> demo.
+</Text>
+```
 
 ### Class Name
 
@@ -349,7 +381,7 @@ The text content of the `Text` component
 
 # Converting from `Typography` to `Text`
 
-The `Typography` component has been deprecated in favor of the `Text` component. Below are code examples converting from `Typography` to `Text`.
+The `Typography` component has been deprecated in favor of the `Text` component. You can contribute by submitting a PR against [Replace deprecated Typography with Text component](https://github.com/MetaMask/metamask-extension/issues/17670) on GitHub. Below are code examples converting from `Typography` to `Text`.
 
 ### Variant
 
@@ -536,19 +568,19 @@ import { TextVariant } from '../../../helpers/constants/design-system';
 
 The prop name `align` has been deprecated in favor of `textAlign`
 
-Values and using the `TEXT_ALIGN` object from `./ui/helpers/constants/design-system.js` remain the same
+Values using the `TextAlign` object from `./ui/helpers/constants/design-system.js` remain the same
 
 ```jsx
 // Before
-<Typograpghy align={TEXT_ALIGN.CENTER}>Demo</Typograpghy>;
+<Typography align={TEXT_ALIGN.CENTER}>Demo</Typography>;
 
 // After
-<Text textAlign={TEXT_ALIGN.CENTER}>Demo</Text>;
+<Text textAlign={TextAlign.Center}>Demo</Text>;
 ```
 
 ### Box Props
 
-Box props are now integrated with the `Text` component. Valid box props: [Box](/?path=/story/components-ui-box--default-story)
+Box props are now integrated with the `Text` component. Valid Box props: [Box](/docs/components-componentlibrary-box--docs#props)
 
 You no longer need to pass these props as an object through `boxProps`
 

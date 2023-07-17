@@ -93,9 +93,6 @@
   "back": {
     "message": "Wstecz"
   },
-  "backToAll": {
-    "message": "Wróć do wszystkich"
-  },
   "backupApprovalInfo": {
     "message": "Ten tajny kod jest wymagany do odzyskania portfela w przypadku zgubienia urządzenia, zapomnienia hasła, ponownego zainstalowania MetaMask lub potrzeby uzyskania dostępu do portfela na innym urządzeniu."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Twoja przeglądarka nie jest obsługiwana..."
-  },
-  "buyWithWyre": {
-    "message": "Kup $1 poprzez Wyre"
-  },
-  "buyWithWyreDescription": {
-    "message": "Dzięki Wyre możesz użyć karty kredytowej, aby wpłacić $1 bezpośrednio na swoje konto MetaMask."
   },
   "bytes": {
     "message": "Bajty"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Połącz"
   },
-  "connectHardwareWallet": {
-    "message": "Podłącz portfel sprzętowy"
-  },
   "connectingTo": {
     "message": "Łączenie z $1"
   },
   "connectingToGoerli": {
     "message": "Łączenie z siecią testową Goerli"
   },
+  "connectingToLineaGoerli": {
+    "message": "Łączenie z siecią testową Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "Łączenie z główną siecią Ethereum"
-  },
-  "continueToWyre": {
-    "message": "Przejdź do Wyre"
   },
   "contractDeployment": {
     "message": "Uruchomienie kontraktu"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Utwórz"
   },
-  "createAccount": {
-    "message": "Utwórz konto"
-  },
   "createPassword": {
     "message": "Utwórz hasło"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Usuń"
-  },
-  "deleteAccount": {
-    "message": "Usuń konto"
   },
   "deleteNetwork": {
     "message": "Usunąć sieć?"
@@ -327,13 +309,6 @@
   "general": {
     "message": "Ogólne"
   },
-  "getEther": {
-    "message": "Zdobądź Eter"
-  },
-  "getEtherFromFaucet": {
-    "message": "Zdobądź Eter ze źródła za $1",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Sieć testowa Goerli"
   },
@@ -428,6 +403,9 @@
   "likeToImportTokens": {
     "message": "Czy chcesz dodać te tokeny?"
   },
+  "lineaGoerli": {
+    "message": "Sieć testowa Linea Goerli"
+  },
   "links": {
     "message": "Łącza"
   },
@@ -460,9 +438,6 @@
   },
   "mustSelectOne": {
     "message": "Należy wybrać co najmniej 1 token."
-  },
-  "myAccounts": {
-    "message": "Moje konta"
   },
   "needImportFile": {
     "message": "Musisz wybrać plik do zaimportowania.",
@@ -585,9 +560,6 @@
   "readdToken": {
     "message": "Możesz później ponownie dodać ten token poprzez \"Dodaj token\" w opcjach menu swojego konta."
   },
-  "recents": {
-    "message": "Ostatnie"
-  },
   "recipientAddressPlaceholder": {
     "message": "Szukaj, adres publiczny (0x) lub ENS"
   },
@@ -682,12 +654,6 @@
   "settings": {
     "message": "Ustawienia"
   },
-  "showAdvancedGasInline": {
-    "message": "Zaawansowana kontrola gazu"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Wybierz tę opcję, aby móc zmienić cenę i limit gazu bezpośrednio na ekranach wysyłania i potwierdzania."
-  },
   "showFiatConversionInTestnets": {
     "message": "Pokaż przeliczanie w sieciach testowych"
   },
@@ -748,32 +714,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Symbol musi mieć maksymalnie 11 znaków."
   },
-  "syncWithMobile": {
-    "message": "Synchronizuj z telefonem"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Upewnij się, że nikt inny nie patrzy na Twój ekran podczas skanowania tego kodu"
-  },
-  "syncWithMobileComplete": {
-    "message": "Twoje dane zostały zsynchronizowane. Miłego korzystania z aplikacji mobilnej MetaMask!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Możesz synchronizować swoje konta i informacje z urządzeniem mobilnym. Otwórz aplikację mobilną MetaMask, przejdź do „Ustawień” i wybierz opcję „Synchronizuj z rozszerzeniem przeglądarki”."
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Jeśli po raz pierwszy otwierasz aplikację MetaMask Mobile, postępuj zgodnie z instrukcjami w telefonie."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Zeskanuj ten kod za pomocą aplikacji mobilnej MetaMask"
-  },
-  "syncWithMobileTitle": {
-    "message": "Synchronizuj z telefonem"
-  },
   "terms": {
     "message": "Regulamin"
-  },
-  "testFaucet": {
-    "message": "Źródło testowego ETH"
   },
   "tips": {
     "message": "Napiwki"
@@ -835,15 +777,8 @@
   "transfer": {
     "message": "Przelew"
   },
-  "transferBetweenAccounts": {
-    "message": "Przelew między moimi kontami"
-  },
   "transferFrom": {
     "message": "Przelew z"
-  },
-  "troubleTokenBalances": {
-    "message": "Wystąpił problem z załadowaniem informacji o Twoich tokenach. Można je zobaczyć ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Spróbuj ponownie"
@@ -889,9 +824,6 @@
   },
   "userName": {
     "message": "Nazwa użytkownika"
-  },
-  "viewAccount": {
-    "message": "Zobacz konto"
   },
   "viewContact": {
     "message": "Wyświetl kontakt"

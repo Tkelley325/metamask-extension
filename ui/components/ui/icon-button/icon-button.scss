@@ -4,7 +4,7 @@
   align-items: center;
   background-color: unset;
   text-align: center;
-  width: 73px;
+  width: 60px;
 
   @include H7;
 
@@ -22,10 +22,15 @@
     border-radius: 18px;
     margin-top: 6px;
     margin-bottom: 5px;
+    margin-inline: auto;
   }
 
   &--disabled {
     opacity: 0.3;
     cursor: auto;
+  }
+
+  &__label {
+    width: 60px; //for ellipsis keeping the width same as icon-button used here
   }
 }

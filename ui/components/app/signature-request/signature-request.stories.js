@@ -3,11 +3,12 @@ import testData from '../../../../.storybook/test-data';
 import README from './README.mdx';
 import SignatureRequest from './signature-request.component';
 
-const [MOCK_PRIMARY_IDENTITY] = Object.values(testData.metamask.identities);
+const [MOCK_PRIMARY_IDENTITY, MOCK_SECONDARY_IDENTITY] = Object.values(
+  testData.metamask.identities,
+);
 
 export default {
   title: 'Components/App/SignatureRequest',
-
   component: SignatureRequest,
   parameters: {
     docs: {
@@ -28,6 +29,10 @@ export default {
     clearConfirmTransaction: { action: 'Clean Confirm' },
     cancel: { action: 'Cancel' },
     sign: { action: 'Sign' },
+    showRejectTransactionsConfirmationModal: {
+      action: 'showRejectTransactionsConfirmationModal',
+    },
+    cancelAll: { action: 'cancelAll' },
   },
 };
 
@@ -75,5 +80,19 @@ DefaultStory.args = {
     },
   },
   fromAccount: MOCK_PRIMARY_IDENTITY,
-  provider: { name: 'Goerli ETH' },
+  providerConfig: { name: 'Goerli ETH' },
+  selectedAccount: MOCK_PRIMARY_IDENTITY,
+  hardwareWalletRequiresConnection: false,
+  currentCurrency: 'usd',
+};
+
+export const AccountMismatchStory = (args) => {
+  return <SignatureRequest {...args} />;
+};
+
+AccountMismatchStory.storyName = 'AccountMismatch';
+
+AccountMismatchStory.args = {
+  ...DefaultStory.args,
+  selectedAccount: MOCK_SECONDARY_IDENTITY,
 };

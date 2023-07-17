@@ -93,9 +93,6 @@
   "back": {
     "message": "Назад"
   },
-  "backToAll": {
-    "message": "Povratak na Sve"
-  },
   "backupApprovalInfo": {
     "message": "Potreban je tajni kôd za oporavak vašeg novčanika u slučaju da izgubite uređaj, zaboravite lozinku, morate ponovo da instalirate MetaMask ili želite da pristupite novčaniku sa drugog uređaja."
   },
@@ -124,12 +121,6 @@
   "browserNotSupported": {
     "message": "Vaš pregledač nije podržan..."
   },
-  "buyWithWyre": {
-    "message": "Kupite $1 preko servisa Wyre"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre vam dozvoljava da koristite kreditnu karticu kako biste deponovali $1 pravo na vaš MetaMask nalog."
-  },
   "bytes": {
     "message": "Bajtovi"
   },
@@ -157,20 +148,17 @@
   "connect": {
     "message": "Повезивање"
   },
-  "connectHardwareWallet": {
-    "message": "Povežite Hardverski novčanik"
-  },
   "connectingTo": {
     "message": "Povezuje se na $1"
   },
   "connectingToGoerli": {
     "message": "Povezuje se sa test mrežom Goerli "
   },
+  "connectingToLineaGoerli": {
+    "message": "Povezuje se sa test mrežom Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "Povezuje se na glavnu Ethereum mrežu"
-  },
-  "continueToWyre": {
-    "message": "Nastavite ka Wyre"
   },
   "contractDeployment": {
     "message": "Primena ugovora"
@@ -196,9 +184,6 @@
   "create": {
     "message": "Направи"
   },
-  "createAccount": {
-    "message": "Kreirajte nalog"
-  },
   "createPassword": {
     "message": "Kreirajte lozinku"
   },
@@ -222,9 +207,6 @@
   },
   "delete": {
     "message": "Избриши"
-  },
-  "deleteAccount": {
-    "message": "Obriši nalog"
   },
   "deleteNetwork": {
     "message": "Da li želite da obrišete mrežu?"
@@ -324,13 +306,6 @@
   "general": {
     "message": "Opšte"
   },
-  "getEther": {
-    "message": "Nabavite Ether"
-  },
-  "getEtherFromFaucet": {
-    "message": "Preuzmite Ether sa slavine za $1",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Test mreža Goerli "
   },
@@ -425,6 +400,9 @@
   "likeToImportTokens": {
     "message": "Želite li da dodate ove tokene?"
   },
+  "lineaGoerli": {
+    "message": "Test mreža Linea Goerli"
+  },
   "links": {
     "message": "Veze"
   },
@@ -454,9 +432,6 @@
   },
   "mustSelectOne": {
     "message": "Morate izabrati najmanje 1 token."
-  },
-  "myAccounts": {
-    "message": "Moji nalozi"
   },
   "needImportFile": {
     "message": "Morate izabrati fajl koji ćete uvesti.",
@@ -582,9 +557,6 @@
   "readdToken": {
     "message": "U budućnosti možete vratiti ovaj token tako što ćete otvoriti „Dodaj token“ u meniju opcija vašeg naloga."
   },
-  "recents": {
-    "message": "Skorašnje"
-  },
   "recipientAddressPlaceholder": {
     "message": "Pretraga, javna adresa (0x) ili ENS"
   },
@@ -679,12 +651,6 @@
   "settings": {
     "message": "Podešavanja"
   },
-  "showAdvancedGasInline": {
-    "message": "Napredne kontrole gasa"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Izaberite ovo kako biste prikazali cenu gasa i kontrole limita direktno na ekranima za slanje i potvrđivanje."
-  },
   "showFiatConversionInTestnets": {
     "message": "Prikažite konverzije na Testnet"
   },
@@ -747,27 +713,6 @@
   },
   "symbolBetweenZeroTwelve": {
     "message": "Simbol mora biti 11 znakova ili manje."
-  },
-  "syncWithMobile": {
-    "message": "Sinhronizacija sa mobilnim telefonom"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Obratite pažnju da niko drugi ne gleda u vaš ekran kad skenirate ovaj kod"
-  },
-  "syncWithMobileComplete": {
-    "message": "Vaši podaci su uspešno sinhronizovani. Uživajte u mobilnoj aplikaciji MetaMask!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Možete sinhronizovati vaše naloge i informacije sa svojim mobilnim uređajem. Otvorite mobilnu aplikaciju MetaMask, idite na \"Podešavanja\" i pritisnite \"Sinhronizuj iz ekstenzije za pregledač\""
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Ako prvi put otvorite aplikaciju MetaMask Mobile, samo sledite korake u svom telefonu."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Skenirajte ovaj kod uz pomoć svoje MetaMask mobilne aplikacije"
-  },
-  "syncWithMobileTitle": {
-    "message": "Sinhronizujte sa mobilnim uređajem"
   },
   "terms": {
     "message": "Uslovi korišćenja"
@@ -832,15 +777,8 @@
   "transfer": {
     "message": "Prenos"
   },
-  "transferBetweenAccounts": {
-    "message": "Prenos između mojih naloga"
-  },
   "transferFrom": {
     "message": "Prebacite iz"
-  },
-  "troubleTokenBalances": {
-    "message": "Imali smo problema sa učitavanjem bilansa Vaših tokena. Možete ih pogledati",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Пробај поново"
@@ -886,9 +824,6 @@
   },
   "userName": {
     "message": "Корисничко име"
-  },
-  "viewAccount": {
-    "message": "Прикажи налог"
   },
   "viewContact": {
     "message": "Pogledaj kontakt"

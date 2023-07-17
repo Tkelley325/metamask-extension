@@ -3,23 +3,40 @@ import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { debounce } from 'lodash';
 import { getCurrentLocale } from '../../../ducks/locale/locale';
 import { I18nContext } from '../../../contexts/i18n';
 import { useEqualityCheck } from '../../../hooks/useEqualityCheck';
-import Button from '../../ui/button';
 import Popover from '../../ui/popover';
-import Typography from '../../ui/typography';
+import {
+  Button,
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  IconName,
+  ///: END:ONLY_INCLUDE_IN
+} from '../../component-library';
+import { Text } from '../../component-library/text/deprecated';
 import { updateViewedNotifications } from '../../../store/actions';
 import { getTranslatedUINotifications } from '../../../../shared/notifications';
 import { getSortedAnnouncementsToShow } from '../../../selectors';
 import {
   BUILD_QUOTE_ROUTE,
+  PREPARE_SWAP_ROUTE,
   ADVANCED_ROUTE,
   EXPERIMENTAL_ROUTE,
   SECURITY_ROUTE,
 } from '../../../helpers/constants/routes';
-import { TypographyVariant } from '../../../helpers/constants/design-system';
+import {
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  Size,
+  ///: END:ONLY_INCLUDE_IN
+  TextVariant,
+} from '../../../helpers/constants/design-system';
 import ZENDESK_URLS from '../../../helpers/constants/zendesk-url';
+import { MetaMetricsContext } from '../../../contexts/metametrics';
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventName,
+} from '../../../../shared/constants/metametrics';
 
 function getActionFunctionById(id, history) {
   const actionFunctions = {
@@ -59,9 +76,29 @@ function getActionFunctionById(id, history) {
       updateViewedNotifications({ 14: true });
       history.push(`${ADVANCED_ROUTE}#backup-userdata`);
     },
+    16: () => {
+      updateViewedNotifications({ 16: true });
+    },
     17: () => {
       updateViewedNotifications({ 17: true });
-      history.push(SECURITY_ROUTE);
+    },
+    18: () => {
+      updateViewedNotifications({ 18: true });
+      history.push(`${EXPERIMENTAL_ROUTE}#transaction-security-check`);
+    },
+    19: () => {
+      updateViewedNotifications({ 19: true });
+      history.push(`${EXPERIMENTAL_ROUTE}#autodetect-nfts`);
+    },
+    20: () => {
+      updateViewedNotifications({ 20: true });
+      global.platform.openTab({
+        url: ZENDESK_URLS.LEDGER_FIREFOX_U2F_GUIDE,
+      });
+    },
+    21: () => {
+      updateViewedNotifications({ 21: true });
+      history.push(PREPARE_SWAP_ROUTE);
     },
   };
 
@@ -70,11 +107,7 @@ function getActionFunctionById(id, history) {
 
 const renderDescription = (description) => {
   if (!Array.isArray(description)) {
-    return (
-      <Typography variant={TypographyVariant.paragraph}>
-        {description}
-      </Typography>
-    );
+    return <Text variant={TextVariant.bodyMd}>{description}</Text>;
   }
 
   return (
@@ -82,22 +115,50 @@ const renderDescription = (description) => {
       {description.map((piece, index) => {
         const isLast = index === description.length - 1;
         return (
-          <Typography
+          <Text
             key={`item-${index}`}
-            variant={TypographyVariant.paragraph}
-            boxProps={{ marginBottom: isLast ? 0 : 2 }}
+            variant={TextVariant.bodyMd}
+            marginBottom={isLast ? 0 : 4}
           >
             {piece}
-          </Typography>
+          </Text>
         );
       })}
     </>
   );
 };
 
-const renderFirstNotification = (notification, idRefMap, history, isLast) => {
-  const { id, date, title, description, image, actionText } = notification;
+const renderFirstNotification = ({
+  notification,
+  idRefMap,
+  history,
+  isLast,
+  trackEvent,
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  mmiPortfolioUrl,
+  seenNotifications,
+  onClose,
+  ///: END:ONLY_INCLUDE_IN
+}) => {
+  const {
+    id,
+    date,
+    title,
+    description,
+    image,
+    actionText,
+    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    customButton,
+    hideDate,
+    ///: END:ONLY_INCLUDE_IN
+  } = notification;
   const actionFunction = getActionFunctionById(id, history);
+  let showNotificationDate = true;
+
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  showNotificationDate = !hideDate;
+  ///: END:ONLY_INCLUDE_IN
+
   const imageComponent = image && (
     <img
       className="whats-new-popup__notification-image"
@@ -117,24 +178,53 @@ const renderFirstNotification = (notification, idRefMap, history, isLast) => {
       )}
       key={`whats-new-popop-notification-${id}`}
     >
+      <Text variant={TextVariant.bodyLgMedium} marginBottom={2}>
+        {title}
+      </Text>
       {!placeImageBelowDescription && imageComponent}
-      <div className="whats-new-popup__notification-title">{title}</div>
       <div className="whats-new-popup__description-and-date">
         <div className="whats-new-popup__notification-description">
           {renderDescription(description)}
         </div>
-        <div className="whats-new-popup__notification-date">{date}</div>
+        {showNotificationDate && (
+          <div className="whats-new-popup__notification-date">{date}</div>
+        )}
       </div>
       {placeImageBelowDescription && imageComponent}
       {actionText && (
         <Button
-          type="secondary"
+          type="primary"
           className="whats-new-popup__button"
-          onClick={actionFunction}
+          onClick={() => {
+            actionFunction();
+            trackEvent({
+              category: MetaMetricsEventCategory.Home,
+              event: MetaMetricsEventName.WhatsNewClicked,
+            });
+          }}
         >
           {actionText}
         </Button>
       )}
+      {
+        ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+        customButton && customButton.name === 'mmi-portfolio' && (
+          <Button
+            className="whats-new-popup__button"
+            data-testid="view-mmi-portfolio"
+            size={Size.SM}
+            startIconName={IconName.MmmiPortfolioDashboard}
+            onClick={() => {
+              updateViewedNotifications(seenNotifications);
+              onClose();
+              window.open(mmiPortfolioUrl, '_blank');
+            }}
+          >
+            {customButton.text}
+          </Button>
+        )
+        ///: END:ONLY_INCLUDE_IN
+      }
       <div
         className="whats-new-popup__intersection-observable"
         ref={idRefMap[id]}
@@ -143,12 +233,12 @@ const renderFirstNotification = (notification, idRefMap, history, isLast) => {
   );
 };
 
-const renderSubsequentNotification = (
+const renderSubsequentNotification = ({
   notification,
   idRefMap,
   history,
   isLast,
-) => {
+}) => {
   const { id, date, title, description, actionText } = notification;
 
   const actionFunction = getActionFunctionById(id, history);
@@ -179,7 +269,12 @@ const renderSubsequentNotification = (
   );
 };
 
-export default function WhatsNewPopup({ onClose }) {
+export default function WhatsNewPopup({
+  onClose,
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  mmiPortfolioUrl,
+  ///: END:ONLY_INCLUDE_IN
+}) {
   const t = useContext(I18nContext);
   const history = useHistory();
 
@@ -187,6 +282,7 @@ export default function WhatsNewPopup({ onClose }) {
   const locale = useSelector(getCurrentLocale);
 
   const [seenNotifications, setSeenNotifications] = useState({});
+  const [shouldShowScrollButton, setShouldShowScrollButton] = useState(true);
 
   const popoverRef = useRef();
 
@@ -203,6 +299,26 @@ export default function WhatsNewPopup({ onClose }) {
     [memoizedNotifications],
   );
 
+  const trackEvent = useContext(MetaMetricsContext);
+
+  const handleDebouncedScroll = debounce((target) => {
+    setShouldShowScrollButton(
+      target.scrollHeight - target.scrollTop !== target.clientHeight,
+    );
+  }, 100);
+
+  const handleScroll = (e) => {
+    handleDebouncedScroll(e.target);
+  };
+
+  const handleScrollDownClick = (e) => {
+    e.stopPropagation();
+    idRefMap[notifications[notifications.length - 1].id].current.scrollIntoView(
+      {
+        behavior: 'smooth',
+      },
+    );
+  };
   useEffect(() => {
     const observer = new window.IntersectionObserver(
       (entries, _observer) => {
@@ -236,29 +352,62 @@ export default function WhatsNewPopup({ onClose }) {
     };
   }, [idRefMap, setSeenNotifications]);
 
+  // Display the swaps notification with full image
+  // Displays the NFTs & OpenSea notifications 18,19 with full image
+  const notificationRenderers = {
+    0: renderFirstNotification,
+    1: renderFirstNotification,
+    18: renderFirstNotification,
+    19: renderFirstNotification,
+    21: renderFirstNotification,
+  };
+
   return (
     <Popover
-      className="whats-new-popup__popover"
       title={t('whatsNew')}
+      headerProps={{ padding: [4, 4, 4] }}
+      className="whats-new-popup__popover"
       onClose={() => {
         updateViewedNotifications(seenNotifications);
+        trackEvent({
+          category: MetaMetricsEventCategory.Home,
+          event: MetaMetricsEventName.WhatsNewViewed,
+          properties: {
+            number_viewed: Object.keys(seenNotifications).pop(),
+            completed_all: true,
+          },
+        });
         onClose();
       }}
       popoverRef={popoverRef}
+      showScrollDown={shouldShowScrollButton && notifications.length > 1}
+      onScrollDownButtonClick={handleScrollDownClick}
+      onScroll={handleScroll}
     >
       <div className="whats-new-popup__notifications">
         {notifications.map(({ id }, index) => {
           const notification = getTranslatedUINotifications(t, locale)[id];
           const isLast = index === notifications.length - 1;
-          // Display the swaps notification with full image
-          return index === 0 || id === 1
-            ? renderFirstNotification(notification, idRefMap, history, isLast)
-            : renderSubsequentNotification(
-                notification,
-                idRefMap,
-                history,
-                isLast,
-              );
+          // Choose the appropriate rendering function based on the id
+          let renderNotification =
+            notificationRenderers[id] || renderSubsequentNotification;
+
+          ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+          renderNotification = renderFirstNotification;
+          ///: END:ONLY_INCLUDE_IN
+
+          return renderNotification({
+            notification,
+            idRefMap,
+            history,
+            isLast,
+            trackEvent,
+            ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+            mmiPortfolioUrl,
+            seenNotifications,
+            onClose,
+            ///: END:ONLY_INCLUDE_IN
+          });
         })}
       </div>
     </Popover>
@@ -267,4 +416,7 @@ export default function WhatsNewPopup({ onClose }) {
 
 WhatsNewPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
+  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  mmiPortfolioUrl: PropTypes.string.isRequired,
+  ///: END:ONLY_INCLUDE_IN
 };

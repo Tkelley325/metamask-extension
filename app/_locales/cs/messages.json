@@ -81,9 +81,6 @@
   "create": {
     "message": "Vytvořit"
   },
-  "createAccount": {
-    "message": "Vytvořit účet"
-  },
   "customToken": {
     "message": "Vlastní token"
   },
@@ -139,13 +136,6 @@
   },
   "gasPrice": {
     "message": "Cena paliva (GWEI)"
-  },
-  "getEther": {
-    "message": "Získejte Ether"
-  },
-  "getEtherFromFaucet": {
-    "message": "Získejte Ether z faucetu za $1.",
-    "description": "Displays network name for Ether faucet"
   },
   "here": {
     "message": "zde",
@@ -215,9 +205,6 @@
   },
   "mustSelectOne": {
     "message": "Musíte zvolit aspoň 1 token."
-  },
-  "myAccounts": {
-    "message": "Moje účty"
   },
   "needImportFile": {
     "message": "Musíte zvolit soubor k importu.",
@@ -356,9 +343,6 @@
   "terms": {
     "message": "Podmínky použití"
   },
-  "testFaucet": {
-    "message": "Testovací faucet"
-  },
   "to": {
     "message": "Komu"
   },
@@ -373,10 +357,6 @@
   },
   "transactionError": {
     "message": "Chyba transakce. Vyhozena výjimka v kódu kontraktu."
-  },
-  "troubleTokenBalances": {
-    "message": "Měli jsme problém s načtením vašich tokenových zůstatků. Můžete je vidět ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "typePassword": {
     "message": "Zadejte své heslo"
@@ -398,9 +378,6 @@
   },
   "usedByClients": {
     "message": "Používána různými klienty"
-  },
-  "viewAccount": {
-    "message": "Zobrazit účet"
   },
   "visitWebSite": {
     "message": "Navštivte naši stránku"

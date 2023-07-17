@@ -96,9 +96,6 @@
   "connect": {
     "message": "Konekte"
   },
-  "connectHardwareWallet": {
-    "message": "Konekte Materyèl Wallet"
-  },
   "connectingToMainnet": {
     "message": "Konekte ak Prensipal Ethereum Rezo a"
   },
@@ -119,9 +116,6 @@
   },
   "create": {
     "message": "Kreye"
-  },
-  "createAccount": {
-    "message": "Kreye Kont"
   },
   "currentLanguage": {
     "message": "Lang Aktyèl"
@@ -199,13 +193,6 @@
   },
   "gasUsed": {
     "message": "Gaz yo Itilize"
-  },
-  "getEther": {
-    "message": "Jwenn Ether"
-  },
-  "getEtherFromFaucet": {
-    "message": "Jwenn Ether nan yon tiyo pou $1 la",
-    "description": "Displays network name for Ether faucet"
   },
   "hardware": {
     "message": "materyèl"
@@ -312,9 +299,6 @@
   },
   "mustSelectOne": {
     "message": "Ou dwe chwazi omwen 1 token."
-  },
-  "myAccounts": {
-    "message": "Kont mwen"
   },
   "needImportFile": {
     "message": "Ou dwe chwazi yon dosye pou enpòte.",
@@ -537,9 +521,6 @@
   "terms": {
     "message": "Tèm pou itilize"
   },
-  "testFaucet": {
-    "message": "Tès Tiyo"
-  },
   "to": {
     "message": "Pou"
   },
@@ -572,10 +553,6 @@
   },
   "transfer": {
     "message": "Transfè"
-  },
-  "troubleTokenBalances": {
-    "message": "Nou te gen pwoblèm chaje balans token ou. Ou ka wè yo ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Eseye anko"
@@ -618,9 +595,6 @@
   },
   "usedByClients": {
     "message": "Itilize pa yon varyete de kliyan diferan"
-  },
-  "viewAccount": {
-    "message": "Wè Kont"
   },
   "visitWebSite": {
     "message": "Vizite sit entènèt nou an"

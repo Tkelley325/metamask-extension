@@ -6,11 +6,19 @@ import AccountModalContainer from '../account-modal-container';
 import QrView from '../../../ui/qr-code';
 import EditableLabel from '../../../ui/editable-label';
 import Button from '../../../ui/button';
-import { getURLHostName } from '../../../../helpers/utils/util';
-import { isHardwareKeyring } from '../../../../helpers/utils/hardware';
 import {
-  EVENT,
-  EVENT_NAMES,
+  getURLHostName,
+  isAbleToExportAccount,
+} from '../../../../helpers/utils/util';
+///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+import CustodyLabels from '../../../institutional/custody-labels/custody-labels';
+import { toChecksumHexAddress } from '../../../../../shared/modules/hexstring-utils';
+///: END:ONLY_INCLUDE_IN
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventLinkType,
+  MetaMetricsEventKeyType,
+  MetaMetricsEventName,
 } from '../../../../../shared/constants/metametrics';
 import { NETWORKS_ROUTE } from '../../../../helpers/constants/routes';
 
@@ -26,6 +34,10 @@ export default class AccountDetailsModal extends Component {
     history: PropTypes.object,
     hideModal: PropTypes.func,
     blockExplorerLinkText: PropTypes.object,
+    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    accountType: PropTypes.string,
+    custodyAccountDetails: PropTypes.object,
+    ///: END:ONLY_INCLUDE_IN
   };
 
   static contextTypes = {
@@ -44,6 +56,10 @@ export default class AccountDetailsModal extends Component {
       history,
       hideModal,
       blockExplorerLinkText,
+      ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+      accountType,
+      custodyAccountDetails,
+      ///: END:ONLY_INCLUDE_IN
     } = this.props;
     const { name, address } = selectedIdentity;
 
@@ -51,11 +67,18 @@ export default class AccountDetailsModal extends Component {
       return kr.accounts.includes(address);
     });
 
-    let exportPrivateKeyFeatureEnabled = true;
-    // This feature is disabled for hardware wallets
-    if (isHardwareKeyring(keyring?.type)) {
+    let exportPrivateKeyFeatureEnabled = isAbleToExportAccount(keyring?.type);
+
+    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    if (keyring?.type?.search('Custody') !== -1) {
       exportPrivateKeyFeatureEnabled = false;
     }
+    const showCustodyLabels = accountType === 'custody';
+    const custodyLabels = custodyAccountDetails
+      ? custodyAccountDetails[toChecksumHexAddress(selectedIdentity.address)]
+          ?.labels
+      : {};
+    ///: END:ONLY_INCLUDE_IN
 
     const routeToAddBlockExplorerUrl = () => {
       hideModal();
@@ -65,10 +88,10 @@ export default class AccountDetailsModal extends Component {
     const openBlockExplorer = () => {
       const accountLink = getAccountLink(address, chainId, rpcPrefs);
       this.context.trackEvent({
-        category: EVENT.CATEGORIES.NAVIGATION,
-        event: EVENT_NAMES.EXTERNAL_LINK_CLICKED,
+        category: MetaMetricsEventCategory.Navigation,
+        event: MetaMetricsEventName.ExternalLinkClicked,
         properties: {
-          link_type: EVENT.EXTERNAL_LINK_TYPES.ACCOUNT_TRACKER,
+          link_type: MetaMetricsEventLinkType.AccountTracker,
           location: 'Account Details Modal',
           url_domain: getURLHostName(accountLink),
         },
@@ -86,7 +109,11 @@ export default class AccountDetailsModal extends Component {
           onSubmit={(label) => setAccountLabel(address, label)}
           accounts={this.props.accounts}
         />
-
+        {
+          ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+          showCustodyLabels && <CustodyLabels labels={custodyLabels} />
+          ///: END:ONLY_INCLUDE_IN
+        }
         <QrView
           Qr={{
             data: address,
@@ -115,10 +142,10 @@ export default class AccountDetailsModal extends Component {
             className="account-details-modal__button"
             onClick={() => {
               this.context.trackEvent({
-                category: EVENT.CATEGORIES.ACCOUNTS,
-                event: EVENT_NAMES.KEY_EXPORT_SELECTED,
+                category: MetaMetricsEventCategory.Accounts,
+                event: MetaMetricsEventName.KeyExportSelected,
                 properties: {
-                  key_type: EVENT.KEY_TYPES.PKEY,
+                  key_type: MetaMetricsEventKeyType.Pkey,
                   location: 'Account Details Modal',
                 },
               });

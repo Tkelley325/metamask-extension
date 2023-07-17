@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import ToggleButton from '../../../components/ui/toggle-button';
 import TextField from '../../../components/ui/text-field';
 import Button from '../../../components/ui/button';
-import { MOBILE_SYNC_ROUTE } from '../../../helpers/constants/routes';
 import Dropdown from '../../../components/ui/dropdown';
 import Dialog from '../../../components/ui/dialog';
 
@@ -19,10 +18,19 @@ import {
   LedgerTransportTypes,
   LEDGER_USB_VENDOR_ID,
 } from '../../../../shared/constants/hardware-wallets';
-import { EVENT, EVENT_NAMES } from '../../../../shared/constants/metametrics';
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventName,
+} from '../../../../shared/constants/metametrics';
+import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../../../shared/constants/preferences';
 import { exportAsFile } from '../../../helpers/utils/export-utils';
 import ActionableMessage from '../../../components/ui/actionable-message';
 import ZENDESK_URLS from '../../../helpers/constants/zendesk-url';
+import { BannerAlert } from '../../../components/component-library';
+import {
+  SEVERITIES,
+  TextVariant,
+} from '../../../helpers/constants/design-system';
 
 const CORRUPT_JSON_FILE = 'CORRUPT_JSON_FILE';
 
@@ -38,11 +46,9 @@ export default class AdvancedTab extends PureComponent {
     setHexDataFeatureFlag: PropTypes.func,
     displayWarning: PropTypes.func,
     showResetAccountConfirmationModal: PropTypes.func,
+    showEthSignModal: PropTypes.func,
     warning: PropTypes.string,
-    history: PropTypes.object,
     sendHexData: PropTypes.bool,
-    setAdvancedInlineGasFeatureFlag: PropTypes.func,
-    advancedInlineGas: PropTypes.bool,
     showFiatInTestnets: PropTypes.bool,
     showTestNetworks: PropTypes.bool,
     autoLockTimeLimit: PropTypes.number,
@@ -67,6 +73,7 @@ export default class AdvancedTab extends PureComponent {
 
   state = {
     autoLockTimeLimit: this.props.autoLockTimeLimit,
+    autoLockTimeLimitBeforeNormalization: this.props.autoLockTimeLimit,
     lockTimeError: '',
     showLedgerTransportWarning: false,
     showResultMessage: false,
@@ -191,44 +198,13 @@ export default class AdvancedTab extends PureComponent {
     );
   }
 
-  renderMobileSync() {
-    const { t } = this.context;
-    const { history } = this.props;
-
-    return (
-      <div
-        ref={this.settingsRefs[1]}
-        className="settings-page__content-row"
-        data-testid="advanced-setting-mobile-sync"
-      >
-        <div className="settings-page__content-item">
-          <span>{t('syncWithMobile')}</span>
-        </div>
-        <div className="settings-page__content-item">
-          <div className="settings-page__content-item-col">
-            <Button
-              type="secondary"
-              large
-              onClick={(event) => {
-                event.preventDefault();
-                history.push(MOBILE_SYNC_ROUTE);
-              }}
-            >
-              {t('syncWithMobile')}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   renderResetAccount() {
     const { t } = this.context;
     const { showResetAccountConfirmationModal } = this.props;
 
     return (
       <div
-        ref={this.settingsRefs[2]}
+        ref={this.settingsRefs[1]}
         className="settings-page__content-row"
         data-testid="advanced-setting-reset-account"
       >
@@ -247,8 +223,8 @@ export default class AdvancedTab extends PureComponent {
               onClick={(event) => {
                 event.preventDefault();
                 this.context.trackEvent({
-                  category: EVENT.CATEGORIES.SETTINGS,
-                  event: EVENT_NAMES.ACCOUNT_RESET,
+                  category: MetaMetricsEventCategory.Settings,
+                  event: MetaMetricsEventName.AccountReset,
                   properties: {},
                 });
                 showResetAccountConfirmationModal();
@@ -262,43 +238,13 @@ export default class AdvancedTab extends PureComponent {
     );
   }
 
-  renderAdvancedGasInputInline() {
-    const { t } = this.context;
-    const { advancedInlineGas, setAdvancedInlineGasFeatureFlag } = this.props;
-
-    return (
-      <div
-        ref={this.settingsRefs[3]}
-        className="settings-page__content-row"
-        data-testid="advanced-setting-advanced-gas-inline"
-      >
-        <div className="settings-page__content-item">
-          <span>{t('showAdvancedGasInline')}</span>
-          <div className="settings-page__content-description">
-            {t('showAdvancedGasInlineDescription')}
-          </div>
-        </div>
-        <div className="settings-page__content-item">
-          <div className="settings-page__content-item-col">
-            <ToggleButton
-              value={advancedInlineGas}
-              onToggle={(value) => setAdvancedInlineGasFeatureFlag(!value)}
-              offLabel={t('off')}
-              onLabel={t('on')}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   renderHexDataOptIn() {
     const { t } = this.context;
     const { sendHexData, setHexDataFeatureFlag } = this.props;
 
     return (
       <div
-        ref={this.settingsRefs[4]}
+        ref={this.settingsRefs[2]}
         className="settings-page__content-row"
         data-testid="advanced-setting-hex-data"
       >
@@ -329,7 +275,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[5]}
+        ref={this.settingsRefs[3]}
         className="settings-page__content-row"
         data-testid="advanced-setting-show-testnet-conversion"
       >
@@ -361,7 +307,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[6]}
+        ref={this.settingsRefs[4]}
         className="settings-page__content-row"
         data-testid="advanced-setting-show-testnet-conversion"
       >
@@ -391,7 +337,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[7]}
+        ref={this.settingsRefs[5]}
         className="settings-page__content-row"
         data-testid="advanced-setting-custom-nonce"
       >
@@ -422,7 +368,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[8]}
+        ref={this.settingsRefs[6]}
         className="settings-page__content-row"
         data-testid="advanced-setting-auto-lock"
       >
@@ -435,11 +381,10 @@ export default class AdvancedTab extends PureComponent {
         <div className="settings-page__content-item">
           <div className="settings-page__content-item-col">
             <TextField
-              type="number"
               id="autoTimeout"
               data-testid="auto-lockout-time"
-              placeholder="5"
-              value={this.state.autoLockTimeLimit}
+              placeholder="0"
+              value={this.state.autoLockTimeLimitBeforeNormalization}
               onChange={(e) => this.handleLockChange(e.target.value)}
               error={lockTimeError}
               fullWidth
@@ -510,7 +455,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[9]}
+        ref={this.settingsRefs[7]}
         className="settings-page__content-row"
         data-testId="ledger-live-control"
       >
@@ -576,7 +521,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[10]}
+        ref={this.settingsRefs[8]}
         className="settings-page__content-row"
         data-testid="advanced-setting-dismiss-reminder"
       >
@@ -601,13 +546,26 @@ export default class AdvancedTab extends PureComponent {
   }
 
   renderToggleEthSignControl() {
-    const { t } = this.context;
-    const { disabledRpcMethodPreferences, setDisabledRpcMethodPreference } =
-      this.props;
-
+    const { t, trackEvent } = this.context;
+    const {
+      disabledRpcMethodPreferences,
+      showEthSignModal,
+      setDisabledRpcMethodPreference,
+    } = this.props;
+    const toggleOff = (value) => {
+      setDisabledRpcMethodPreference('eth_sign', !value);
+      trackEvent({
+        category: MetaMetricsEventCategory.Settings,
+        event: MetaMetricsEventName.OnboardingWalletAdvancedSettings,
+        properties: {
+          location: 'Settings',
+          enable_eth_sign: false,
+        },
+      });
+    };
     return (
       <div
-        ref={this.settingsRefs[10]}
+        ref={this.settingsRefs[9]}
         className="settings-page__content-row"
         data-testid="advanced-setting-toggle-ethsign"
       >
@@ -617,15 +575,26 @@ export default class AdvancedTab extends PureComponent {
             {t('toggleEthSignDescriptionField')}
           </div>
         </div>
+
+        {disabledRpcMethodPreferences?.eth_sign === true ? (
+          <BannerAlert
+            severity={SEVERITIES.DANGER}
+            marginBottom={5}
+            descriptionProps={{ variant: TextVariant.bodyMd }}
+          >
+            {t('toggleEthSignBannerDescription')}
+          </BannerAlert>
+        ) : null}
         <div className="settings-page__content-item">
           <div className="settings-page__content-item-col">
             <ToggleButton
+              className="eth-sign-toggle"
               value={disabledRpcMethodPreferences?.eth_sign || false}
-              onToggle={(value) =>
-                setDisabledRpcMethodPreference('eth_sign', !value)
-              }
-              offLabel={t('off')}
-              onLabel={t('on')}
+              onToggle={(value) => {
+                value ? toggleOff(value) : showEthSignModal();
+              }}
+              offLabel={t('toggleEthSignOff')}
+              onLabel={t('toggleEthSignOn')}
             />
           </div>
         </div>
@@ -633,21 +602,41 @@ export default class AdvancedTab extends PureComponent {
     );
   }
 
-  handleLockChange(time) {
+  handleLockChange(autoLockTimeLimitBeforeNormalization) {
     const { t } = this.context;
-    const autoLockTimeLimit = Math.max(Number(time), 0);
 
-    this.setState(() => {
-      let lockTimeError = '';
+    if (autoLockTimeLimitBeforeNormalization === '') {
+      this.setState({
+        autoLockTimeLimitBeforeNormalization,
+        autoLockTimeLimit: DEFAULT_AUTO_LOCK_TIME_LIMIT.toString(),
+        lockTimeError: '',
+      });
+      return;
+    }
 
-      if (autoLockTimeLimit > 10080) {
-        lockTimeError = t('lockTimeTooGreat');
-      }
+    const autoLockTimeLimitAfterNormalization = Number(
+      autoLockTimeLimitBeforeNormalization,
+    );
 
-      return {
-        autoLockTimeLimit,
-        lockTimeError,
-      };
+    if (
+      Number.isNaN(autoLockTimeLimitAfterNormalization) ||
+      autoLockTimeLimitAfterNormalization < 0 ||
+      autoLockTimeLimitAfterNormalization > 10080
+    ) {
+      this.setState({
+        autoLockTimeLimitBeforeNormalization,
+        autoLockTimeLimit: null,
+        lockTimeError: t('lockTimeInvalid'),
+      });
+      return;
+    }
+
+    const autoLockTimeLimit = autoLockTimeLimitAfterNormalization;
+
+    this.setState({
+      autoLockTimeLimitBeforeNormalization,
+      autoLockTimeLimit,
+      lockTimeError: '',
     });
   }
 
@@ -655,7 +644,7 @@ export default class AdvancedTab extends PureComponent {
     const { t } = this.context;
     return (
       <div
-        ref={this.settingsRefs[11]}
+        ref={this.settingsRefs[10]}
         className="settings-page__content-row"
         data-testid="advanced-setting-data-backup"
       >
@@ -695,7 +684,7 @@ export default class AdvancedTab extends PureComponent {
 
     return (
       <div
-        ref={this.settingsRefs[12]}
+        ref={this.settingsRefs[11]}
         className="settings-page__content-row"
         data-testid="advanced-setting-data-restore"
       >
@@ -752,9 +741,7 @@ export default class AdvancedTab extends PureComponent {
       <div className="settings-page__body">
         {warning ? <div className="settings-tab__error">{warning}</div> : null}
         {this.renderStateLogs()}
-        {this.renderMobileSync()}
         {this.renderResetAccount()}
-        {this.renderAdvancedGasInputInline()}
         {this.renderHexDataOptIn()}
         {this.renderShowConversionInTestnets()}
         {this.renderToggleTestNetworks()}

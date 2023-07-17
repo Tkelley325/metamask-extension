@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Box from '../../ui/box/box';
-import { Text } from '../text';
+import { Text } from '../text/deprecated';
 import {
   AlignItems,
   BackgroundColor,
@@ -13,9 +13,7 @@ import {
   Size,
   TextVariant,
 } from '../../../helpers/constants/design-system';
-import { AvatarFavicon } from '../avatar-favicon';
-import { ButtonLink } from '../button-link';
-import { Icon, ICON_NAMES } from '../icon';
+import { AvatarFavicon, ButtonLink, IconName, Icon, IconSize } from '..';
 
 export const TagUrl = ({
   label,
@@ -47,9 +45,9 @@ export const TagUrl = ({
       {showLockIcon && (
         <Icon
           className="mm-tag-url__lock-icon"
-          name={ICON_NAMES.LOCK}
+          name={IconName.Lock}
           color={IconColor.iconAlternative}
-          size={Size.SM}
+          size={IconSize.Sm}
           aria-label="https://"
           role="img"
           {...lockIconProps}
@@ -87,11 +85,11 @@ TagUrl.propTypes = {
   /**
    * It accepts all the props from Avatar Favicon
    */
-  avatarFaviconProps: PropTypes.shape(AvatarFavicon.PropTypes),
+  avatarFaviconProps: PropTypes.shape(AvatarFavicon.propTypes),
   /**
    * It accepts all the props from Icon
    */
-  lockIconProps: PropTypes.shape(Icon.PropTypes),
+  lockIconProps: PropTypes.object,
   /**
    * The text content of the TagUrl component
    */
@@ -99,7 +97,7 @@ TagUrl.propTypes = {
   /**
    * It accepts all the props from Text Component
    */
-  labelProps: PropTypes.shape(Text.PropTypes),
+  labelProps: PropTypes.shape(Text.propTypes),
   /**
    * If we want a button in TagUrl component.
    */
@@ -107,7 +105,7 @@ TagUrl.propTypes = {
   /**
    * It accepts all the props from ButtonLink
    */
-  actionButtonProps: PropTypes.shape(ButtonLink.PropTypes),
+  actionButtonProps: PropTypes.shape(ButtonLink.propTypes),
   /**
    * Additional classNames to be added to the TagUrl component
    */

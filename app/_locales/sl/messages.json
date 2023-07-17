@@ -93,9 +93,6 @@
   "back": {
     "message": "Nazaj"
   },
-  "backToAll": {
-    "message": "Nazaj na vse"
-  },
   "backupApprovalInfo": {
     "message": "Ta skrivna koda je potrebna za obnovitev denarnice, če izgubite napravo, pozabite geslo, ponovno namestite MetaMask ali želite dostopati do denarnice v drugi napravi."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Vaš brskalnik ni podptrt ..."
-  },
-  "buyWithWyre": {
-    "message": "Kupi $1 z Wyre"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre vam omogoča, da s kreditno kartico nakažete $1 neposredno na svoj račun MetaMask."
   },
   "bytes": {
     "message": "Bajti"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Poveži"
   },
-  "connectHardwareWallet": {
-    "message": "Poveži strojno denarnico"
-  },
   "connectingTo": {
     "message": "Povezovanje na $1"
   },
   "connectingToGoerli": {
     "message": "Povezovanje na testno omrežje Goerli"
   },
+  "connectingToLineaGoerli": {
+    "message": "Povezovanje na testno omrežje Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "Povezovanje na glavno omrežje"
-  },
-  "continueToWyre": {
-    "message": "Nadaljuj na Wyre"
   },
   "contractDeployment": {
     "message": "Ustvarjanje pogodbe"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Ustvari"
   },
-  "createAccount": {
-    "message": "Ustvari račun"
-  },
   "createPassword": {
     "message": "Ustvari geslo"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Izbriši"
-  },
-  "deleteAccount": {
-    "message": "Izbriši račun"
   },
   "deleteNetwork": {
     "message": "Izbrišem to omrežje?"
@@ -324,13 +306,6 @@
   "general": {
     "message": "Splošno"
   },
-  "getEther": {
-    "message": "Pridobi Ether"
-  },
-  "getEtherFromFaucet": {
-    "message": "Pridobite Ether iz fauceta za $1",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Testno omrežje Goerli"
   },
@@ -422,6 +397,9 @@
   "likeToImportTokens": {
     "message": "Želite dodati te žetone?"
   },
+  "lineaGoerli": {
+    "message": "Testno omrežje Linea Goerli"
+  },
   "links": {
     "message": "Povezave"
   },
@@ -451,9 +429,6 @@
   },
   "mustSelectOne": {
     "message": "Izbran mora biti vsaj 1 žeton."
-  },
-  "myAccounts": {
-    "message": "Moji računi"
   },
   "needImportFile": {
     "message": "Za uvoz morate izbrati datoteko.",
@@ -579,9 +554,6 @@
   "readdToken": {
     "message": "Ta žeton lahko dodate tudi kasneje z uporabo gumba “Dodaj žeton” v možnostih vašega računa."
   },
-  "recents": {
-    "message": "Nedavno"
-  },
   "recipientAddressPlaceholder": {
     "message": "Iskanje, javni naslov (0x) ali ENS"
   },
@@ -676,12 +648,6 @@
   "settings": {
     "message": "Nastavitve"
   },
-  "showAdvancedGasInline": {
-    "message": "Napredno krmiljenje plina"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Izberite to možnost, če želite prikazati ceno plina in omejiti nadzor neposredno na zaslonih za pošiljanje in potrditev."
-  },
   "showFiatConversionInTestnets": {
     "message": "Pokažite pretvorbo na testnih omrežjih"
   },
@@ -745,32 +711,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Simbol mora biti največ 11 znakov ali manj."
   },
-  "syncWithMobile": {
-    "message": "Sinhroniziraj z mobilnimi telefonom"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Ko skenirate to kodo, naj nihče ne kuka na vaš zaslon"
-  },
-  "syncWithMobileComplete": {
-    "message": "Vaši podatki so uspešno sinhronizirani. Uživajte v mobilni aplikaciji MetaMask!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Račune in podatke lahko sinhronizirate s svojo mobilno napravo. Odprite mobilno aplikacijo MetaMask, pojdite na \"Nastavitve\" in tapnite \"Sinhroniziraj z razširitvijo brskalnika\""
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Če ste sedaj prvič odprli aplikacijo MetaMask Mobile, samo sledite korakom v telefonu."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Skenirajte to kodo z mobilno aplikacijo MetaMask"
-  },
-  "syncWithMobileTitle": {
-    "message": "Sinhroniziraj z mobilnimi telefonom"
-  },
   "terms": {
     "message": "Pogoji uporabe"
-  },
-  "testFaucet": {
-    "message": "Testni faucet"
   },
   "tips": {
     "message": "Nasveti"
@@ -835,15 +777,8 @@
   "transfer": {
     "message": "Prenesi"
   },
-  "transferBetweenAccounts": {
-    "message": "Prenos med mojimi računi"
-  },
   "transferFrom": {
     "message": "Prenesi od"
-  },
-  "troubleTokenBalances": {
-    "message": "Če imate težave pri ogledu zneskov žetonov si jih lahko ogledate ",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Poskusi znova"
@@ -889,9 +824,6 @@
   },
   "userName": {
     "message": "Uporabniško ime"
-  },
-  "viewAccount": {
-    "message": "Poglej račun"
   },
   "viewContact": {
     "message": "Ogled stika"

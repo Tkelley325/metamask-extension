@@ -60,6 +60,14 @@ function importAllScripts() {
   loadFile('./globalthis.js');
   loadFile('./sentry-install.js');
 
+  // eslint-disable-next-line no-undef
+  const isWorker = !self.document;
+  if (!isWorker) {
+    loadFile('./snow.js');
+  }
+
+  loadFile('./use-snow.js');
+
   // Always apply LavaMoat in e2e test builds, so that we can capture initialization stats
   if (testMode || applyLavaMoat) {
     loadFile('./runtime-lavamoat.js');
@@ -125,10 +133,6 @@ self.addEventListener('install', importAllScripts);
 chrome.runtime.onMessage.addListener(() => {
   importAllScripts();
   return false;
-});
-
-chrome.runtime.onStartup.addListener(() => {
-  globalThis.isFirstTimeProfileLoaded = true;
 });
 
 /*

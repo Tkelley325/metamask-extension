@@ -6,32 +6,38 @@ import { getTokenTrackerLink } from '@metamask/etherscan-link';
 import UrlIcon from '../../../components/ui/url-icon';
 import { addressSummary } from '../../../helpers/utils/util';
 import { formatCurrency } from '../../../helpers/utils/confirm-tx.util';
-import Typography from '../../../components/ui/typography';
 import Box from '../../../components/ui/box';
 import Button from '../../../components/ui/button';
 import SimulationErrorMessage from '../../../components/ui/simulation-error-message';
 import EditGasFeeButton from '../../../components/app/edit-gas-fee-button';
 import MultiLayerFeeMessage from '../../../components/app/multilayer-fee-message';
+import SecurityProviderBannerMessage from '../../../components/app/security-provider-banner-message/security-provider-banner-message';
 import {
-  TypographyVariant,
-  FONT_WEIGHT,
   BLOCK_SIZES,
-  JustifyContent,
   DISPLAY,
   TextColor,
   IconColor,
+  TextVariant,
+  AlignItems,
 } from '../../../helpers/constants/design-system';
 import { ConfirmPageContainerWarning } from '../../../components/app/confirm-page-container/confirm-page-container-content';
-import GasDetailsItem from '../../../components/app/gas-details-item';
 import LedgerInstructionField from '../../../components/app/ledger-instruction-field';
+import { isSuspiciousResponse } from '../../../../shared/modules/security-provider.utils';
+
 import { TokenStandard } from '../../../../shared/constants/transaction';
 import { CHAIN_IDS, TEST_CHAINS } from '../../../../shared/constants/network';
 import ContractDetailsModal from '../../../components/app/modals/contract-details-modal/contract-details-modal';
 import {
-  ICON_NAMES,
   ButtonIcon,
   Icon,
+  IconName,
 } from '../../../components/component-library';
+import { Text } from '../../../components/component-library/text/deprecated';
+import TransactionDetailItem from '../../../components/app/transaction-detail-item/transaction-detail-item.component';
+import UserPreferencedCurrencyDisplay from '../../../components/app/user-preferenced-currency-display';
+import { PRIMARY, SECONDARY } from '../../../helpers/constants/common';
+import { ConfirmGasDisplay } from '../../../components/app/confirm-gas-display';
+import CustomNonce from '../../../components/app/custom-nonce';
 
 export default class ConfirmApproveContent extends Component {
   static contextTypes = {
@@ -63,6 +69,7 @@ export default class ConfirmApproveContent extends Component {
     rpcPrefs: PropTypes.object,
     isContract: PropTypes.bool,
     hexTransactionTotal: PropTypes.string,
+    hexMinimumTransactionFee: PropTypes.string,
     isMultiLayerFeeNetwork: PropTypes.bool,
     supportsEIP1559: PropTypes.bool,
     assetName: PropTypes.string,
@@ -75,6 +82,7 @@ export default class ConfirmApproveContent extends Component {
     setUserAcknowledgedGasMissing: PropTypes.func,
     renderSimulationFailureWarning: PropTypes.bool,
     useCurrencyRateCheck: PropTypes.bool,
+    useNativeCurrencyAsPrimaryCurrency: PropTypes.bool,
   };
 
   state = {
@@ -155,12 +163,14 @@ export default class ConfirmApproveContent extends Component {
       ethTransactionTotal,
       fiatTransactionTotal,
       hexTransactionTotal,
+      hexMinimumTransactionFee,
       txData,
       isMultiLayerFeeNetwork,
       supportsEIP1559,
       userAcknowledgedGasMissing,
       renderSimulationFailureWarning,
       useCurrencyRateCheck,
+      useNativeCurrencyAsPrimaryCurrency,
     } = this.props;
     if (
       !isMultiLayerFeeNetwork &&
@@ -168,7 +178,7 @@ export default class ConfirmApproveContent extends Component {
       !renderSimulationFailureWarning
     ) {
       return (
-        <GasDetailsItem
+        <ConfirmGasDisplay
           userAcknowledgedGasMissing={userAcknowledgedGasMissing}
         />
       );
@@ -177,10 +187,27 @@ export default class ConfirmApproveContent extends Component {
       <div className="confirm-approve-content__transaction-details-content">
         {isMultiLayerFeeNetwork ? (
           <div className="confirm-approve-content__transaction-details-extra-content">
-            <div className="confirm-approve-content__transaction-details-content__labelled-fee">
-              <span>{t('transactionDetailLayer2GasHeading')}</span>
-              {`${ethTransactionTotal} ${nativeCurrency}`}
-            </div>
+            <TransactionDetailItem
+              key="confirm-approve-content-min-tx-fee"
+              detailTitle={t('transactionDetailLayer2GasHeading')}
+              detailTotal={
+                <UserPreferencedCurrencyDisplay
+                  type={PRIMARY}
+                  value={hexMinimumTransactionFee}
+                  hideLabel={!useNativeCurrencyAsPrimaryCurrency}
+                  numberOfDecimals={18}
+                />
+              }
+              detailText={
+                <UserPreferencedCurrencyDisplay
+                  type={SECONDARY}
+                  value={hexMinimumTransactionFee}
+                  hideLabel={Boolean(useNativeCurrencyAsPrimaryCurrency)}
+                />
+              }
+              noBold
+              flexWidthValues
+            />
             <MultiLayerFeeMessage
               transaction={txData}
               layer2fee={hexTransactionTotal}
@@ -210,9 +237,13 @@ export default class ConfirmApproveContent extends Component {
 
   renderERC721OrERC1155PermissionContent() {
     const { t } = this.context;
-    const { origin, toAddress, isContract, isSetApproveForAll } = this.props;
+    const { origin, toAddress, isContract, isSetApproveForAll, tokenSymbol } =
+      this.props;
 
     const titleTokenDescription = this.getTitleTokenDescription();
+    const approvedAssetText = tokenSymbol
+      ? t('allOfYour', [titleTokenDescription])
+      : t('allYourNFTsOf', [titleTokenDescription]);
 
     const displayedAddress = isContract
       ? `${t('contract')} (${addressSummary(toAddress)})`
@@ -227,9 +258,7 @@ export default class ConfirmApproveContent extends Component {
             {t('approvedAsset')}:
           </div>
           <div className="confirm-approve-content__medium-text">
-            {isSetApproveForAll
-              ? t('allOfYour', [titleTokenDescription])
-              : titleTokenDescription}
+            {isSetApproveForAll ? approvedAssetText : titleTokenDescription}
           </div>
         </div>
         <div className="flex-row">
@@ -245,7 +274,7 @@ export default class ConfirmApproveContent extends Component {
               onClick={() => copyToClipboard(toAddress)}
               color={IconColor.iconDefault}
               iconName={
-                this.state.copied ? ICON_NAMES.COPY_SUCCESS : ICON_NAMES.COPY
+                this.state.copied ? IconName.CopySuccess : IconName.Copy
               }
               title={
                 this.state.copied
@@ -262,6 +291,11 @@ export default class ConfirmApproveContent extends Component {
   renderDataContent() {
     const { t } = this.context;
     const { data, isSetApproveForAll, isApprovalOrRejection } = this.props;
+
+    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    const { tokenAddress } = this.props;
+    ///: END:ONLY_INCLUDE_IN
+
     return (
       <div className="flex-column">
         <div className="confirm-approve-content__small-text">
@@ -272,6 +306,11 @@ export default class ConfirmApproveContent extends Component {
         {isSetApproveForAll && isApprovalOrRejection !== undefined ? (
           <div className="confirm-approve-content__small-text">
             {`${t('parameters')}: ${isApprovalOrRejection}`}
+            {
+              ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+              `${t('tokenContractAddress')}: ${tokenAddress}`
+              ///: END:ONLY_INCLUDE_IN
+            }
           </div>
         ) : null}
         <div className="confirm-approve-content__small-text confirm-approve-content__data__data-block">
@@ -312,58 +351,6 @@ export default class ConfirmApproveContent extends Component {
     return null;
   }
 
-  renderCustomNonceContent() {
-    const { t } = this.context;
-    const {
-      useNonceField,
-      customNonceValue,
-      updateCustomNonce,
-      getNextNonce,
-      nextNonce,
-      showCustomizeNonceModal,
-    } = this.props;
-    return (
-      <>
-        {useNonceField && (
-          <div className="confirm-approve-content__custom-nonce-content">
-            <Box
-              className="confirm-approve-content__custom-nonce-header"
-              justifyContent={JustifyContent.flexStart}
-            >
-              <Typography
-                variant={TypographyVariant.H6}
-                fontWeight={FONT_WEIGHT.NORMAL}
-              >
-                {t('nonce')}
-              </Typography>
-              <Button
-                type="link"
-                className="confirm-approve-content__custom-nonce-edit"
-                onClick={() =>
-                  showCustomizeNonceModal({
-                    nextNonce,
-                    customNonceValue,
-                    updateCustomNonce,
-                    getNextNonce,
-                  })
-                }
-              >
-                {t('edit')}
-              </Button>
-            </Box>
-            <Typography
-              className="confirm-approve-content__custom-nonce-value"
-              variant={TypographyVariant.H6}
-              fontWeight={FONT_WEIGHT.BOLD}
-            >
-              {customNonceValue || nextNonce}
-            </Typography>
-          </div>
-        )}
-      </>
-    );
-  }
-
   getTokenName() {
     const { tokenId, assetName, assetStandard, tokenSymbol } = this.props;
     const { t } = this.context;
@@ -379,7 +366,7 @@ export default class ConfirmApproveContent extends Component {
       if (assetName || tokenSymbol) {
         titleTokenDescription = `${assetName ?? tokenSymbol}`;
       } else {
-        titleTokenDescription = t('nft');
+        titleTokenDescription = t('thisCollection');
       }
     }
 
@@ -391,7 +378,9 @@ export default class ConfirmApproveContent extends Component {
       this.props;
     const useBlockExplorer =
       rpcPrefs?.blockExplorerUrl ||
-      [...TEST_CHAINS, CHAIN_IDS.MAINNET].includes(chainId);
+      [...TEST_CHAINS, CHAIN_IDS.MAINNET, CHAIN_IDS.LINEA_MAINNET].includes(
+        chainId,
+      );
 
     const titleTokenDescription = this.getTokenName();
     const tokenIdWrapped = tokenId ? ` (#${tokenId})` : '';
@@ -454,9 +443,20 @@ export default class ConfirmApproveContent extends Component {
     let title;
 
     if (isSetApproveForAll) {
-      title = t('approveAllTokensTitle', [titleTokenDescription]);
-      if (isApprovalOrRejection === false) {
-        title = t('revokeAllTokensTitle', [titleTokenDescription]);
+      if (tokenSymbol) {
+        title = t('approveAllTokensTitle', [titleTokenDescription]);
+        if (isApprovalOrRejection === false) {
+          title = t('revokeAllTokensTitle', [titleTokenDescription]);
+        }
+      } else {
+        title = t('approveAllTokensTitleWithoutSymbol', [
+          titleTokenDescription,
+        ]);
+        if (isApprovalOrRejection === false) {
+          title = t('revokeAllTokensTitleWithoutSymbol', [
+            titleTokenDescription,
+          ]);
+        }
       }
     } else if (
       assetStandard === TokenStandard.ERC721 ||
@@ -488,9 +488,15 @@ export default class ConfirmApproveContent extends Component {
     let description = t('trustSiteApprovePermission', [grantee]);
 
     if (isSetApproveForAll && isApprovalOrRejection === false) {
-      description = t('revokeApproveForAllDescription', [
-        this.getTitleTokenDescription(),
-      ]);
+      if (tokenSymbol) {
+        description = t('revokeApproveForAllDescription', [
+          this.getTitleTokenDescription(),
+        ]);
+      } else {
+        description = t('revokeApproveForAllDescriptionWithoutSymbol', [
+          this.getTitleTokenDescription(),
+        ]);
+      }
     } else if (
       isSetApproveForAll ||
       assetStandard === TokenStandard.ERC721 ||
@@ -499,7 +505,13 @@ export default class ConfirmApproveContent extends Component {
       (assetName && tokenId) ||
       (tokenSymbol && tokenId)
     ) {
-      description = t('approveTokenDescription');
+      if (tokenSymbol) {
+        description = t('approveTokenDescription');
+      } else {
+        description = t('approveTokenDescriptionWithoutSymbol', [
+          this.getTitleTokenDescription(),
+        ]);
+      }
     }
     return description;
   }
@@ -525,6 +537,11 @@ export default class ConfirmApproveContent extends Component {
       userAcknowledgedGasMissing,
       setUserAcknowledgedGasMissing,
       renderSimulationFailureWarning,
+      nextNonce,
+      getNextNonce,
+      customNonceValue,
+      updateCustomNonce,
+      showCustomizeNonceModal,
     } = this.props;
     const { showFullTxDetails, setShowContractDetails } = this.state;
 
@@ -534,6 +551,11 @@ export default class ConfirmApproveContent extends Component {
           'confirm-approve-content--full': showFullTxDetails,
         })}
       >
+        {isSuspiciousResponse(txData?.securityProviderResponse) && (
+          <SecurityProviderBannerMessage
+            securityProviderResponse={txData.securityProviderResponse}
+          />
+        )}
         {warning && (
           <div className="confirm-approve-content__custom-nonce-warning">
             <ConfirmPageContainerWarning warning={warning} />
@@ -543,21 +565,21 @@ export default class ConfirmApproveContent extends Component {
           display={DISPLAY.FLEX}
           className="confirm-approve-content__icon-display-content"
         >
-          <Box display={DISPLAY.FLEX}>
+          <Box display={DISPLAY.FLEX} alignItems={AlignItems.center}>
             <UrlIcon
               className="confirm-approve-content__siteimage-identicon"
               fallbackClassName="confirm-approve-content__siteimage-identicon"
               name={origin}
               url={siteImage}
             />
-            <Typography
-              variant={TypographyVariant.H6}
-              fontWeight={FONT_WEIGHT.NORMAL}
+            <Text
+              variant={TextVariant.bodySm}
+              as="h6"
               color={TextColor.textAlternative}
-              boxProps={{ marginLeft: 1, marginTop: 2 }}
+              marginLeft={1}
             >
               {origin}
-            </Typography>
+            </Text>
           </Box>
         </Box>
         <div
@@ -608,7 +630,7 @@ export default class ConfirmApproveContent extends Component {
             </Box>
           )}
           {this.renderApproveContentCard({
-            symbol: <Icon name={ICON_NAMES.TAG} />,
+            symbol: <Icon name={IconName.Tag} />,
             title: t('transactionFee'),
             showEdit: true,
             showAdvanceGasFeeOptions: true,
@@ -643,7 +665,20 @@ export default class ConfirmApproveContent extends Component {
           {useNonceField &&
             this.renderApproveContentCard({
               showHeader: false,
-              content: this.renderCustomNonceContent(),
+              content: (
+                <CustomNonce
+                  nextNonce={nextNonce}
+                  customNonceValue={customNonceValue}
+                  showCustomizeNonceModal={() => {
+                    showCustomizeNonceModal({
+                      nextNonce,
+                      customNonceValue,
+                      updateCustomNonce,
+                      getNextNonce,
+                    });
+                  }}
+                />
+              ),
               useNonceField,
               noBorder: !showFullTxDetails,
               footer: (

@@ -20,7 +20,16 @@ const emptyStalelist = {
   lastUpdated: 0,
 };
 
-async function setupMocking(server, testSpecificMock) {
+/**
+ * Setup E2E network mocks.
+ *
+ * @param {object} server - The mock server used for network mocks.
+ * @param {Function} testSpecificMock - A function for setting up test-specific network mocks
+ * @param {object} options - Network mock options.
+ * @param {string} options.chainId - The chain ID used by the default configured network.
+ * @returns
+ */
+async function setupMocking(server, testSpecificMock, { chainId }) {
   await server.forAnyRequest().thenPassThrough({
     beforeRequest: (req) => {
       const { host } = req.headers;
@@ -32,6 +41,25 @@ async function setupMocking(server, testSpecificMock) {
       return {};
     },
   });
+
+  const mockedEndpoint = await testSpecificMock(server);
+
+  // Mocks below this line can be overridden by test-specific mocks
+
+  await server
+    .forPost(
+      'https://arbitrum-mainnet.infura.io/v3/00000000000000000000000000000000',
+    )
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {
+          jsonrpc: '2.0',
+          id: '1675864782845',
+          result: '0xa4b1',
+        },
+      };
+    });
 
   await server.forPost('https://api.segment.io/v1/batch').thenCallback(() => {
     return {
@@ -80,7 +108,9 @@ async function setupMocking(server, testSpecificMock) {
     });
 
   await server
-    .forGet('https://gas-api.metaswap.codefi.network/networks/1/gasPrices')
+    .forGet(
+      `https://gas-api.metaswap.codefi.network/networks/${chainId}/gasPrices`,
+    )
     .thenCallback(() => {
       return {
         statusCode: 200,
@@ -111,7 +141,7 @@ async function setupMocking(server, testSpecificMock) {
 
   await server
     .forGet(
-      'https://gas-api.metaswap.codefi.network/networks/1/suggestedGasFees',
+      `https://gas-api.metaswap.codefi.network/networks/${chainId}/suggestedGasFees`,
     )
     .thenCallback(() => {
       return {
@@ -184,7 +214,7 @@ async function setupMocking(server, testSpecificMock) {
     });
 
   await server
-    .forGet('https://token-api.metaswap.codefi.network/tokens/1337')
+    .forGet(`https://token-api.metaswap.codefi.network/tokens/${chainId}`)
     .thenCallback(() => {
       return {
         statusCode: 200,
@@ -324,7 +354,7 @@ async function setupMocking(server, testSpecificMock) {
     });
 
   await server
-    .forGet('https://token-api.metaswap.codefi.network/token/0x539')
+    .forGet(`https://token-api.metaswap.codefi.network/token/${chainId}`)
     .thenCallback(() => {
       return {
         statusCode: 200,
@@ -332,16 +362,16 @@ async function setupMocking(server, testSpecificMock) {
       };
     });
 
-  // It disables loading of token icons, e.g. this URL: https://static.metaswap.codefi.network/api/v1/tokenIcons/1337/0x0000000000000000000000000000000000000000.png
-  await server
-    .forGet(
-      /^https:\/\/static\.metaswap\.codefi\.network\/api\/v1\/tokenIcons\/1337\/.*\.png/u,
-    )
-    .thenCallback(() => {
-      return {
-        statusCode: 200,
-      };
-    });
+  // It disables loading of token icons, e.g. this URL: https://static.metafi.codefi.network/api/v1/tokenIcons/1337/0x0000000000000000000000000000000000000000.png
+  const tokenIconRegex = new RegExp(
+    `^https:\\/\\/static\\.metafi\\.codefi\\.network\\/api\\/vi\\/tokenIcons\\/${chainId}\\/.*\\.png`,
+    'u',
+  );
+  await server.forGet(tokenIconRegex).thenCallback(() => {
+    return {
+      statusCode: 200,
+    };
+  });
 
   await server
     .forGet('https://min-api.cryptocompare.com/data/price')
@@ -354,10 +384,6 @@ async function setupMocking(server, testSpecificMock) {
         },
       };
     });
-
-  testSpecificMock(server);
-
-  // Mocks below this line can be overridden by test-specific mocks
 
   await server.forGet(STALELIST_URL).thenCallback(() => {
     return {
@@ -372,6 +398,21 @@ async function setupMocking(server, testSpecificMock) {
       json: emptyHotlist,
     };
   });
+
+  await server
+    .forPost('https://customnetwork.com/api/customRPC')
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {
+          jsonrpc: '2.0',
+          id: '1675864782845',
+          result: '0x122',
+        },
+      };
+    });
+
+  return mockedEndpoint;
 }
 
 module.exports = { setupMocking };

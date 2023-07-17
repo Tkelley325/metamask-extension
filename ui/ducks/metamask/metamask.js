@@ -14,21 +14,20 @@ import {
 import { updateTransactionGasFees } from '../../store/actions';
 import { setCustomGasLimit, setCustomGasPrice } from '../gas/gas.duck';
 
-import { HardwareKeyringTypes } from '../../../shared/constants/hardware-wallets';
+import { KeyringType } from '../../../shared/constants/keyring';
+import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../../shared/constants/preferences';
 import { isEqualCaseInsensitive } from '../../../shared/modules/string-utils';
 import { stripHexPrefix } from '../../../shared/modules/hexstring-utils';
-import {
-  decGWEIToHexWEI,
-  hexToDecimal,
-} from '../../../shared/modules/conversion.utils';
+import { decGWEIToHexWEI } from '../../../shared/modules/conversion.utils';
 
 const initialState = {
   isInitialized: false,
   isUnlocked: false,
   isAccountMenuOpen: false,
+  isNetworkMenuOpen: false,
   identities: {},
   unapprovedTxs: {},
-  frequentRpcList: [],
+  networkConfigurations: {},
   addressBook: [],
   contractExchangeRates: {},
   pendingTokens: {},
@@ -39,7 +38,7 @@ const initialState = {
   currentLocale: '',
   currentBlockGasLimit: '',
   preferences: {
-    autoLockTimeLimit: undefined,
+    autoLockTimeLimit: DEFAULT_AUTO_LOCK_TIME_LIMIT,
     showFiatInTestnets: false,
     showTestNetworks: false,
     useNativeCurrencyAsPrimaryCurrency: true,
@@ -100,6 +99,12 @@ export default function reduceMetamask(state = initialState, action) {
       return {
         ...metamaskState,
         isAccountMenuOpen: !metamaskState.isAccountMenuOpen,
+      };
+
+    case actionConstants.TOGGLE_NETWORK_MENU:
+      return {
+        ...metamaskState,
+        isNetworkMenuOpen: !metamaskState.isNetworkMenuOpen,
       };
 
     case actionConstants.UPDATE_TRANSACTION_PARAMS: {
@@ -223,6 +228,16 @@ export function updateGasFees({
 
 export const getAlertEnabledness = (state) => state.metamask.alertEnabledness;
 
+/**
+ * Get the provider configuration for the current selected network.
+ *
+ * @param {object} state - Redux state object.
+ * @returns {import('../../../app/scripts/controllers/network/network-controller').NetworkControllerState['providerConfig']} The provider configuration for the current selected network.
+ */
+export function getProviderConfig(state) {
+  return state.metamask.providerConfig;
+}
+
 export const getUnconnectedAccountAlertEnabledness = (state) =>
   getAlertEnabledness(state)[AlertTypes.unconnectedAccount];
 
@@ -242,30 +257,20 @@ export function getNftsDropdownState(state) {
 
 export const getNfts = (state) => {
   const {
-    metamask: {
-      allNfts,
-      provider: { chainId },
-      selectedAddress,
-    },
+    metamask: { allNfts, selectedAddress },
   } = state;
+  const { chainId } = getProviderConfig(state);
 
-  const chainIdAsDecimal = hexToDecimal(chainId);
-
-  return allNfts?.[selectedAddress]?.[chainIdAsDecimal] ?? [];
+  return allNfts?.[selectedAddress]?.[chainId] ?? [];
 };
 
 export const getNftContracts = (state) => {
   const {
-    metamask: {
-      allNftContracts,
-      provider: { chainId },
-      selectedAddress,
-    },
+    metamask: { allNftContracts, selectedAddress },
   } = state;
+  const { chainId } = getProviderConfig(state);
 
-  const chainIdAsDecimal = hexToDecimal(chainId);
-
-  return allNftContracts?.[selectedAddress]?.[chainIdAsDecimal] ?? [];
+  return allNftContracts?.[selectedAddress]?.[chainId] ?? [];
 };
 
 export function getBlockGasLimit(state) {
@@ -280,7 +285,7 @@ export function getNativeCurrency(state) {
   const useCurrencyRateCheck = getUseCurrencyRateCheck(state);
   return useCurrencyRateCheck
     ? state.metamask.nativeCurrency
-    : state.metamask.provider.ticker;
+    : getProviderConfig(state).ticker;
 }
 
 export function getSendHexDataFeatureFlagState(state) {
@@ -407,7 +412,7 @@ export function getLedgerTransportType(state) {
 export function isAddressLedger(state, address) {
   const keyring = findKeyringForAddress(state, address);
 
-  return keyring?.type === HardwareKeyringTypes.ledger;
+  return keyring?.type === KeyringType.ledger;
 }
 
 /**
@@ -419,6 +424,10 @@ export function isAddressLedger(state, address) {
  */
 export function doesUserHaveALedgerAccount(state) {
   return state.metamask.keyrings.some((kr) => {
-    return kr.type === HardwareKeyringTypes.ledger;
+    return kr.type === KeyringType.ledger;
   });
+}
+
+export function isLineaMainnetNetworkReleased(state) {
+  return state.metamask.isLineaMainnetReleased;
 }

@@ -93,9 +93,6 @@
   "back": {
     "message": "Tagasi"
   },
-  "backToAll": {
-    "message": "Tagasi kõigile"
-  },
   "backupApprovalInfo": {
     "message": "See salakood on vajalik teie rahakoti taastamiseks, kui kaotate oma seadme, unustate parooli, peate MetaMaski uuesti alla laadima, või kui soovite avada oma rahakoti mõnel teisel seadmel."
   },
@@ -123,12 +120,6 @@
   },
   "browserNotSupported": {
     "message": "Teie lehitsejat ei toetata..."
-  },
-  "buyWithWyre": {
-    "message": "Ostke $1 -d Wyre'iga"
-  },
-  "buyWithWyreDescription": {
-    "message": "Wyre võimaldab kasutada krediitkaarti, et teha $1 sissemakse otse MetaMaski kontole."
   },
   "bytes": {
     "message": "Baidid"
@@ -160,20 +151,17 @@
   "connect": {
     "message": "Ühendamine"
   },
-  "connectHardwareWallet": {
-    "message": "Ühendage riistvara rahakott"
-  },
   "connectingTo": {
     "message": "Ühenduse loomine $1"
   },
   "connectingToGoerli": {
     "message": "Ühendamine Goerli testvõrguga"
   },
+  "connectingToLineaGoerli": {
+    "message": "Ühendamine Linea Goerli testvõrguga"
+  },
   "connectingToMainnet": {
     "message": "Ühenduse loomine peamise Etherumi võrguga"
-  },
-  "continueToWyre": {
-    "message": "Ava Wyre"
   },
   "contractDeployment": {
     "message": "Lepingu juurutamine"
@@ -199,9 +187,6 @@
   "create": {
     "message": "Loo"
   },
-  "createAccount": {
-    "message": "Loo konto"
-  },
   "createPassword": {
     "message": "Loo parool"
   },
@@ -225,9 +210,6 @@
   },
   "delete": {
     "message": "Kustuta"
-  },
-  "deleteAccount": {
-    "message": "Kustuta konto"
   },
   "deleteNetwork": {
     "message": "Võrk kustutada?"
@@ -323,13 +305,6 @@
   "general": {
     "message": "Üldine teave"
   },
-  "getEther": {
-    "message": "Hankige eetrit"
-  },
-  "getEtherFromFaucet": {
-    "message": "Hankige kraanist eetrit $1eest",
-    "description": "Displays network name for Ether faucet"
-  },
   "goerli": {
     "message": "Goerli testvõrk"
   },
@@ -424,6 +399,9 @@
   "likeToImportTokens": {
     "message": "Kas soovite need load lisada?"
   },
+  "lineaGoerli": {
+    "message": "Linea Goerli testvõrk"
+  },
   "links": {
     "message": "Lingid"
   },
@@ -453,9 +431,6 @@
   },
   "mustSelectOne": {
     "message": "Peate valima vähemalt 1 loa."
-  },
-  "myAccounts": {
-    "message": "Minu kontod"
   },
   "needImportFile": {
     "message": "Peate importimiseks faili valima.",
@@ -581,9 +556,6 @@
   "readdToken": {
     "message": "Saate selle loa tulevikus tagasi lisada, kui lähete oma kontovalikute menüüs vahelehele „Lisa luba“."
   },
-  "recents": {
-    "message": "Hiljutised"
-  },
   "recipientAddressPlaceholder": {
     "message": "Otsing, avalik aadress (0x) või ENS"
   },
@@ -678,12 +650,6 @@
   "settings": {
     "message": "Seaded"
   },
-  "showAdvancedGasInline": {
-    "message": "Täiustatud gaasijuhikud"
-  },
-  "showAdvancedGasInlineDescription": {
-    "message": "Valige see, et kuvada gaasi hinda ja piirangut otse saatmise ning kinnitamise kuval."
-  },
   "showFiatConversionInTestnets": {
     "message": "Kuva teisendus Testnetsis"
   },
@@ -747,32 +713,8 @@
   "symbolBetweenZeroTwelve": {
     "message": "Sümbol peab olema 11 tähemärki või vähem."
   },
-  "syncWithMobile": {
-    "message": "Mobiiliga sünkroonimine"
-  },
-  "syncWithMobileBeCareful": {
-    "message": "Veenduge, et keegi teine ei vaata selle koodi skannimisel teie ekraani"
-  },
-  "syncWithMobileComplete": {
-    "message": "Teie andmed on edukalt sünkroonitud. Nautige MetaMaski mobiilirakendust!"
-  },
-  "syncWithMobileDesc": {
-    "message": "Saate sünkroonida oma kontod ja teabe oma mobiiliseadmega. Avage MetaMaski mobiilirakendus, avage \"Settings\" (Seaded) ja puudutage valikut \"Sync from Browser Extension\" (Sünkroonimine lehitseja laiendusest)"
-  },
-  "syncWithMobileDescNewUsers": {
-    "message": "Järgige MetaMaski mobiilirakenduse esmakordsel avamisel telefonis esitatud samme."
-  },
-  "syncWithMobileScanThisCode": {
-    "message": "Skanneerige see kood MetaMaski mobiilirakendusega"
-  },
-  "syncWithMobileTitle": {
-    "message": "Mobiiliga sünkroonimine"
-  },
   "terms": {
     "message": "Teenusetingimused"
-  },
-  "testFaucet": {
-    "message": "Testkraan"
   },
   "tips": {
     "message": "Preemiad"
@@ -837,15 +779,8 @@
   "transfer": {
     "message": "Ülekandmine"
   },
-  "transferBetweenAccounts": {
-    "message": "Ülekandmine minu kontode vahel"
-  },
   "transferFrom": {
     "message": "Ülekandmine asukohast"
-  },
-  "troubleTokenBalances": {
-    "message": "Teie loasaldode laadimisega oli probleem. Saate neid vaadata",
-    "description": "Followed by a link (here) to view token balances"
   },
   "tryAgain": {
     "message": "Proovi uuesti"
@@ -891,9 +826,6 @@
   },
   "userName": {
     "message": "Kasutajanimi"
-  },
-  "viewAccount": {
-    "message": "Kuva konto"
   },
   "viewContact": {
     "message": "Kuva kontakt"

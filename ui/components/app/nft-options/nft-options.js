@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { I18nContext } from '../../../contexts/i18n';
 import { Menu, MenuItem } from '../../ui/menu';
-import { ButtonIcon, ICON_NAMES } from '../../component-library';
+import { ButtonIcon, ButtonIconSize, IconName } from '../../component-library';
 import { Color } from '../../../helpers/constants/design-system';
 
 const NftOptions = ({ onRemove, onViewOnOpensea }) => {
@@ -14,11 +14,12 @@ const NftOptions = ({ onRemove, onViewOnOpensea }) => {
   return (
     <div ref={ref}>
       <ButtonIcon
-        iconName={ICON_NAMES.MORE_VERTICAL}
+        iconName={IconName.MoreVertical}
         className="nft-options__button"
         data-testid="nft-options__button"
         onClick={() => setNftOptionsOpen(true)}
         color={Color.textDefault}
+        size={ButtonIconSize.Sm}
         ariaLabel={t('nftOptions')}
       />
 
@@ -30,7 +31,7 @@ const NftOptions = ({ onRemove, onViewOnOpensea }) => {
         >
           {onViewOnOpensea ? (
             <MenuItem
-              iconName={ICON_NAMES.EXPORT}
+              iconName={IconName.Export}
               data-testid="nft-options__view-on-opensea"
               onClick={() => {
                 setNftOptionsOpen(false);
@@ -41,7 +42,7 @@ const NftOptions = ({ onRemove, onViewOnOpensea }) => {
             </MenuItem>
           ) : null}
           <MenuItem
-            iconName={ICON_NAMES.TRASH}
+            iconName={IconName.Trash}
             data-testid="nft-item-remove"
             onClick={() => {
               setNftOptionsOpen(false);

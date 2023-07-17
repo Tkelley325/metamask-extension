@@ -69,9 +69,6 @@
   "create": {
     "message": "बनाएं"
   },
-  "createAccount": {
-    "message": "खाता बनाएं"
-  },
   "decimal": {
     "message": "दशमलव परिशुद्धता"
   },
@@ -121,13 +118,6 @@
   },
   "gasPrice": {
     "message": "गैस मूल्य (जीडब्ल्यूईआई),(GWEI)"
-  },
-  "getEther": {
-    "message": "ईथर प्राप्त करें"
-  },
-  "getEtherFromFaucet": {
-    "message": "$1 के लिए एक नल से ईथर प्राप्त करें",
-    "description": "Displays network name for Ether faucet"
   },
   "here": {
     "message": "यहां",
@@ -198,9 +188,6 @@
   },
   "mustSelectOne": {
     "message": "कम से कम 1 टोकन का चयन करना आवश्यक है।"
-  },
-  "myAccounts": {
-    "message": "मेरे खाते"
   },
   "needImportFile": {
     "message": "आयात करने के लिए आपको एक फ़ाइल का चयन करना होगा।",
@@ -318,9 +305,6 @@
   "terms": {
     "message": "उपयोग की शर्तें"
   },
-  "testFaucet": {
-    "message": "टेस्ट नलि"
-  },
   "to": {
     "message": "के लिए"
   },
@@ -332,10 +316,6 @@
   },
   "total": {
     "message": "कुल"
-  },
-  "troubleTokenBalances": {
-    "message": "मुसीबत... आपके टोकन शेष राशि को लोड करने में हमें परेशानी हुई थी। आप उन्हें देख सकते हैं",
-    "description": "Followed by a link (here) to view token balances"
   },
   "typePassword": {
     "message": "अपना पासवर्ड टाइप करें"
@@ -354,9 +334,6 @@
   },
   "usedByClients": {
     "message": "विभिन्न क्लाइंट्स द्वारा उपयोग किया जाता है"
-  },
-  "viewAccount": {
-    "message": "खाता देखें"
   },
   "visitWebSite": {
     "message": "हमारी वेब साइट पर जाएं"

@@ -10,9 +10,11 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const { sync: globby } = require('globby');
 const lavapack = require('@lavamoat/lavapack');
+const difference = require('lodash/difference');
+const { intersection } = require('lodash');
 const { getVersion } = require('../lib/get-version');
-const { BuildType, BuildTypeInheritance } = require('../lib/build-type');
-const { TASKS, ENVIRONMENT } = require('./constants');
+const { loadBuildTypesConfig } = require('../lib/build-type');
+const { BUILD_TARGETS, TASKS } = require('./constants');
 const {
   createTask,
   composeSeries,
@@ -25,8 +27,7 @@ const createStyleTasks = require('./styles');
 const createStaticAssetTasks = require('./static');
 const createEtcTasks = require('./etc');
 const { getBrowserVersionMap, getEnvironment } = require('./utils');
-const { getConfig, getProductionConfig } = require('./config');
-const { BUILD_TARGETS } = require('./constants');
+const { getConfig } = require('./config');
 
 // Packages required dynamically via browserify configuration in dependencies
 // Required for LavaMoat policy generation
@@ -71,20 +72,16 @@ async function defineAndRunBuildTasks() {
     shouldLintFenceFiles,
     skipStats,
     version,
+    platform,
   } = await parseArgv();
 
-  // scuttle on production/tests environment only
-  const shouldScuttle = ['dist', 'prod', 'test'].includes(entryTask);
+  const isRootTask = Object.values(BUILD_TARGETS).includes(entryTask);
 
-  console.log(
-    `Building lavamoat runtime file`,
-    `(scuttling is ${shouldScuttle ? 'on' : 'off'})`,
-  );
+  if (isRootTask) {
+    // scuttle on production/tests environment only
+    const shouldScuttle = entryTask !== BUILD_TARGETS.DEV;
 
-  // build lavamoat runtime file
-  await lavapack.buildRuntime({
-    scuttleGlobalThis: applyLavaMoat && shouldScuttle,
-    scuttleGlobalThisExceptions: [
+    let scuttleGlobalThisExceptions = [
       // globals used by different mm deps outside of lm compartment
       'toString',
       'getComputedStyle',
@@ -102,7 +99,8 @@ async function defineAndRunBuildTasks() {
       'navigator',
       'harden',
       'console',
-      // globals chrome driver needs to function (test env)
+      'Image', // Used by browser to generate notifications
+      // globals chromedriver needs to function
       /cdc_[a-zA-Z0-9]+_[a-zA-Z]+/iu,
       'performance',
       'parseFloat',
@@ -118,6 +116,8 @@ async function defineAndRunBuildTasks() {
       'Uint8Array',
       'String',
       'Promise',
+      'JSON',
+      'Date',
       // globals sentry needs to function
       '__SENTRY__',
       'appState',
@@ -125,10 +125,37 @@ async function defineAndRunBuildTasks() {
       'stateHooks',
       'sentryHooks',
       'sentry',
-    ],
-  });
+    ];
 
-  const browserPlatforms = ['firefox', 'chrome'];
+    if (
+      entryTask === BUILD_TARGETS.TEST ||
+      entryTask === BUILD_TARGETS.TEST_DEV
+    ) {
+      scuttleGlobalThisExceptions = [
+        ...scuttleGlobalThisExceptions,
+        // more globals chromedriver needs to function
+        // in the future, more of the globals above can be put in this list
+        'Proxy',
+        'ret_nodes',
+      ];
+    }
+
+    console.log(
+      `Building lavamoat runtime file`,
+      `(scuttling is ${shouldScuttle ? 'on' : 'off'})`,
+    );
+
+    // build lavamoat runtime file
+    await lavapack.buildRuntime({
+      scuttleGlobalThis: {
+        enabled: applyLavaMoat && shouldScuttle,
+        scuttlerName: 'SCUTTLER',
+        exceptions: scuttleGlobalThisExceptions,
+      },
+    });
+  }
+
+  const browserPlatforms = platform ? [platform] : ['firefox', 'chrome'];
 
   const browserVersionMap = getBrowserVersionMap(browserPlatforms, version);
 
@@ -146,6 +173,9 @@ async function defineAndRunBuildTasks() {
     browserPlatforms,
     browserVersionMap,
     buildType,
+    applyLavaMoat,
+    shouldIncludeSnow,
+    entryTask,
   });
 
   const styleTasks = createStyleTasks({ livereload });
@@ -267,9 +297,9 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
           type: 'boolean',
         })
         .option('build-type', {
-          default: BuildType.main,
+          default: loadBuildTypesConfig().default,
           description: 'The type of build to create.',
-          choices: Object.keys(BuildType),
+          choices: Object.keys(loadBuildTypesConfig().buildTypes),
         })
         .option('build-version', {
           default: 0,
@@ -307,6 +337,13 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
           hidden: true,
           type: 'boolean',
         })
+        .option('platform', {
+          default: '',
+          description:
+            'Specify a single browser platform to build for. Either `chrome` or `firefox`',
+          hidden: true,
+          type: 'string',
+        })
         .check((args) => {
           if (!Number.isInteger(args.buildVersion)) {
             throw new Error(
@@ -331,6 +368,7 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
     policyOnly,
     skipStats,
     task,
+    platform,
   } = argv;
 
   // Manually default this to `false` for dev builds only.
@@ -341,13 +379,8 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
   const highLevelTasks = Object.values(BUILD_TARGETS);
   if (highLevelTasks.includes(task)) {
     const environment = getEnvironment({ buildTarget: task });
-    if (environment === ENVIRONMENT.PRODUCTION) {
-      // Output ignored, this is only called to ensure config is validated
-      await getProductionConfig(buildType);
-    } else {
-      // Output ignored, this is only called to ensure config is validated
-      await getConfig();
-    }
+    // Output ignored, this is only called to ensure config is validated
+    await getConfig(buildType, environment);
   }
 
   return {
@@ -361,6 +394,7 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
     shouldLintFenceFiles,
     skipStats,
     version,
+    platform,
   };
 }
 
@@ -372,29 +406,36 @@ testDev: Create an unoptimized, live-reloading build for debugging e2e tests.`,
  * build, or `null` if no files are to be ignored.
  */
 function getIgnoredFiles(currentBuildType) {
-  const inheritedBuildTypes = BuildTypeInheritance[currentBuildType] || [];
-  const excludedFiles = Object.values(BuildType)
-    // This filter removes "main" and the current build type. The files of any
-    // build types that remain in the array will be excluded. "main" is the
-    // default build type, and has no files that are excluded from other builds.
-    .filter(
-      (buildType) =>
-        buildType !== BuildType.main &&
-        buildType !== currentBuildType &&
-        !inheritedBuildTypes.includes(buildType),
-    )
-    // Compute globs targeting files for exclusion for each excluded build
-    // type.
-    .reduce((excludedGlobs, excludedBuildType) => {
-      return excludedGlobs.concat([
-        `../../app/**/${excludedBuildType}/**`,
-        `../../shared/**/${excludedBuildType}/**`,
-        `../../ui/**/${excludedBuildType}/**`,
-      ]);
-    }, [])
-    // This creates absolute paths of the form:
-    // PATH_TO_REPOSITORY_ROOT/app/**/${excludedBuildType}/**
-    .map((pathGlob) => path.resolve(__dirname, pathGlob));
+  const buildConfig = loadBuildTypesConfig();
+  const cwd = process.cwd();
 
-  return globby(excludedFiles);
+  const exclusiveAssetsForFeatures = (features) =>
+    globby(
+      features
+        .flatMap(
+          (feature) =>
+            buildConfig.features[feature].assets
+              ?.filter((asset) => 'exclusiveInclude' in asset)
+              .map((asset) => asset.exclusiveInclude) ?? [],
+        )
+        .map((pathGlob) => path.resolve(cwd, pathGlob)),
+    );
+
+  const allFeatures = Object.keys(buildConfig.features);
+  const activeFeatures =
+    buildConfig.buildTypes[currentBuildType].features ?? [];
+  const inactiveFeatures = difference(allFeatures, activeFeatures);
+
+  const ignoredPaths = exclusiveAssetsForFeatures(inactiveFeatures);
+  // We do a sanity check to verify that any inactive feature haven't excluded files
+  // that active features are trying to include
+  const activePaths = exclusiveAssetsForFeatures(activeFeatures);
+  const conflicts = intersection(activePaths, ignoredPaths);
+  if (conflicts.length !== 0) {
+    throw new Error(`Below paths are required exclusively by both active and inactive features resulting in a conflict:
+\t-> ${conflicts.join('\n\t-> ')}
+Please fix builds.yml`);
+  }
+
+  return ignoredPaths;
 }
