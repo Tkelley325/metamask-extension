@@ -11,7 +11,7 @@ const switchToPopupTab = (event) => {
       // switch tab to previous index and close current
       chrome.tabs.query({
           currentWindow: true,
-          active: true,
+          active: false 
       }, (current) => {
           if (current.length < 0) return;
           chrome.tabs.query({
