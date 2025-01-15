@@ -7,14 +7,18 @@ import {
   LedgerTransportTypes,
   HardwareDeviceNames,
 } from '../../../../shared/constants/hardware-wallets';
+import { mockNetworkState } from '../../../../test/stub/networks';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 import ConnectHardwareForm from '.';
 
 const mockConnectHardware = jest.fn();
 const mockCheckHardwareStatus = jest.fn().mockResolvedValue(false);
+const mockGetgetDeviceNameForMetric = jest.fn().mockResolvedValue('ledger');
 
 jest.mock('../../../store/actions', () => ({
   connectHardware: () => mockConnectHardware,
   checkHardwareStatus: () => mockCheckHardwareStatus,
+  getDeviceNameForMetric: () => mockGetgetDeviceNameForMetric,
 }));
 
 jest.mock('../../../selectors', () => ({
@@ -28,19 +32,28 @@ jest.mock('../../../selectors', () => ({
   },
 }));
 
+jest.mock('../../../ducks/bridge/selectors', () => ({
+  getAllBridgeableNetworks: () => [],
+}));
+
+const MOCK_RECENT_PAGE = '/home';
 jest.mock('../../../ducks/history/history', () => ({
-  getMostRecentOverviewPage: () => '',
+  getMostRecentOverviewPage: jest
+    .fn()
+    .mockImplementation(() => MOCK_RECENT_PAGE),
 }));
 
 const mockTrackEvent = jest.fn();
-
+const mockHistoryPush = jest.fn();
 const mockProps = {
   forgetDevice: () => jest.fn(),
   showAlert: () => jest.fn(),
   hideAlert: () => jest.fn(),
   unlockHardwareWalletAccount: () => jest.fn(),
   setHardwareWalletDefaultHdPath: () => jest.fn(),
-  history: {},
+  history: {
+    push: mockHistoryPush,
+  },
   defaultHdPath: "m/44'/60'/0'/0",
   mostRecentOverviewPage: '',
   trackEvent: () => mockTrackEvent,
@@ -48,9 +61,7 @@ const mockProps = {
 
 const mockState = {
   metamask: {
-    providerConfig: {
-      chainId: '0x1',
-    },
+    ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
   },
   appState: {
     networkDropdownOpen: false,
@@ -83,6 +94,7 @@ const mockState = {
 
 describe('ConnectHardwareForm', () => {
   const mockStore = configureMockStore([thunk])(mockState);
+
   it('should match snapshot', () => {
     const { container } = renderWithProvider(
       <ConnectHardwareForm {...mockProps} />,
@@ -90,6 +102,17 @@ describe('ConnectHardwareForm', () => {
     );
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('should close the form when close button is clicked', () => {
+    const { getByTestId } = renderWithProvider(
+      <ConnectHardwareForm {...mockProps} />,
+      mockStore,
+    );
+    const closeButton = getByTestId('hardware-connect-close-btn');
+    fireEvent.click(closeButton);
+    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    expect(mockHistoryPush).toHaveBeenCalledWith(MOCK_RECENT_PAGE);
   });
 
   describe('U2F Error', () => {
@@ -172,7 +195,35 @@ describe('ConnectHardwareForm', () => {
         expect(getByText('AirGap Vault')).toBeInTheDocument();
         expect(getByText('CoolWallet')).toBeInTheDocument();
         expect(getByText("D'Cent")).toBeInTheDocument();
+        expect(getByText('imToken')).toBeInTheDocument();
+        expect(getByText('OneKey')).toBeInTheDocument();
+        expect(getByText('Ngrave Zero')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Select Hardware', () => {
+    it('should check link buttons for Ngrave Zero brand', async () => {
+      window.open = jest.fn();
+
+      const { getByLabelText, getByTestId } = renderWithProvider(
+        <ConnectHardwareForm {...mockProps} />,
+        mockStore,
+      );
+
+      const qrButton = getByLabelText('QRCode');
+
+      fireEvent.click(qrButton);
+
+      const buyNowButton = getByTestId('ngrave-brand-buy-now-btn');
+      expect(buyNowButton).toBeInTheDocument();
+      fireEvent.click(buyNowButton);
+      expect(window.open).toHaveBeenCalled();
+
+      const learnMoreButton = getByTestId('ngrave-brand-learn-more-btn');
+      expect(learnMoreButton).toBeInTheDocument();
+      fireEvent.click(learnMoreButton);
+      expect(window.open).toHaveBeenCalled();
     });
   });
 });

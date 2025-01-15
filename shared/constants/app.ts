@@ -1,6 +1,4 @@
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { DialogType } from '@metamask/rpc-methods';
-///: END:ONLY_INCLUDE_IN
+import { DIALOG_APPROVAL_TYPES } from '@metamask/snaps-rpc-methods';
 import { RestrictedMethods } from './permissions';
 
 /**
@@ -30,10 +28,15 @@ export const MESSAGE_TYPE = {
   ADD_ETHEREUM_CHAIN: 'wallet_addEthereumChain',
   ETH_ACCOUNTS: RestrictedMethods.eth_accounts,
   ETH_DECRYPT: 'eth_decrypt',
+  ETH_CHAIN_ID: 'eth_chainId',
   ETH_GET_ENCRYPTION_PUBLIC_KEY: 'eth_getEncryptionPublicKey',
+  ETH_GET_BLOCK_BY_NUMBER: 'eth_getBlockByNumber',
   ETH_REQUEST_ACCOUNTS: 'eth_requestAccounts',
-  ETH_SIGN: 'eth_sign',
+  ETH_SEND_TRANSACTION: 'eth_sendTransaction',
+  ETH_SEND_RAW_TRANSACTION: 'eth_sendRawTransaction',
+  ETH_SIGN_TRANSACTION: 'eth_signTransaction',
   ETH_SIGN_TYPED_DATA: 'eth_signTypedData',
+  ETH_SIGN_TYPED_DATA_V1: 'eth_signTypedData_v1',
   ETH_SIGN_TYPED_DATA_V3: 'eth_signTypedData_v3',
   ETH_SIGN_TYPED_DATA_V4: 'eth_signTypedData_v4',
   GET_PROVIDER_STATE: 'metamask_getProviderState',
@@ -45,12 +48,11 @@ export const MESSAGE_TYPE = {
   WALLET_REQUEST_PERMISSIONS: 'wallet_requestPermissions',
   WATCH_ASSET: 'wallet_watchAsset',
   WATCH_ASSET_LEGACY: 'metamask_watchAsset',
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
-  SNAP_DIALOG_ALERT: `${RestrictedMethods.snap_dialog}:alert`,
-  SNAP_DIALOG_CONFIRMATION: `${RestrictedMethods.snap_dialog}:confirmation`,
-  SNAP_DIALOG_PROMPT: `${RestrictedMethods.snap_dialog}:prompt`,
-  ///: END:ONLY_INCLUDE_IN
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  SNAP_DIALOG_ALERT: DIALOG_APPROVAL_TYPES.alert,
+  SNAP_DIALOG_CONFIRMATION: DIALOG_APPROVAL_TYPES.confirmation,
+  SNAP_DIALOG_PROMPT: DIALOG_APPROVAL_TYPES.prompt,
+  SNAP_DIALOG_DEFAULT: DIALOG_APPROVAL_TYPES.default,
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   MMI_AUTHENTICATE: 'metamaskinstitutional_authenticate',
   MMI_REAUTHENTICATE: 'metamaskinstitutional_reauthenticate',
   MMI_REFRESH_TOKEN: 'metamaskinstitutional_refresh_token',
@@ -60,22 +62,24 @@ export const MESSAGE_TYPE = {
   MMI_CHECK_IF_TOKEN_IS_PRESENT: 'metamaskinstitutional_checkIfTokenIsPresent',
   MMI_SET_ACCOUNT_AND_NETWORK: 'metamaskinstitutional_setAccountAndNetwork',
   MMI_OPEN_ADD_HARDWARE_WALLET: 'metamaskinstitutional_openAddHardwareWallet',
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 } as const;
 
-///: BEGIN:ONLY_INCLUDE_IN(keyring-snaps)
-// eslint-disable-next-line prefer-destructuring
-export const KEYRING_SNAPS_REGISTRY_URL =
-  process.env.KEYRING_SNAPS_REGISTRY_URL;
-///: END:ONLY_INCLUDE_IN
+export type MessageType = (typeof MESSAGE_TYPE)[keyof typeof MESSAGE_TYPE];
 
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-export const SNAP_DIALOG_TYPES = {
-  [DialogType.Alert]: MESSAGE_TYPE.SNAP_DIALOG_ALERT,
-  [DialogType.Confirmation]: MESSAGE_TYPE.SNAP_DIALOG_CONFIRMATION,
-  [DialogType.Prompt]: MESSAGE_TYPE.SNAP_DIALOG_PROMPT,
+///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
+export const SNAP_MANAGE_ACCOUNTS_CONFIRMATION_TYPES = {
+  confirmAccountCreation: 'snap_manageAccounts:confirmAccountCreation',
+  confirmAccountRemoval: 'snap_manageAccounts:confirmAccountRemoval',
+  showSnapAccountRedirect: 'snap_manageAccounts:showSnapAccountRedirect',
+  showNameSnapAccount: 'snap_manageAccounts:showNameSnapAccount',
 };
-///: END:ONLY_INCLUDE_IN
+///: END:ONLY_INCLUDE_IF
+
+export const SMART_TRANSACTION_CONFIRMATION_TYPES = {
+  showSmartTransactionStatusPage:
+    'smartTransaction:showSmartTransactionStatusPage',
+};
 
 /**
  * Custom messages to send and be received by the extension
@@ -120,3 +124,11 @@ export const FIREFOX_BUILD_IDS = [
 ] as const;
 
 export const UNKNOWN_TICKER_SYMBOL = 'UNKNOWN';
+
+export const TRACE_ENABLED_SIGN_METHODS = [
+  MESSAGE_TYPE.ETH_SIGN_TYPED_DATA,
+  MESSAGE_TYPE.ETH_SIGN_TYPED_DATA_V1,
+  MESSAGE_TYPE.ETH_SIGN_TYPED_DATA_V3,
+  MESSAGE_TYPE.ETH_SIGN_TYPED_DATA_V4,
+  MESSAGE_TYPE.PERSONAL_SIGN,
+];

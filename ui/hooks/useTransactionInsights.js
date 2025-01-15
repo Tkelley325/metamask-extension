@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { CHAIN_ID_TO_NETWORK_ID_MAP } from '../../shared/constants/network';
-import { stripHexPrefix } from '../../shared/modules/hexstring-utils';
-import { TransactionType } from '../../shared/constants/transaction';
-import { getInsightSnaps } from '../selectors';
+import { TransactionType } from '@metamask/transaction-controller';
 import { Tab } from '../components/ui/tabs';
 import DropdownTab from '../components/ui/tabs/snaps/dropdown-tab';
-import { SnapInsight } from '../components/app/confirm-page-container/snaps/snap-insight';
+import { SnapInsight } from '../components/app/snaps/snap-insight/snap-insight';
+import {
+  getInsightSnapIds,
+  getInsightSnaps,
+  getSnapsMetadata,
+} from '../selectors';
+import { deleteInterface } from '../store/actions';
+import { getSnapName } from '../helpers/utils/util';
+import { useInsightSnaps } from './snaps/useInsightSnaps';
 
 const isAllowedTransactionTypes = (transactionType) =>
   transactionType === TransactionType.contractInteraction ||
@@ -20,16 +25,33 @@ const isAllowedTransactionTypes = (transactionType) =>
 // https://github.com/MetaMask/metamask-extension/blob/develop/ui/components/app/confirm-page-container/confirm-page-container-content/confirm-page-container-content.component.js#L129
 // Thus it is not possible to use React Component here
 const useTransactionInsights = ({ txData }) => {
+  const dispatch = useDispatch();
   const insightSnaps = useSelector(getInsightSnaps);
+  const insightSnapIds = useSelector(getInsightSnapIds);
+  const snapsMetadata = useSelector(getSnapsMetadata);
+
+  const snapsNameGetter = getSnapName(snapsMetadata);
+
   const [selectedInsightSnapId, setSelectedInsightSnapId] = useState(
     insightSnaps[0]?.id,
   );
 
+  const { data, warnings } = useInsightSnaps(txData.id);
+
   useEffect(() => {
-    if (insightSnaps.length && !selectedInsightSnapId) {
-      setSelectedInsightSnapId(insightSnaps[0]?.id);
+    if (insightSnapIds.length > 0 && !selectedInsightSnapId) {
+      setSelectedInsightSnapId(insightSnapIds[0]);
     }
-  }, [insightSnaps, selectedInsightSnapId, setSelectedInsightSnapId]);
+  }, [insightSnapIds, selectedInsightSnapId, setSelectedInsightSnapId]);
+
+  useEffect(() => {
+    return () => {
+      data?.map(
+        ({ response }) =>
+          response?.id && dispatch(deleteInterface(response.id)),
+      );
+    };
+  }, [data]);
 
   if (!isAllowedTransactionTypes(txData.type) || !insightSnaps.length) {
     return null;
@@ -39,48 +61,45 @@ const useTransactionInsights = ({ txData }) => {
     ({ id }) => id === selectedInsightSnapId,
   );
 
-  const { txParams, chainId, origin } = txData;
-  const networkId = CHAIN_ID_TO_NETWORK_ID_MAP[chainId];
-  const caip2ChainId = `eip155:${networkId ?? stripHexPrefix(chainId)}`;
+  // TODO(hbmalik88): refactor this into another component once we've redone
+  // the logic inside of tabs.component.js is re-done to account for nested tabs
+  let insightComponent;
 
   if (insightSnaps.length === 1) {
-    return (
+    insightComponent = (
       <Tab
         className="confirm-page-container-content__tab"
-        name={selectedSnap.manifest.proposedName}
+        name={snapsNameGetter(selectedSnap.id)}
       >
-        <SnapInsight
-          transaction={txParams}
-          origin={origin}
-          chainId={caip2ChainId}
-          selectedSnap={selectedSnap}
-        />
+        <SnapInsight snapId={selectedInsightSnapId} data={data?.[0]} />
       </Tab>
+    );
+  } else if (insightSnaps.length > 1) {
+    const dropdownOptions = insightSnaps?.map(({ id }) => {
+      const name = snapsNameGetter(id);
+      return {
+        value: id,
+        name,
+      };
+    });
+
+    const selectedSnapData = data?.find(
+      (result) => result?.snapId === selectedInsightSnapId,
+    );
+
+    insightComponent = (
+      <DropdownTab
+        className="confirm-page-container-content__tab"
+        options={dropdownOptions}
+        selectedOption={selectedInsightSnapId}
+        onChange={(snapId) => setSelectedInsightSnapId(snapId)}
+      >
+        <SnapInsight snapId={selectedInsightSnapId} data={selectedSnapData} />
+      </DropdownTab>
     );
   }
 
-  const dropdownOptions = insightSnaps?.map(
-    ({ id, manifest: { proposedName } }) => ({
-      value: id,
-      name: proposedName,
-    }),
-  );
-
-  return (
-    <DropdownTab
-      className="confirm-page-container-content__tab"
-      options={dropdownOptions}
-      selectedOption={selectedInsightSnapId}
-      onChange={(snapId) => setSelectedInsightSnapId(snapId)}
-    >
-      <SnapInsight
-        transaction={txParams}
-        origin={origin}
-        chainId={caip2ChainId}
-        selectedSnap={selectedSnap}
-      />
-    </DropdownTab>
-  );
+  return { insightComponent, warnings };
 };
 
 export default useTransactionInsights;

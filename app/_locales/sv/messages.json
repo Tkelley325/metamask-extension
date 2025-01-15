@@ -75,9 +75,6 @@
   "asset": {
     "message": "Tillgång"
   },
-  "attemptingConnect": {
-    "message": "Försöker ansluta till blockkedja."
-  },
   "attributions": {
     "message": "Tillskrivningar"
   },
@@ -169,9 +166,6 @@
   "copyAddress": {
     "message": "Kopiera adress till urklipp"
   },
-  "copyPrivateKey": {
-    "message": "Det här är din privata nyckel (klicka för att kopiera)"
-  },
   "copyToClipboard": {
     "message": "Kopiera till Urklipp"
   },
@@ -205,12 +199,6 @@
   "delete": {
     "message": "Radera"
   },
-  "deleteNetwork": {
-    "message": "Radera nätverk?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Är du säker på att du vill ta bort detta nätverk?"
-  },
   "details": {
     "message": "Info"
   },
@@ -232,15 +220,6 @@
   "editContact": {
     "message": "Redigera kontakt"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS-namnet hittades inte i det aktuella nätverket. Prova att byta till Ethereum Mainnet."
-  },
-  "ensRegistrationError": {
-    "message": "Fel i ENS-namnregistrering"
-  },
-  "enterPassword": {
-    "message": "Ange lösenord"
-  },
   "enterPasswordContinue": {
     "message": "Ange lösenord för att fortsätta"
   },
@@ -252,9 +231,6 @@
   },
   "expandView": {
     "message": "Expandera vy"
-  },
-  "exportPrivateKey": {
-    "message": "Exportera privat nyckel"
   },
   "failed": {
     "message": "Misslyckades"
@@ -362,12 +338,6 @@
   "invalidAddressRecipient": {
     "message": "Mottagarens adress är ogiltig"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Ej ETH-nätverk, ange med små bokstäver"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Ogiltig Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "Ogiltig RPC-URL"
   },
@@ -461,9 +431,6 @@
   "next": {
     "message": "Nästa"
   },
-  "noAddressForName": {
-    "message": "Inga adresser har angetts för detta namn."
-  },
   "noConversionRateAvailable": {
     "message": "Ingen omräkningskurs tillgänglig"
   },
@@ -525,12 +492,6 @@
   "prev": {
     "message": "Föregående"
   },
-  "primaryCurrencySetting": {
-    "message": "Primär valuta"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Välj native för att prioritera visning av värden i den ursprungliga valutan i kedjan (t.ex. ETH). Välj Fiat för att prioritera visning av värden i din valda fiatvaluta."
-  },
   "privacyMsg": {
     "message": "Integritetspolicy"
   },
@@ -544,14 +505,8 @@
   "privateNetwork": {
     "message": "Privat nätverk"
   },
-  "queue": {
-    "message": "Utskriftskö"
-  },
   "readdToken": {
     "message": "Du kan lägga till denna token i framtiden genom att välja \"Lägg till token\" i kontots alternativmeny."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Sök, allmän adress (0x) eller ENS"
   },
   "reject": {
     "message": "Avvisa"
@@ -611,12 +566,6 @@
   "search": {
     "message": "Sök"
   },
-  "searchResults": {
-    "message": "Sökresultat"
-  },
-  "searchTokens": {
-    "message": "Sök tokens"
-  },
   "securityAndPrivacy": {
     "message": "Säkerhet och integritet"
   },
@@ -638,9 +587,6 @@
   "send": {
     "message": "Skicka"
   },
-  "sendTokens": {
-    "message": "Skicka tokens"
-  },
   "settings": {
     "message": "Inställningar"
   },
@@ -655,9 +601,6 @@
   },
   "showHexDataDescription": {
     "message": "Välj detta för att visa hex-datafältet på sändarskärmen"
-  },
-  "showPrivateKeys": {
-    "message": "Visa privata nycklar"
   },
   "sigRequest": {
     "message": "Signaturförfrågan"
@@ -770,9 +713,6 @@
   "tryAgain": {
     "message": "Försök igen"
   },
-  "typePassword": {
-    "message": "Ange ditt MetaMask-lösenord"
-  },
   "unapproved": {
     "message": "Inte godkänd"
   },
@@ -781,12 +721,6 @@
   },
   "unknown": {
     "message": "okänt"
-  },
-  "unknownCameraError": {
-    "message": "Ett fel inträffade när din kamera försökte användas. Försök igen..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Hoppsan! Något gick fel..."
   },
   "unknownNetwork": {
     "message": "Okänt privatnätverk"
@@ -799,9 +733,6 @@
   },
   "unlockMessage": {
     "message": "Den decentraliserade webben väntar"
-  },
-  "updatedWithDate": {
-    "message": "Uppdaterat $1"
   },
   "urlErrorMsg": {
     "message": "URI:er kräver lämpligt HTTP/HTTPS-prefix."

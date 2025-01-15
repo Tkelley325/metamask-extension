@@ -8,8 +8,21 @@ process.env.IN_TEST = true;
 process.env.METAMASK_BUILD_TYPE = 'main';
 
 global.chrome = {
-  runtime: { id: 'testid', getManifest: () => ({ manifest_version: 2 }) },
+  runtime: {
+    id: 'testid',
+    getManifest: () => ({ manifest_version: 2 }),
+    sendMessage: () => {
+      // no-op
+    },
+    onMessage: {
+      addListener: () => {
+        // no-op
+      },
+    },
+  },
 };
+
+global.indexedDB = {};
 
 nock.disableNetConnect();
 nock.enableNetConnect('localhost');
@@ -100,7 +113,7 @@ if (!window.crypto) {
 }
 if (!window.crypto.getRandomValues) {
   // eslint-disable-next-line node/global-require
-  window.crypto.getRandomValues = require('polyfill-crypto.getrandomvalues');
+  window.crypto.getRandomValues = require('crypto').webcrypto.getRandomValues;
 }
 
 // TextEncoder/TextDecoder
@@ -114,3 +127,8 @@ if (!window.navigator.clipboard) {
 if (!window.navigator.clipboard.writeText) {
   window.navigator.clipboard.writeText = () => undefined;
 }
+
+window.SVGPathElement = window.SVGPathElement || { prototype: {} };
+
+// scrollIntoView is not available in JSDOM
+window.HTMLElement.prototype.scrollIntoView = () => undefined;

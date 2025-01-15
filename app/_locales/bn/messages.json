@@ -75,9 +75,6 @@
   "asset": {
     "message": "সম্পদ"
   },
-  "attemptingConnect": {
-    "message": "ব্লকচেনে সংযোগ করার চেষ্টা করছে।"
-  },
   "attributions": {
     "message": "গুণাবলী"
   },
@@ -172,9 +169,6 @@
   "copyAddress": {
     "message": "ক্লিপবোর্ডে ঠিকানা কপি করুন"
   },
-  "copyPrivateKey": {
-    "message": "এটি হল আপনার গোপন কী (কপি করতে ক্লিক করুন)"
-  },
   "copyToClipboard": {
     "message": "ক্লিপবোর্ডে কপি করুন"
   },
@@ -208,12 +202,6 @@
   "delete": {
     "message": "মুছুন"
   },
-  "deleteNetwork": {
-    "message": "নেটওয়ার্ক মুছবেন?"
-  },
-  "deleteNetworkDescription": {
-    "message": "আপনি কি এই নেটওয়ার্কটি মোছার বিষয়ে নিশ্চিত?"
-  },
   "details": {
     "message": "বিশদ বিবরণ"
   },
@@ -235,15 +223,6 @@
   "editContact": {
     "message": "পরিচিতি সম্পাদনা করুন"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS নাম বর্তমান নেটওয়ার্কে খুঁজে পাওয়া যায় নি। মূল Ethereum নেটওয়ার্কে বদলানোর চেষ্টা করুন।"
-  },
-  "ensRegistrationError": {
-    "message": "ENS নাম নিবন্ধীকরণে ত্রুটি হয়েছে"
-  },
-  "enterPassword": {
-    "message": "পাসওয়ার্ড লিখুন"
-  },
   "enterPasswordContinue": {
     "message": "অবিরত রাখতে পাসওয়ার্ড লিখুন"
   },
@@ -256,18 +235,11 @@
   "expandView": {
     "message": "ভিউ সম্প্রসারিত করুন"
   },
-  "exportPrivateKey": {
-    "message": "ব্যক্তিগত কী রপ্তানি করুন"
-  },
   "failed": {
     "message": "ব্যর্থ হয়েছে"
   },
   "fast": {
     "message": "দ্রুত"
-  },
-  "fiat": {
-    "message": "ফিয়াট",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "ফাইল আমদানি কাজ করছে না? এখানে ক্লিক করুন!",
@@ -369,12 +341,6 @@
   "invalidAddressRecipient": {
     "message": "প্রাপকের ঠিকানা অবৈধ"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "ETH নেটওয়ার্ক নয়, ছোটো হরফে সেট করা হয়েছে"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "অবৈধ Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "অবৈধ RPC URL"
   },
@@ -471,9 +437,6 @@
   "next": {
     "message": "পরবর্তী"
   },
-  "noAddressForName": {
-    "message": "এই নামের জন্য কোনো ঠিকানা সেট করা হয় নি।"
-  },
   "noConversionRateAvailable": {
     "message": "কোনো বিনিময় হার উপলভ্য নয়"
   },
@@ -535,12 +498,6 @@
   "prev": {
     "message": "পূর্ববর্তী"
   },
-  "primaryCurrencySetting": {
-    "message": "প্রাথমিক মুদ্রা"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "চেনটিতে (যেমন ETH) দেশীয় মুদ্রায় মানগুলি প্রদর্শনকে অগ্রাধিকার দিতে দেশীয় নির্বাচন করুন। আপনার নির্দেশিত মুদ্রায় মানগুলির প্রদর্শনকে অগ্রাধিকার দিতে নির্দেশিত নির্বাচন করুন।"
-  },
   "privacyMsg": {
     "message": "সম্মত হয়েছেন"
   },
@@ -554,14 +511,8 @@
   "privateNetwork": {
     "message": "ব্যক্তিগত নেটওয়ার্ক"
   },
-  "queue": {
-    "message": "অপেক্ষমাণ"
-  },
   "readdToken": {
     "message": "আপনি আপনার অ্যাকাউন্টস বিকল্পের মেনুতে \"টোকেনগুলি যোগ করুন\" এ গিয়ে ভবিষ্যতে আবার এই টোকেনটি যোগ করতে পারবেন। "
-  },
-  "recipientAddressPlaceholder": {
-    "message": "অনুসন্ধান, সার্বজনীন ঠিকানা (0x), বা ENS"
   },
   "reject": {
     "message": "প্রত্যাখ্যান"
@@ -621,12 +572,6 @@
   "search": {
     "message": "সার্চ করুন"
   },
-  "searchResults": {
-    "message": "অনুসন্ধানের ফলাফলগুলি"
-  },
-  "searchTokens": {
-    "message": "টোকেনগুলি অনুসন্ধান করুন"
-  },
   "securityAndPrivacy": {
     "message": "নিরাপত্তা এবং গোপনীয়তা"
   },
@@ -648,9 +593,6 @@
   "send": {
     "message": "পাঠান"
   },
-  "sendTokens": {
-    "message": "টোকেনগুলি পাঠান"
-  },
   "settings": {
     "message": "সেটিংস"
   },
@@ -665,9 +607,6 @@
   },
   "showHexDataDescription": {
     "message": "পাঠাবার স্ক্রিনে হেক্স ডেটা ফিল্ডটি দেখাবার জন্য এটি নির্বাচন করুন"
-  },
-  "showPrivateKeys": {
-    "message": "গোপনীয় কীগুলি দেখান"
   },
   "sigRequest": {
     "message": "স্বাক্ষরের অনুরোধ"
@@ -789,9 +728,6 @@
   "tryAgain": {
     "message": "আবার করুন"
   },
-  "typePassword": {
-    "message": "আপনার MetaMask পাসওয়ার্ড টাইপ করুন"
-  },
   "unapproved": {
     "message": "অননুমোদিত"
   },
@@ -800,12 +736,6 @@
   },
   "unknown": {
     "message": "অজানা"
-  },
-  "unknownCameraError": {
-    "message": "আপনার ক্যামেরা অ্যাক্সেস করার চেষ্টা করার সময় একটি ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "ওহো! কিছু সমস্যা হয়েছে...."
   },
   "unknownNetwork": {
     "message": "অজানা ব্যক্তিগত নেটওয়ার্ক"
@@ -818,9 +748,6 @@
   },
   "unlockMessage": {
     "message": "ছড়িয়ে ছিটিয়ে থাকা ওয়েব অপেক্ষা করছে"
-  },
-  "updatedWithDate": {
-    "message": "আপডেট করা $1"
   },
   "urlErrorMsg": {
     "message": "URI গুলির যথাযথ HTTP/HTTPS প্রেফিক্সের প্রয়োজন।"

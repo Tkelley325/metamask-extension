@@ -1,8 +1,8 @@
-import { EncryptionPublicKeyManager } from '@metamask/message-manager';
 import {
+  EncryptionPublicKeyManager,
   AbstractMessage,
   OriginalRequest,
-} from '@metamask/message-manager/dist/AbstractMessageManager';
+} from '@metamask/message-manager';
 import { KeyringType } from '../../../shared/constants/keyring';
 import { MetaMetricsEventCategory } from '../../../shared/constants/metametrics';
 import EncryptionPublicKeyController, {
@@ -19,7 +19,7 @@ const messageIdMock2 = '456';
 const stateMock = { test: 123 };
 const addressMock = '0xc38bf1ad06ef69f0c04e29dbeb4152b4175f0a8d';
 const publicKeyMock = '32762347862378feb87123781623a=';
-const keyringMock = { type: KeyringType.hdKeyTree };
+const keyringTypeMock = KeyringType.hdKeyTree;
 
 const messageParamsMock = {
   from: addressMock,
@@ -34,6 +34,8 @@ const messageMock = {
   status: 'unapproved',
   type: 'testType',
   rawSig: undefined,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any as AbstractMessage;
 
 const coreMessageMock = {
@@ -56,6 +58,9 @@ const createMessengerMock = () =>
     registerActionHandler: jest.fn(),
     publish: jest.fn(),
     call: jest.fn(),
+    registerInitialEventPayload: jest.fn(),
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any as jest.Mocked<EncryptionPublicKeyControllerMessenger>);
 
 const createEncryptionPublicKeyManagerMock = <T>() =>
@@ -71,12 +76,9 @@ const createEncryptionPublicKeyManagerMock = <T>() =>
     hub: {
       on: jest.fn(),
     },
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any as jest.Mocked<T>);
-
-const createKeyringControllerMock = () => ({
-  getKeyringForAccount: jest.fn(),
-  getEncryptionPublicKey: jest.fn(),
-});
 
 describe('EncryptionPublicKeyController', () => {
   let encryptionPublicKeyController: EncryptionPublicKeyController;
@@ -88,7 +90,8 @@ describe('EncryptionPublicKeyController', () => {
   const encryptionPublicKeyManagerMock =
     createEncryptionPublicKeyManagerMock<EncryptionPublicKeyManager>();
   const messengerMock = createMessengerMock();
-  const keyringControllerMock = createKeyringControllerMock();
+  const getEncryptionPublicKeyMock = jest.fn();
+  const getAccountKeyringTypeMock = jest.fn();
   const getStateMock = jest.fn();
   const metricsEventMock = jest.fn();
 
@@ -100,9 +103,20 @@ describe('EncryptionPublicKeyController', () => {
     );
 
     encryptionPublicKeyController = new EncryptionPublicKeyController({
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       messenger: messengerMock as any,
-      keyringController: keyringControllerMock as any,
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      getEncryptionPublicKey: getEncryptionPublicKeyMock as any,
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      getAccountKeyringType: getAccountKeyringTypeMock as any,
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getState: getStateMock as any,
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metricsEvent: metricsEventMock as any,
     } as EncryptionPublicKeyControllerOptions);
   });
@@ -123,6 +137,8 @@ describe('EncryptionPublicKeyController', () => {
       encryptionPublicKeyController.update(() => ({
         unapprovedEncryptionPublicKeyMsgs: {
           [messageIdMock]: messageMock,
+          // TODO: Replace `any` with type
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         unapprovedEncryptionPublicKeyMsgCount: 1,
       }));
@@ -143,11 +159,15 @@ describe('EncryptionPublicKeyController', () => {
         [messageIdMock2]: messageMock,
       };
       encryptionPublicKeyManagerMock.getUnapprovedMessages.mockReturnValueOnce(
+        // TODO: Replace `any` with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messages as any,
       );
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       encryptionPublicKeyController.update(() => ({
+        // TODO: Replace `any` with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         unapprovedEncryptionPublicKeyMsgs: messages as any,
       }));
     });
@@ -195,6 +215,7 @@ describe('EncryptionPublicKeyController', () => {
   });
 
   describe('newRequestEncryptionPublicKey', () => {
+    // @ts-expect-error This function is missing from the Mocha type definitions
     it.each([
       ['Ledger', KeyringType.ledger],
       ['Trezor', KeyringType.trezor],
@@ -202,10 +223,11 @@ describe('EncryptionPublicKeyController', () => {
       ['QR hardware', KeyringType.qr],
     ])(
       'throws if keyring is not supported',
-      async (keyringName, keyringType) => {
-        keyringControllerMock.getKeyringForAccount.mockResolvedValueOnce({
-          type: keyringType,
-        });
+      async (
+        keyringName: string,
+        keyringType: (typeof KeyringType)[keyof typeof KeyringType],
+      ) => {
+        getAccountKeyringTypeMock.mockResolvedValueOnce(keyringType);
 
         await expect(
           encryptionPublicKeyController.newRequestEncryptionPublicKey(
@@ -219,9 +241,7 @@ describe('EncryptionPublicKeyController', () => {
     );
 
     it('adds message to message manager', async () => {
-      keyringControllerMock.getKeyringForAccount.mockResolvedValueOnce(
-        keyringMock,
-      );
+      getAccountKeyringTypeMock.mockResolvedValueOnce(keyringTypeMock);
 
       await encryptionPublicKeyController.newRequestEncryptionPublicKey(
         addressMock,
@@ -243,9 +263,7 @@ describe('EncryptionPublicKeyController', () => {
         from: messageParamsMock.data,
       });
 
-      keyringControllerMock.getEncryptionPublicKey.mockResolvedValueOnce(
-        publicKeyMock,
-      );
+      getEncryptionPublicKeyMock.mockResolvedValueOnce(publicKeyMock);
     });
 
     it('approves message and signs', async () => {
@@ -253,10 +271,8 @@ describe('EncryptionPublicKeyController', () => {
         messageParamsMock,
       );
 
-      expect(
-        keyringControllerMock.getEncryptionPublicKey,
-      ).toHaveBeenCalledTimes(1);
-      expect(keyringControllerMock.getEncryptionPublicKey).toHaveBeenCalledWith(
+      expect(getEncryptionPublicKeyMock).toHaveBeenCalledTimes(1);
+      expect(getEncryptionPublicKeyMock).toHaveBeenCalledWith(
         messageParamsMock.data,
       );
 
@@ -294,10 +310,8 @@ describe('EncryptionPublicKeyController', () => {
     });
 
     it('rejects message on error', async () => {
-      keyringControllerMock.getEncryptionPublicKey.mockReset();
-      keyringControllerMock.getEncryptionPublicKey.mockRejectedValue(
-        new Error('Test Error'),
-      );
+      getEncryptionPublicKeyMock.mockReset();
+      getEncryptionPublicKeyMock.mockRejectedValue(new Error('Test Error'));
 
       await expect(
         encryptionPublicKeyController.encryptionPublicKey(messageParamsMock),
@@ -312,10 +326,8 @@ describe('EncryptionPublicKeyController', () => {
     });
 
     it('rejects approval on error', async () => {
-      keyringControllerMock.getEncryptionPublicKey.mockReset();
-      keyringControllerMock.getEncryptionPublicKey.mockRejectedValue(
-        new Error('Test Error'),
-      );
+      getEncryptionPublicKeyMock.mockReset();
+      getEncryptionPublicKeyMock.mockRejectedValue(new Error('Test Error'));
 
       await expect(
         encryptionPublicKeyController.encryptionPublicKey(messageParamsMock),
@@ -368,6 +380,8 @@ describe('EncryptionPublicKeyController', () => {
       const mockListener = jest.fn();
 
       encryptionPublicKeyController.hub.on('updateBadge', mockListener);
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (encryptionPublicKeyManagerMock.hub.on as any).mock.calls[0][1]();
 
       expect(mockListener).toHaveBeenCalledTimes(1);
@@ -376,6 +390,8 @@ describe('EncryptionPublicKeyController', () => {
     it('requires approval on unapproved message event from EncryptionPublicKeyManager', () => {
       messengerMock.call.mockResolvedValueOnce({});
 
+      // TODO: Replace `any` with type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (encryptionPublicKeyManagerMock.hub.on as any).mock.calls[1][1](
         messageParamsMock,
       );
@@ -394,12 +410,16 @@ describe('EncryptionPublicKeyController', () => {
 
     it('updates state on EncryptionPublicKeyManager state change', async () => {
       await encryptionPublicKeyManagerMock.subscribe.mock.calls[0][0]({
+        // TODO: Replace `any` with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         unapprovedMessages: { [messageIdMock]: coreMessageMock as any },
         unapprovedMessagesCount: 3,
       });
 
       expect(encryptionPublicKeyController.state).toEqual({
         unapprovedEncryptionPublicKeyMsgs: {
+          // TODO: Replace `any` with type
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           [messageIdMock]: stateMessageMock as any,
         },
         unapprovedEncryptionPublicKeyMsgCount: 3,

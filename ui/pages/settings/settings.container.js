@@ -1,8 +1,13 @@
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { getAddressBookEntryOrAccountName } from '../../selectors';
+import {
+  getAddressBookEntryOrAccountName,
+  getUseExternalServices,
+} from '../../selectors';
 import { ENVIRONMENT_TYPE_POPUP } from '../../../shared/constants/app';
+// TODO: Remove restricted import
+// eslint-disable-next-line import/no-restricted-paths
 import { getEnvironmentType } from '../../../app/scripts/lib/util';
 import { getMostRecentOverviewPage } from '../../ducks/history/history';
 import {
@@ -13,11 +18,11 @@ import {
 import {
   ABOUT_US_ROUTE,
   ADVANCED_ROUTE,
-  ALERTS_ROUTE,
   CONTACT_LIST_ROUTE,
   CONTACT_ADD_ROUTE,
   CONTACT_EDIT_ROUTE,
   CONTACT_VIEW_ROUTE,
+  DEVELOPER_OPTIONS_ROUTE,
   GENERAL_ROUTE,
   NETWORKS_FORM_ROUTE,
   NETWORKS_ROUTE,
@@ -25,10 +30,10 @@ import {
   SETTINGS_ROUTE,
   EXPERIMENTAL_ROUTE,
   ADD_NETWORK_ROUTE,
-  SNAPS_LIST_ROUTE,
-  SNAPS_VIEW_ROUTE,
   ADD_POPULAR_CUSTOM_NETWORK,
 } from '../../helpers/constants/routes';
+import { getProviderConfig } from '../../ducks/metamask/metamask';
+import { toggleNetworkMenu } from '../../store/actions';
 import Settings from './settings.component';
 
 const ROUTES_TO_I18N_KEYS = {
@@ -36,30 +41,30 @@ const ROUTES_TO_I18N_KEYS = {
   [ADD_NETWORK_ROUTE]: 'networks',
   [ADD_POPULAR_CUSTOM_NETWORK]: 'addNetwork',
   [ADVANCED_ROUTE]: 'advanced',
-  [ALERTS_ROUTE]: 'alerts',
   [CONTACT_ADD_ROUTE]: 'newContact',
   [CONTACT_EDIT_ROUTE]: 'editContact',
   [CONTACT_LIST_ROUTE]: 'contacts',
   [CONTACT_VIEW_ROUTE]: 'viewContact',
+  [DEVELOPER_OPTIONS_ROUTE]: 'developerOptions',
   [EXPERIMENTAL_ROUTE]: 'experimental',
   [GENERAL_ROUTE]: 'general',
   [NETWORKS_FORM_ROUTE]: 'networks',
   [NETWORKS_ROUTE]: 'networks',
   [SECURITY_ROUTE]: 'securityAndPrivacy',
-  [SNAPS_LIST_ROUTE]: 'snaps',
-  [SNAPS_VIEW_ROUTE]: 'snaps',
 };
 
 const mapStateToProps = (state, ownProps) => {
   const { location } = ownProps;
   const { pathname } = location;
+  const { ticker } = getProviderConfig(state);
   const {
-    metamask: { conversionDate },
+    metamask: { currencyRates },
   } = state;
+
+  const conversionDate = currencyRates[ticker]?.conversionDate;
 
   const pathNameTail = pathname.match(/[^/]+$/u)[0];
   const isAddressEntryPage = pathNameTail.includes('0x');
-  const isSnapViewPage = Boolean(pathname.match(SNAPS_VIEW_ROUTE));
   const isAddContactPage = Boolean(pathname.match(CONTACT_ADD_ROUTE));
   const isEditContactPage = Boolean(pathname.match(CONTACT_EDIT_ROUTE));
   const isNetworksFormPage =
@@ -80,8 +85,6 @@ const mapStateToProps = (state, ownProps) => {
     backRoute = CONTACT_LIST_ROUTE;
   } else if (isNetworksFormPage) {
     backRoute = NETWORKS_ROUTE;
-  } else if (isSnapViewPage) {
-    backRoute = SNAPS_LIST_ROUTE;
   } else if (isAddPopularCustomNetwork) {
     backRoute = NETWORKS_ROUTE;
   }
@@ -96,6 +99,7 @@ const mapStateToProps = (state, ownProps) => {
       ? pathNameTail
       : '',
   );
+  const useExternalServices = getUseExternalServices(state);
 
   return {
     addNewNetwork,
@@ -107,10 +111,19 @@ const mapStateToProps = (state, ownProps) => {
     initialBreadCrumbRoute,
     isAddressEntryPage,
     isPopup,
-    isSnapViewPage,
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
     pathnameI18nKey,
+    useExternalServices,
   };
 };
 
-export default compose(withRouter, connect(mapStateToProps))(Settings);
+function mapDispatchToProps(dispatch) {
+  return {
+    toggleNetworkMenu: (payload) => dispatch(toggleNetworkMenu(payload)),
+  };
+}
+
+export default compose(
+  withRouter,
+  connect(mapStateToProps, mapDispatchToProps),
+)(Settings);

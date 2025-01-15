@@ -1,6 +1,19 @@
 import { ApprovalType } from '@metamask/controller-utils';
+import { EthAccountType } from '@metamask/keyring-api';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '@metamask/transaction-controller';
+import {
+  SmartTransactionStatuses,
+  SmartTransactionMinedTx,
+} from '@metamask/smart-transactions-controller/dist/types';
 import { CHAIN_IDS } from '../../shared/constants/network';
-import { TransactionStatus } from '../../shared/constants/transaction';
+import {
+  ETH_4337_METHODS,
+  ETH_EOA_METHODS,
+} from '../../shared/constants/eth-methods';
+import { mockNetworkState } from '../../test/stub/networks';
 import {
   unapprovedMessagesSelector,
   transactionsSelector,
@@ -9,40 +22,13 @@ import {
   nonceSortedCompletedTransactionsSelector,
   submittedPendingTransactionsSelector,
   hasTransactionPendingApprovals,
+  getApprovedAndSignedTransactions,
+  smartTransactionsListSelector,
+  getTransactions,
 } from './transactions';
 
 describe('Transaction Selectors', () => {
   describe('unapprovedMessagesSelector', () => {
-    it('returns eth sign msg from unapprovedMsgs', () => {
-      const msg = {
-        id: 1,
-        msgParams: {
-          from: '0xAddress',
-          data: '0xData',
-          origin: 'origin',
-        },
-        time: 1,
-        status: TransactionStatus.unapproved,
-        type: 'eth_sign',
-      };
-
-      const state = {
-        metamask: {
-          unapprovedMsgs: {
-            1: msg,
-          },
-          providerConfig: {
-            chainId: '0x5',
-          },
-        },
-      };
-
-      const msgSelector = unapprovedMessagesSelector(state);
-
-      expect(Array.isArray(msgSelector)).toStrictEqual(true);
-      expect(msgSelector).toStrictEqual([msg]);
-    });
-
     it('returns personal sign from unapprovedPersonalMsgsSelector', () => {
       const msg = {
         id: 1,
@@ -61,9 +47,7 @@ describe('Transaction Selectors', () => {
           unapprovedPersonalMsgs: {
             1: msg,
           },
-          providerConfig: {
-            chainId: '0x5',
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
         },
       };
 
@@ -92,9 +76,7 @@ describe('Transaction Selectors', () => {
           unapprovedTypedMessages: {
             1: msg,
           },
-          providerConfig: {
-            chainId: '0x5',
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
         },
       };
 
@@ -104,22 +86,283 @@ describe('Transaction Selectors', () => {
       expect(msgSelector).toStrictEqual([msg]);
     });
   });
+  describe('smartTransactionsListSelector', () => {
+    const createSmartTransaction = (customParams = {}) => {
+      return {
+        uuid: 'uuid1',
+        status: customParams.status || SmartTransactionStatuses.SUCCESS,
+        type: customParams.type || TransactionType.contractInteraction,
+        cancellable: false,
+        confirmed: customParams.confirmed ?? false,
+        statusMetadata: {
+          cancellationFeeWei: 36777567771000,
+          cancellationReason:
+            customParams.cancellationReason || 'not_cancelled',
+          deadlineRatio: 0.6400288486480713,
+          minedHash: customParams.minedHash || '',
+          minedTx: customParams.minedTx || '',
+        },
+        txParams: {
+          from: customParams.fromAddress || '0xAddress',
+          to: '0xRecipient',
+        },
+      };
+    };
+
+    const createState = (smartTransaction) => {
+      return {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          featureFlags: {},
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                address: '0xAddress',
+              },
+              metadata: {
+                name: 'Test Account',
+                keyring: {
+                  type: 'HD Key Tree',
+                },
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          },
+          smartTransactionsState: {
+            liveness: true,
+            fees: null,
+            smartTransactions: {
+              [CHAIN_IDS.MAINNET]: smartTransaction ? [smartTransaction] : [],
+            },
+          },
+        },
+      };
+    };
+
+    it('returns an empty array if there are no smart transactions in state', () => {
+      const state = createState();
+      state.metamask.smartTransactionsState.smartTransactions = {
+        [CHAIN_IDS.MAINNET]: [],
+      };
+
+      const result = smartTransactionsListSelector(state);
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('does not return a confirmed transaction with status "success"', () => {
+      const smartTransaction = createSmartTransaction({
+        minedHash:
+          '0x55ad39634ee10d417b6e190cfd3736098957e958879cffe78f1f00f4fd2654d6',
+        minedTx: SmartTransactionMinedTx.SUCCESS,
+        confirmed: true,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return a confirmed transaction with status "reverted"', () => {
+      const smartTransaction = createSmartTransaction({
+        minedTx: SmartTransactionMinedTx.REVERTED,
+        confirmed: true,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return a confirmed transaction', () => {
+      const smartTransaction = createSmartTransaction({
+        confirmed: true,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return an unconfirmed transaction with status "pending" for a different from address', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.PENDING,
+        fromAddress: '0xAddress2',
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('returns an unconfirmed transaction with status "pending"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.PENDING,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [
+        {
+          ...smartTransaction,
+          isSmartTransaction: true,
+        },
+      ];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('returns an unconfirmed transaction with status "cancelled" and type "swap"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.PENDING,
+        type: TransactionType.swap,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [
+        {
+          ...smartTransaction,
+          isSmartTransaction: true,
+        },
+      ];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('returns an unconfirmed transaction with status "cancelled" and type "swapApproval"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.PENDING,
+        type: TransactionType.swapApproval,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [
+        {
+          ...smartTransaction,
+          isSmartTransaction: true,
+        },
+      ];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('returns an unconfirmed transaction with status "unknown" and type "swap"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.UNKNOWN,
+        type: TransactionType.swap,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [
+        {
+          ...smartTransaction,
+          isSmartTransaction: true,
+        },
+      ];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('returns an unconfirmed transaction with status "resolved" and type "swap"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.RESOLVED,
+        type: TransactionType.swap,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [
+        {
+          ...smartTransaction,
+          isSmartTransaction: true,
+        },
+      ];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return an unconfirmed transaction with status "cancelled" and type "simpleSend"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.CANCELLED,
+        type: TransactionType.simpleSend,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return an unconfirmed transaction with status "unknown" and type "simpleSend"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.UNKNOWN,
+        type: TransactionType.simpleSend,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('does not return an unconfirmed transaction with status "reverted" and type "simpleSend"', () => {
+      const smartTransaction = createSmartTransaction({
+        status: SmartTransactionStatuses.REVERTED,
+        type: TransactionType.simpleSend,
+      });
+      const state = createState(smartTransaction);
+
+      const result = smartTransactionsListSelector(state);
+
+      const expected = [];
+      expect(result).toStrictEqual(expected);
+    });
+  });
 
   describe('transactionsSelector', () => {
-    it('selects the currentNetworkTxList', () => {
+    it('selects the current network transactions', () => {
       const state = {
         metamask: {
-          providerConfig: {
-            nickname: 'mainnet',
-            chainId: CHAIN_IDS.MAINNET,
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          featureFlags: {},
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: '0xAddress',
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
           },
-          featureFlags: {
-            showIncomingTransactions: false,
-          },
-          selectedAddress: '0xAddress',
-          currentNetworkTxList: [
+          transactions: [
             {
               id: 0,
+              chainId: CHAIN_IDS.MAINNET,
               time: 0,
               txParams: {
                 from: '0xAddress',
@@ -128,6 +371,7 @@ describe('Transaction Selectors', () => {
             },
             {
               id: 1,
+              chainId: CHAIN_IDS.MAINNET,
               time: 1,
               txParams: {
                 from: '0xAddress',
@@ -138,22 +382,84 @@ describe('Transaction Selectors', () => {
         },
       };
 
-      const orderedTxList = state.metamask.currentNetworkTxList.sort(
-        (a, b) => b.time - a.time,
-      );
+      const selectedTx = transactionsSelector(state);
+
+      expect(Array.isArray(selectedTx)).toStrictEqual(true);
+      expect(selectedTx).toStrictEqual([
+        state.metamask.transactions[1],
+        state.metamask.transactions[0],
+      ]);
+    });
+    it('should not duplicate incoming transactions', () => {
+      const state = {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          featureFlags: {},
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                address: '0xAddress',
+              },
+              metadata: {
+                name: 'Test Account',
+                keyring: {
+                  type: 'HD Key Tree',
+                },
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          },
+          transactions: [
+            {
+              id: 0,
+              chainId: CHAIN_IDS.MAINNET,
+              time: 0,
+              txParams: {
+                from: '0xAddress',
+                to: '0xRecipient',
+              },
+            },
+            {
+              id: 1,
+              chainId: CHAIN_IDS.MAINNET,
+              time: 1,
+              txParams: {
+                from: '0xAddress',
+                to: '0xRecipient',
+              },
+            },
+            {
+              id: 2,
+              chainId: CHAIN_IDS.MAINNET,
+              time: 2,
+              type: TransactionType.incoming,
+              txParams: {
+                from: '0xAddress',
+                to: '0xAddress',
+              },
+            },
+          ],
+        },
+      };
 
       const selectedTx = transactionsSelector(state);
 
       expect(Array.isArray(selectedTx)).toStrictEqual(true);
-      expect(selectedTx).toStrictEqual(orderedTxList);
+      expect(selectedTx).toStrictEqual([
+        state.metamask.transactions[1],
+        state.metamask.transactions[0],
+      ]);
     });
   });
 
   describe('nonceSortedTransactionsSelector', () => {
-    it('returns transaction group nonce sorted tx from from selectedTxList wit', () => {
+    it('returns transaction group nonce sorted tx from selectedTxList', () => {
       const tx1 = {
         id: 0,
         time: 0,
+        chainId: CHAIN_IDS.MAINNET,
         txParams: {
           from: '0xAddress',
           to: '0xRecipient',
@@ -164,6 +470,7 @@ describe('Transaction Selectors', () => {
       const tx2 = {
         id: 1,
         time: 1,
+        chainId: CHAIN_IDS.MAINNET,
         txParams: {
           from: '0xAddress',
           to: '0xRecipient',
@@ -173,15 +480,28 @@ describe('Transaction Selectors', () => {
 
       const state = {
         metamask: {
-          providerConfig: {
-            nickname: 'mainnet',
-            chainId: CHAIN_IDS.MAINNET,
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: '0xAddress',
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
           },
-          selectedAddress: '0xAddress',
-          featureFlags: {
-            showIncomingTransactions: false,
-          },
-          currentNetworkTxList: [tx1, tx2],
+          featureFlags: {},
+          transactions: [tx1, tx2],
         },
       };
 
@@ -214,6 +534,7 @@ describe('Transaction Selectors', () => {
     const submittedTx = {
       id: 0,
       time: 0,
+      chainId: CHAIN_IDS.MAINNET,
       txParams: {
         from: '0xAddress',
         to: '0xRecipient',
@@ -225,6 +546,7 @@ describe('Transaction Selectors', () => {
     const unapprovedTx = {
       id: 1,
       time: 1,
+      chainId: CHAIN_IDS.MAINNET,
       txParams: {
         from: '0xAddress',
         to: '0xRecipient',
@@ -236,6 +558,7 @@ describe('Transaction Selectors', () => {
     const approvedTx = {
       id: 2,
       time: 2,
+      chainId: CHAIN_IDS.MAINNET,
       txParams: {
         from: '0xAddress',
         to: '0xRecipient',
@@ -247,6 +570,7 @@ describe('Transaction Selectors', () => {
     const confirmedTx = {
       id: 3,
       time: 3,
+      chainId: CHAIN_IDS.MAINNET,
       txParams: {
         from: '0xAddress',
         to: '0xRecipient',
@@ -257,20 +581,28 @@ describe('Transaction Selectors', () => {
 
     const state = {
       metamask: {
-        providerConfig: {
-          nickname: 'mainnet',
-          chainId: CHAIN_IDS.MAINNET,
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+        internalAccounts: {
+          accounts: {
+            'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+              address: '0xAddress',
+              id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+              metadata: {
+                name: 'Test Account',
+                keyring: {
+                  type: 'HD Key Tree',
+                },
+              },
+              options: {},
+              methods: ETH_4337_METHODS,
+              type: EthAccountType.Eoa,
+            },
+          },
+          selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
         },
-        selectedAddress: '0xAddress',
-        featureFlags: {
-          showIncomingTransactions: false,
-        },
-        currentNetworkTxList: [
-          submittedTx,
-          unapprovedTx,
-          approvedTx,
-          confirmedTx,
-        ],
+        featureFlags: {},
+        transactions: [submittedTx, unapprovedTx, approvedTx, confirmedTx],
       },
     };
 
@@ -333,12 +665,10 @@ describe('Transaction Selectors', () => {
   });
 
   describe('hasTransactionPendingApprovals', () => {
-    const mockNetworkId = 'mockNetworkId';
+    const mockChainId = 'mockChainId';
     const mockedState = {
       metamask: {
-        providerConfig: {
-          chainId: mockNetworkId,
-        },
+        ...mockNetworkState({ chainId: mockChainId }),
         pendingApprovalCount: 2,
         pendingApprovals: {
           1: {
@@ -358,12 +688,13 @@ describe('Transaction Selectors', () => {
             requestState: null,
           },
         },
-        unapprovedTxs: {
-          2: {
+        transactions: [
+          {
             id: '2',
-            chainId: mockNetworkId,
+            chainId: mockChainId,
+            status: TransactionStatus.unapproved,
           },
-        },
+        ],
       },
     };
 
@@ -371,15 +702,16 @@ describe('Transaction Selectors', () => {
       const result = hasTransactionPendingApprovals(mockedState);
       expect(result).toBe(true);
     });
-    it('should return false if there is a pending transaction on different network', () => {
-      mockedState.metamask.unapprovedTxs['2'].chainId = 'differentNetworkId';
+
+    it('should return true if there is a pending transaction on different network', () => {
+      mockedState.metamask.transactions[0].chainId = 'differentChainId';
       const result = hasTransactionPendingApprovals(mockedState);
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
+
     it.each([
       [ApprovalType.EthDecrypt],
       [ApprovalType.EthGetEncryptionPublicKey],
-      [ApprovalType.EthSign],
       [ApprovalType.EthSignTypedData],
       [ApprovalType.PersonalSign],
     ])(
@@ -404,5 +736,123 @@ describe('Transaction Selectors', () => {
         expect(result).toBe(true);
       },
     );
+  });
+
+  describe('getApprovedAndSignedTransactions', () => {
+    it('returns transactions with status of approved or signed for all networks', () => {
+      const state = {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          transactions: [
+            {
+              id: 0,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.approved,
+            },
+            {
+              id: 1,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.submitted,
+            },
+            {
+              id: 2,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.unapproved,
+            },
+            {
+              id: 3,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.signed,
+            },
+            {
+              id: 4,
+              chainId: CHAIN_IDS.GOERLI,
+              status: TransactionStatus.signed,
+            },
+          ],
+        },
+      };
+
+      const results = getApprovedAndSignedTransactions(state);
+
+      expect(results).toStrictEqual([
+        state.metamask.transactions[0],
+        state.metamask.transactions[3],
+        state.metamask.transactions[4],
+      ]);
+    });
+
+    it('returns an empty array if there are no approved or signed transactions', () => {
+      const state = {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          transactions: [
+            {
+              id: 0,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.submitted,
+            },
+            {
+              id: 1,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.unapproved,
+            },
+          ],
+        },
+      };
+
+      const results = getApprovedAndSignedTransactions(state);
+
+      expect(results).toStrictEqual([]);
+    });
+  });
+
+  describe('getTransactions', () => {
+    it('returns all transactions for all networks', () => {
+      const state = {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+          transactions: [
+            {
+              id: 0,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.approved,
+            },
+            {
+              id: 1,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.submitted,
+            },
+            {
+              id: 2,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.unapproved,
+            },
+            {
+              id: 3,
+              chainId: CHAIN_IDS.MAINNET,
+              status: TransactionStatus.signed,
+            },
+            {
+              id: 4,
+              chainId: CHAIN_IDS.GOERLI,
+              status: TransactionStatus.signed,
+            },
+          ],
+        },
+      };
+
+      const results = getTransactions(state);
+
+      expect(results).toStrictEqual(state.metamask.transactions);
+    });
+
+    it('returns an empty array if there are no transactions', () => {
+      const results = getTransactions({});
+      expect(results).toStrictEqual([]);
+    });
   });
 });

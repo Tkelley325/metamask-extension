@@ -5,6 +5,8 @@ import UnitInput from '../unit-input';
 import CurrencyDisplay from '../currency-display';
 import { getWeiHexFromDecimalValue } from '../../../../shared/modules/conversion.utils';
 
+// TODO: Remove restricted import
+// eslint-disable-next-line import/no-restricted-paths
 import { addHexPrefix } from '../../../../app/scripts/lib/util';
 import { isEqualCaseInsensitive } from '../../../../shared/modules/string-utils';
 import { Numeric } from '../../../../shared/modules/Numeric';
@@ -33,6 +35,7 @@ export default class TokenInput extends PureComponent {
       symbol: PropTypes.string,
     }).isRequired,
     tokenExchangeRates: PropTypes.object,
+    nativeCurrency: PropTypes.string,
     tokens: PropTypes.array.isRequired,
   };
 
@@ -104,7 +107,9 @@ export default class TokenInput extends PureComponent {
       hideConversion,
       token,
       tokens,
+      nativeCurrency,
     } = this.props;
+
     const { decimalValue } = this.state;
 
     const existingToken = tokens.find(({ address }) =>
@@ -127,8 +132,8 @@ export default class TokenInput extends PureComponent {
       currency = currentCurrency;
       numberOfDecimals = 2;
     } else {
-      // Display ETH
-      currency = EtherDenomination.ETH;
+      // Display Native currency
+      currency = nativeCurrency;
       numberOfDecimals = 6;
     }
 
@@ -138,7 +143,6 @@ export default class TokenInput extends PureComponent {
       fromCurrency: EtherDenomination.ETH,
       fromDenomination: EtherDenomination.ETH,
     });
-
     return tokenExchangeRate ? (
       <CurrencyDisplay
         className="currency-input__conversion-component"

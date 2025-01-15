@@ -3,9 +3,9 @@ const fs = require('fs-extra');
 const watch = require('gulp-watch');
 const glob = require('fast-glob');
 
-const locales = require('../../app/_locales/index.json');
 const { loadBuildTypesConfig } = require('../lib/build-type');
 
+const { isManifestV3 } = require('../../shared/modules/mv3.utils');
 const { TASKS } = require('./constants');
 const { createTask, composeSeries } = require('./task');
 const { getPathInsideNodeModules } = require('./utils');
@@ -30,7 +30,6 @@ module.exports = function createStaticAssetTasks({
     const [copyTargetsProd, copyTargetsDev] = getCopyTargets(
       shouldIncludeLockdown,
       shouldIncludeSnow,
-      activeFeatures,
     );
     copyTargetsProds[browser] = copyTargetsProd;
     copyTargetsDevs[browser] = copyTargetsDev;
@@ -109,11 +108,7 @@ module.exports = function createStaticAssetTasks({
   }
 };
 
-function getCopyTargets(
-  shouldIncludeLockdown,
-  shouldIncludeSnow,
-  activeFeatures,
-) {
+function getCopyTargets(shouldIncludeLockdown, shouldIncludeSnow) {
   const allCopyTargets = [
     {
       src: `./app/_locales/`,
@@ -128,7 +123,7 @@ function getCopyTargets(
       dest: `images/contract`,
     },
     {
-      src: `./app/fonts/`,
+      src: `./ui/css/utilities/fonts/`,
       dest: `fonts`,
     },
     {
@@ -140,93 +135,84 @@ function getCopyTargets(
         '@fortawesome/fontawesome-free',
         'webfonts/',
       ),
+      // update this location in styles.js if it changes
       dest: `fonts/fontawesome`,
-    },
-    {
-      src: getPathInsideNodeModules('react-responsive-carousel', 'lib/styles/'),
-      dest: 'react-gallery/',
     },
     {
       src: `./ui/css/output/`,
       pattern: `*.css`,
       dest: ``,
     },
-    {
-      src: `./app/loading.html`,
-      dest: `loading.html`,
-    },
-    {
-      src: getPathInsideNodeModules('globalthis', 'dist/browser.js'),
-      dest: `globalthis.js`,
-    },
-    {
-      src: shouldIncludeSnow
-        ? `./node_modules/@lavamoat/snow/snow.prod.js`
-        : EMPTY_JS_FILE,
-      dest: `snow.js`,
-    },
-    {
-      src: shouldIncludeSnow ? `./app/scripts/use-snow.js` : EMPTY_JS_FILE,
-      dest: `use-snow.js`,
-    },
+    ...(shouldIncludeSnow
+      ? [
+          {
+            src: `./node_modules/@lavamoat/snow/snow.prod.js`,
+            dest: `scripts/snow.js`,
+          },
+          {
+            src: `./app/scripts/use-snow.js`,
+            dest: `scripts/use-snow.js`,
+          },
+        ]
+      : []),
     {
       src: shouldIncludeLockdown
         ? getPathInsideNodeModules('ses', 'dist/lockdown.umd.min.js')
         : EMPTY_JS_FILE,
-      dest: `lockdown-install.js`,
+      dest: `scripts/lockdown-install.js`,
     },
     {
       src: './app/scripts/init-globals.js',
-      dest: 'init-globals.js',
+      dest: 'scripts/init-globals.js',
     },
     {
       src: shouldIncludeLockdown
         ? `./app/scripts/lockdown-run.js`
         : EMPTY_JS_FILE,
-      dest: `lockdown-run.js`,
+      dest: `scripts/lockdown-run.js`,
     },
     {
       src: shouldIncludeLockdown
         ? `./app/scripts/lockdown-more.js`
         : EMPTY_JS_FILE,
-      dest: `lockdown-more.js`,
+      dest: `scripts/lockdown-more.js`,
     },
     {
       src: getPathInsideNodeModules('@lavamoat/lavapack', 'src/runtime-cjs.js'),
-      dest: `runtime-cjs.js`,
+      dest: `scripts/runtime-cjs.js`,
       pattern: '',
     },
     {
       src: getPathInsideNodeModules('@lavamoat/lavapack', 'src/runtime.js'),
-      dest: `runtime-lavamoat.js`,
+      dest: `scripts/runtime-lavamoat.js`,
       pattern: '',
     },
-  ];
-
-  if (activeFeatures.includes('blockaid')) {
-    allCopyTargets.push({
-      src: getPathInsideNodeModules('@metamask/ppom-validator', 'dist/'),
+    {
+      src: getPathInsideNodeModules('@blockaid/ppom_release', '/'),
       pattern: '*.wasm',
-      dest: '',
-    });
-  }
-
-  const languageTags = new Set();
-  for (const locale of locales) {
-    const { code } = locale;
-    const tag = code.split('_')[0];
-    languageTags.add(tag);
-  }
-
-  for (const tag of languageTags) {
-    allCopyTargets.push({
-      src: getPathInsideNodeModules(
-        '@formatjs/intl-relativetimeformat',
-        `dist/locale-data/${tag}.json`,
-      ),
-      dest: `intl/${tag}/relative-time-format-data.json`,
-    });
-  }
+      dest: isManifestV3 ? 'scripts/' : '',
+    },
+    ...(isManifestV3
+      ? [
+          {
+            src: getPathInsideNodeModules(
+              '@metamask/snaps-execution-environments',
+              'dist/browserify/iframe/index.html',
+            ),
+            dest: `snaps/index.html`,
+            pattern: '',
+          },
+          {
+            src: getPathInsideNodeModules(
+              '@metamask/snaps-execution-environments',
+              'dist/browserify/iframe/bundle.js',
+            ),
+            dest: `snaps/bundle.js`,
+            pattern: '',
+          },
+        ]
+      : []),
+  ];
 
   const copyTargetsDev = [
     ...allCopyTargets,

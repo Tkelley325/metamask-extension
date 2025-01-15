@@ -2,34 +2,39 @@ import sinon from 'sinon';
 import createMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { BigNumber } from '@ethersproject/bignumber';
+import { EthAccountType } from '@metamask/keyring-api';
+import { TransactionEnvelopeType } from '@metamask/transaction-controller';
+import { waitFor } from '@testing-library/react';
 import {
   CONTRACT_ADDRESS_ERROR,
+  FLOAT_TOKENS_ERROR,
   INSUFFICIENT_FUNDS_ERROR,
   INSUFFICIENT_FUNDS_FOR_GAS_ERROR,
   INSUFFICIENT_TOKENS_ERROR,
   INVALID_RECIPIENT_ADDRESS_ERROR,
   KNOWN_RECIPIENT_ADDRESS_WARNING,
-  NEGATIVE_ETH_ERROR,
-} from '../../pages/send/send.constants';
+} from '../../pages/confirmations/send/send.constants';
 import { CHAIN_IDS } from '../../../shared/constants/network';
 import { GasEstimateTypes, GAS_LIMITS } from '../../../shared/constants/gas';
 import { KeyringType } from '../../../shared/constants/keyring';
 import {
   AssetType,
   TokenStandard,
-  TransactionEnvelopeType,
 } from '../../../shared/constants/transaction';
 import * as Actions from '../../store/actions';
-import { setBackgroundConnection } from '../../../test/jest';
+import { setBackgroundConnection } from '../../store/background-connection';
 import {
   generateERC20TransferData,
   generateERC721TransferData,
-} from '../../pages/send/send.utils';
+} from '../../pages/confirmations/send/send.utils';
 import { BURN_ADDRESS } from '../../../shared/modules/hexstring-utils';
 import {
   getInitialSendStateWithExistingTxState,
   INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
 } from '../../../test/jest/mocks';
+import { ETH_EOA_METHODS } from '../../../shared/constants/eth-methods';
+import { mockNetworkState } from '../../../test/stub/networks';
+import * as Utils from './swap-and-send-utils';
 import sendReducer, {
   initialState,
   initializeSendState,
@@ -72,10 +77,18 @@ import sendReducer, {
   isSendFormInvalid,
   getSendStage,
   updateGasPrice,
+  getBestQuote,
+  getSender,
+  getSwapsBlockedTokens,
+  updateSendQuote,
+  getIsSwapAndSendDisabledForNetwork,
 } from './send';
 import { draftTransactionInitialState, editExistingTransaction } from '.';
 
 const mockStore = createMockStore([thunk]);
+
+const mockAddress1 = '0xdafea492d9c6733ae3d56b7ed1adb60692c98123';
+const mockNftAddress1 = 'f4831105676a5fc024684d056390b8bc529daf51c7';
 
 jest.mock('./send', () => {
   const actual = jest.requireActual('./send');
@@ -91,20 +104,25 @@ jest.mock('lodash', () => ({
   debounce: (fn) => fn,
 }));
 
-setBackgroundConnection({
-  addPollingTokenToAppState: jest.fn(),
-  addUnapprovedTransaction: jest.fn((_u, _v, _w, _x, _y, _z, cb) => {
-    cb(null);
-  }),
-  updateTransactionSendFlowHistory: jest.fn((_x, _y, _z, cb) => cb(null)),
-});
-
 const getTestUUIDTx = (state) => state.draftTransactions['test-uuid'];
 
 describe('Send Slice', () => {
   let getTokenStandardAndDetailsStub;
-  let addUnapprovedTransactionAndRouteToConfirmationPageStub;
+  let getBalancesInSingleCallStub;
+
+  let addTransactionAndRouteToConfirmationPageStub;
+  let addTransactionAndWaitForPublishStub;
+  let setDefaultHomeActiveTabNameStub;
+
   beforeEach(() => {
+    setBackgroundConnection({
+      addPollingTokenToAppState: jest.fn(),
+      addTransaction: jest.fn((_u, _v, cb) => {
+        cb(null, { transactionMeta: null });
+      }),
+      updateTransactionSendFlowHistory: jest.fn((_x, _y, _z, cb) => cb(null)),
+    });
+
     jest.useFakeTimers();
     getTokenStandardAndDetailsStub = jest
       .spyOn(Actions, 'getTokenStandardAndDetails')
@@ -116,16 +134,29 @@ describe('Send Slice', () => {
           decimals: 18,
         }),
       );
-    addUnapprovedTransactionAndRouteToConfirmationPageStub = jest.spyOn(
+    getBalancesInSingleCallStub = jest
+      .spyOn(Actions, 'getBalancesInSingleCall')
+      .mockImplementation((_, [tokenAddress]) =>
+        Promise.resolve({
+          [tokenAddress]: '0x1',
+        }),
+      );
+    addTransactionAndRouteToConfirmationPageStub = jest.spyOn(
       Actions,
-      'addUnapprovedTransactionAndRouteToConfirmationPage',
+      'addTransactionAndRouteToConfirmationPage',
     );
+    addTransactionAndWaitForPublishStub = jest
+      .spyOn(Actions, 'addTransactionAndWaitForPublish')
+      .mockImplementation(({ id }) => Promise.resolve({ id }));
+    setDefaultHomeActiveTabNameStub = jest
+      .spyOn(Actions, 'setDefaultHomeActiveTabName')
+      .mockImplementation(() => ({ type: '' }));
     jest
       .spyOn(Actions, 'estimateGas')
       .mockImplementation(() => Promise.resolve('0x0'));
     jest
-      .spyOn(Actions, 'getGasFeeEstimatesAndStartPolling')
-      .mockImplementation(() => Promise.resolve());
+      .spyOn(Actions, 'gasFeeStartPollingByNetworkClientId')
+      .mockImplementation(() => Promise.resolve('pollToken'));
     jest
       .spyOn(Actions, 'updateTokenType')
       .mockImplementation(() => Promise.resolve({ isERC721: false }));
@@ -138,6 +169,12 @@ describe('Send Slice', () => {
     jest
       .spyOn(Actions, 'updateTransactionGasFees')
       .mockImplementation(() => ({ type: 'UPDATE_TRANSACTION_GAS_FEES' }));
+    jest
+      .spyOn(Actions, 'getLayer1GasFee')
+      .mockReturnValue({ type: 'GET_LAYER_1_GAS_FEE' });
+    jest
+      .spyOn(Utils, 'getDisabledSwapAndSendNetworksFromAPI')
+      .mockReturnValue([]);
   });
 
   describe('Reducers', () => {
@@ -221,7 +258,7 @@ describe('Send Slice', () => {
         const result = sendReducer(
           {
             ...getInitialSendStateWithExistingTxState({
-              asset: { balance: '0xffff' },
+              sendAsset: { balance: '0xffff' },
               gas: {
                 gasPrice: '0x1',
                 gasLimit: GAS_LIMITS.SIMPLE,
@@ -245,16 +282,50 @@ describe('Send Slice', () => {
         expect(draft.amount.value).toStrictEqual('0xadf7');
         expect(draft.status).toStrictEqual(SEND_STATUSES.VALID);
       });
+
+      it('should not error when draft transaction is not defined', () => {
+        const state = getInitialSendStateWithExistingTxState({
+          gas: {
+            gasPrice: '0x1',
+            maxFeePerGas: '0x2',
+            gasLimit: GAS_LIMITS.SIMPLE,
+          },
+        });
+
+        delete state.draftTransactions['test-uuid'];
+
+        const action = {
+          type: 'send/calculateGasTotal',
+        };
+
+        const runAction = () => sendReducer(state, action);
+
+        expect(runAction).not.toThrow();
+      });
     });
+
     describe('resetSendState', () => {
       it('should set the state back to a blank slate matching the initialState object', () => {
         const action = {
           type: 'send/resetSendState',
         };
 
-        const result = sendReducer({}, action);
+        const result = sendReducer({ prevSwapAndSendInput: null }, action);
 
         expect(result).toStrictEqual(initialState);
+      });
+
+      it('should set the state back to a blank slate matching the initialState object and preserve prevSwapAndSend', () => {
+        const action = {
+          type: 'send/resetSendState',
+        };
+
+        const result = sendReducer({ prevSwapAndSendInput: 'test' }, action);
+
+        expect(result).toStrictEqual({
+          ...initialState,
+          prevSwapAndSendInput: 'test',
+        });
       });
     });
     describe('updateSendAmount', () => {
@@ -274,7 +345,7 @@ describe('Send Slice', () => {
           amount: {
             value: '',
           },
-          asset: {
+          sendAsset: {
             balance: '0x56bc75e2d63100000', // 100000000000000000000
           },
           gas: {
@@ -448,7 +519,7 @@ describe('Send Slice', () => {
     describe('updateAsset', () => {
       it('should update asset type and balance from respective action payload', () => {
         const updateAssetState = getInitialSendStateWithExistingTxState({
-          asset: {
+          sendAsset: {
             type: 'old type',
             balance: 'old balance',
           },
@@ -468,12 +539,70 @@ describe('Send Slice', () => {
 
         const draftTransaction = getTestUUIDTx(result);
 
-        expect(draftTransaction.asset.type).toStrictEqual(
+        expect(draftTransaction.sendAsset.type).toStrictEqual(
           action.payload.asset.type,
         );
-        expect(draftTransaction.asset.balance).toStrictEqual(
+        expect(draftTransaction.sendAsset.balance).toStrictEqual(
           action.payload.asset.balance,
         );
+      });
+
+      it('should update received asset type and balance from respective action payload', () => {
+        const updateAssetState = getInitialSendStateWithExistingTxState({
+          receiveAsset: {
+            type: 'old type',
+            balance: 'old balance',
+          },
+        });
+
+        const action = {
+          type: 'send/updateAsset',
+          payload: {
+            asset: {
+              type: 'new type',
+              balance: 'new balance',
+            },
+            isReceived: true,
+          },
+        };
+
+        const result = sendReducer(updateAssetState, action);
+
+        const draftTransaction = getTestUUIDTx(result);
+
+        expect(draftTransaction.receiveAsset.type).toStrictEqual(
+          action.payload.asset.type,
+        );
+        expect(draftTransaction.receiveAsset.balance).toStrictEqual(
+          action.payload.asset.balance,
+        );
+      });
+
+      it('should update hex data if its not the initial asset set', () => {
+        const updateAssetState = getInitialSendStateWithExistingTxState({
+          sendAsset: {
+            type: 'old type',
+            balance: 'old balance',
+          },
+          userInputHexData: '0xTestHexData',
+        });
+
+        const action = {
+          type: 'send/updateAsset',
+          payload: {
+            asset: {
+              type: 'new type',
+              balance: 'new balance',
+            },
+            initialAssetSet: false,
+          },
+        };
+
+        const result = sendReducer(updateAssetState, action);
+
+        const draftTransaction = getTestUUIDTx(result);
+
+        expect(draftTransaction.userInputHexData).toStrictEqual('');
       });
 
       it('should nullify old contract address error when asset types is not TOKEN', () => {
@@ -481,7 +610,7 @@ describe('Send Slice', () => {
           recipient: {
             error: CONTRACT_ADDRESS_ERROR,
           },
-          asset: {
+          sendAsset: {
             type: AssetType.token,
           },
         });
@@ -527,10 +656,10 @@ describe('Send Slice', () => {
 
         const draftTransaction = getTestUUIDTx(result);
 
-        expect(draftTransaction.asset.type).toStrictEqual(
+        expect(draftTransaction.sendAsset.type).toStrictEqual(
           action.payload.asset.type,
         );
-        expect(draftTransaction.asset.details).toStrictEqual(
+        expect(draftTransaction.sendAsset.details).toStrictEqual(
           action.payload.asset.details,
         );
       });
@@ -541,7 +670,7 @@ describe('Send Slice', () => {
         const action = {
           type: 'send/updateRecipient',
           payload: {
-            address: '0xNewAddress',
+            address: mockNftAddress1,
           },
         };
 
@@ -618,7 +747,7 @@ describe('Send Slice', () => {
               gasLimit: '0x0',
               minimumGasLimit: '0x0',
             },
-            asset: {},
+            sendAsset: {},
           }),
           recipientInput: '',
           recipientMode: RECIPIENT_SEARCH_MODES.MY_ACCOUNTS,
@@ -636,7 +765,7 @@ describe('Send Slice', () => {
         expect(draftTransaction.recipient.warning).toBeNull();
       });
 
-      it('should error with an invalid address error when user input is not a valid hex string', () => {
+      it('should not error with an invalid address error when user input is not a valid hex string', () => {
         const tokenAssetTypeState = {
           ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
           recipientInput: '0xValidateError',
@@ -655,21 +784,18 @@ describe('Send Slice', () => {
 
         const draftTransaction = getTestUUIDTx(result);
 
-        expect(draftTransaction.recipient.error).toStrictEqual(
-          'invalidAddressRecipient',
-        );
+        expect(draftTransaction.recipient.error).toBeNull();
       });
 
-      // TODO: Expectation might change in the future
-      it('should error with an invalid network error when user input is not a valid hex string on a non default network', () => {
+      it('should error with an invalid address error when user input is not a valid checksum address', () => {
         const tokenAssetTypeState = {
           ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
-          recipientInput: '0xValidateError',
+          recipientInput: '0xAAAA6BF26964aF9D7eEd9e03E53415D37aA96045',
         };
         const action = {
           type: 'send/validateRecipientUserInput',
           payload: {
-            chainId: '0x55',
+            chainId: '',
             tokens: [],
             useTokenDetection: true,
             tokenAddressList: [],
@@ -681,7 +807,7 @@ describe('Send Slice', () => {
         const draftTransaction = getTestUUIDTx(result);
 
         expect(draftTransaction.recipient.error).toStrictEqual(
-          'invalidAddressRecipientNotEthNetwork',
+          'invalidAddressRecipient',
         );
       });
 
@@ -712,7 +838,7 @@ describe('Send Slice', () => {
       it('should error with same address recipient as a token', () => {
         const tokenAssetTypeState = {
           ...getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
               type: AssetType.token,
               details: {
                 address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
@@ -839,7 +965,7 @@ describe('Send Slice', () => {
           amount: {
             value: '0x6fc23ac0', // 1875000000
           },
-          asset: {
+          sendAsset: {
             type: AssetType.native,
             balance: '0x77359400', // 2000000000
           },
@@ -859,6 +985,7 @@ describe('Send Slice', () => {
         expect(draftTransaction.amount.error).toStrictEqual(
           INSUFFICIENT_FUNDS_FOR_GAS_ERROR,
         );
+        expect(draftTransaction.status).toBe(SEND_STATUSES.INVALID);
       });
 
       it('should error with insufficient tokens when amount value of tokens is higher than asset balance of token', () => {
@@ -866,7 +993,7 @@ describe('Send Slice', () => {
           amount: {
             value: '0x77359400', // 2000000000
           },
-          asset: {
+          sendAsset: {
             type: AssetType.token,
             balance: '0x6fc23ac0', // 1875000000
             details: {
@@ -886,12 +1013,20 @@ describe('Send Slice', () => {
         expect(draftTransaction.amount.error).toStrictEqual(
           INSUFFICIENT_TOKENS_ERROR,
         );
+        expect(draftTransaction.status).toBe(SEND_STATUSES.INVALID);
       });
 
-      it('should error negative value amount', () => {
+      it('should error float value amount of erc1155', () => {
         const negativeAmountState = getInitialSendStateWithExistingTxState({
           amount: {
-            value: '-1',
+            value: '1.2',
+          },
+          sendAsset: {
+            type: AssetType.NFT,
+            balance: '2',
+            details: {
+              standard: TokenStandard.ERC1155,
+            },
           },
         });
 
@@ -903,7 +1038,8 @@ describe('Send Slice', () => {
 
         const draftTransaction = getTestUUIDTx(result);
 
-        expect(draftTransaction.amount.error).toStrictEqual(NEGATIVE_ETH_ERROR);
+        expect(draftTransaction.amount.error).toStrictEqual(FLOAT_TOKENS_ERROR);
+        expect(draftTransaction.status).toBe(SEND_STATUSES.INVALID);
       });
 
       it('should not error for positive value amount', () => {
@@ -912,7 +1048,7 @@ describe('Send Slice', () => {
             error: 'someError',
             value: '1',
           },
-          asset: {
+          sendAsset: {
             type: '',
           },
         });
@@ -926,6 +1062,59 @@ describe('Send Slice', () => {
         const draftTransaction = getTestUUIDTx(result);
 
         expect(draftTransaction.amount.error).toBeNull();
+        expect(draftTransaction.status).toBe(SEND_STATUSES.VALID);
+      });
+
+      it('should error with insufficient tokens amount when amount value of an erc1155 is higher than asset balance', () => {
+        const tokenAssetState = getInitialSendStateWithExistingTxState({
+          amount: {
+            value: '2',
+          },
+          sendAsset: {
+            type: AssetType.NFT,
+            balance: '0x1',
+            details: {
+              standard: TokenStandard.ERC1155,
+              decimals: 0,
+            },
+          },
+        });
+
+        const action = {
+          type: 'send/validateAmountField',
+        };
+
+        const result = sendReducer(tokenAssetState, action);
+
+        const draftTransaction = getTestUUIDTx(result);
+
+        expect(draftTransaction.amount.error).toStrictEqual(
+          INSUFFICIENT_FUNDS_ERROR,
+        );
+        expect(draftTransaction.status).toBe(SEND_STATUSES.INVALID);
+      });
+
+      it('should not throw error when draft transaction does not exist', () => {
+        const tokenAssetState = getInitialSendStateWithExistingTxState({
+          amount: {
+            value: '0x77359400', // 2000000000
+          },
+          sendAsset: {
+            type: AssetType.token,
+            balance: '0x6fc23ac0', // 1875000000
+            details: {
+              decimals: 0,
+            },
+          },
+        });
+
+        const action = {
+          type: 'send/validateAmountField',
+        };
+
+        delete tokenAssetState.draftTransactions['test-uuid'];
+
+        expect(() => sendReducer(tokenAssetState, action)).not.toThrow();
       });
     });
 
@@ -952,8 +1141,27 @@ describe('Send Slice', () => {
           INSUFFICIENT_FUNDS_ERROR,
         );
       });
+      it('should not throw error when draft transaction does not exist', () => {
+        const gasFieldState = getInitialSendStateWithExistingTxState({
+          account: {
+            balance: '0x0',
+          },
+          gas: {
+            gasTotal: '0x1319718a5000', // 21000000000000
+          },
+        });
+
+        delete gasFieldState.draftTransactions['test-uuid'];
+
+        const action = {
+          type: 'send/validateGasField',
+        };
+
+        expect(() => sendReducer(gasFieldState, action)).not.toThrow();
+      });
     });
 
+    // TODO: update this
     describe('validateSendState', () => {
       it('should set `INVALID` send state status when amount error is present', () => {
         const amountErrorState = getInitialSendStateWithExistingTxState({
@@ -993,7 +1201,7 @@ describe('Send Slice', () => {
 
       it('should set `INVALID` send state status when asset type is `TOKEN` without token details present', () => {
         const assetErrorState = getInitialSendStateWithExistingTxState({
-          asset: {
+          sendAsset: {
             type: AssetType.token,
           },
         });
@@ -1031,7 +1239,7 @@ describe('Send Slice', () => {
       it('should set `VALID` send state status when conditionals have not been met', () => {
         const validSendStatusState = {
           ...getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
               type: AssetType.token,
               details: {
                 address: '0x000',
@@ -1063,7 +1271,7 @@ describe('Send Slice', () => {
     describe('QR Code Detected', () => {
       const qrCodestate = getInitialSendStateWithExistingTxState({
         recipient: {
-          address: '0xAddress',
+          address: mockAddress1,
         },
       });
 
@@ -1102,7 +1310,7 @@ describe('Send Slice', () => {
 
         const draftTransaction = getTestUUIDTx(result);
 
-        expect(draftTransaction.recipient.address).toStrictEqual('0xAddress');
+        expect(draftTransaction.recipient.address).toStrictEqual(mockAddress1);
         expect(draftTransaction.recipient.error).toStrictEqual(
           INVALID_RECIPIENT_ADDRESS_ERROR,
         );
@@ -1115,7 +1323,7 @@ describe('Send Slice', () => {
           ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
           selectedAccount: {
             balance: '0x0',
-            address: '0xAddress',
+            address: mockAddress1,
           },
         };
 
@@ -1138,13 +1346,80 @@ describe('Send Slice', () => {
           action.payload.account.address,
         );
       });
+      it('should reset to native asset on selectedAccount changed', () => {
+        const olderState = (asset) => ({
+          ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
+          selectedAccount: {
+            balance: '0x3',
+            address: mockAddress1,
+          },
+          draftTransactions: {
+            'test-uuid': {
+              ...draftTransactionInitialState,
+              asset,
+            },
+          },
+        });
+
+        const assets = [
+          {
+            type: AssetType.token,
+            error: null,
+            details: {
+              address: 'tokenAddress',
+              symbol: 'tokenSymbol',
+              decimals: 'tokenDecimals',
+            },
+            balance: '0x2',
+          },
+          {
+            type: AssetType.NFT,
+            details: {
+              standard: TokenStandard.ERC721,
+            },
+          },
+          {
+            type: AssetType.NFT,
+            details: {
+              standard: TokenStandard.ERC1155,
+            },
+          },
+        ];
+
+        for (let i = 0; i < assets.length; i++) {
+          const action = {
+            type: 'SELECTED_ACCOUNT_CHANGED',
+            payload: {
+              account: {
+                address: `0xAddress${i}`,
+                balance: `0x${i}`,
+              },
+            },
+          };
+
+          const result = sendReducer(olderState(assets[i]), action);
+          expect(result.selectedAccount.balance).toStrictEqual(
+            action.payload.account.balance,
+          );
+          expect(result.selectedAccount.address).toStrictEqual(
+            action.payload.account.address,
+          );
+
+          expect(result.draftTransactions['test-uuid'].sendAsset).toStrictEqual(
+            {
+              ...draftTransactionInitialState.sendAsset,
+              balance: action.payload.account.balance,
+            },
+          );
+        }
+      });
 
       it('should gracefully handle missing account in payload', () => {
         const olderState = {
           ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
           selectedAccount: {
             balance: '0x0',
-            address: '0xAddress',
+            address: mockAddress1,
           },
         };
 
@@ -1158,7 +1433,7 @@ describe('Send Slice', () => {
         const result = sendReducer(olderState, action);
 
         expect(result.selectedAccount.balance).toStrictEqual('0x0');
-        expect(result.selectedAccount.address).toStrictEqual('0xAddress');
+        expect(result.selectedAccount.address).toStrictEqual(mockAddress1);
       });
     });
 
@@ -1167,13 +1442,13 @@ describe('Send Slice', () => {
         const accountsChangedState = {
           ...getInitialSendStateWithExistingTxState({
             fromAccount: {
-              address: '0xAddress',
+              address: mockAddress1,
               balance: '0x0',
             },
           }),
           stage: SEND_STAGES.EDIT,
           selectedAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
             balance: '0x0',
           },
         };
@@ -1182,7 +1457,7 @@ describe('Send Slice', () => {
           type: 'ACCOUNT_CHANGED',
           payload: {
             account: {
-              address: '0xAddress',
+              address: mockAddress1,
               balance: '0x1',
             },
           },
@@ -1201,13 +1476,13 @@ describe('Send Slice', () => {
         const accountsChangedState = {
           ...getInitialSendStateWithExistingTxState({
             fromAccount: {
-              address: '0xAddress',
+              address: mockAddress1,
               balance: '0x0',
             },
           }),
           stage: SEND_STAGES.EDIT,
           selectedAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
             balance: '0x0',
           },
         };
@@ -1231,7 +1506,7 @@ describe('Send Slice', () => {
           ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
           stage: SEND_STAGES.EDIT,
           selectedAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
             balance: '0x0',
           },
         };
@@ -1269,33 +1544,43 @@ describe('Send Slice', () => {
           metamask: {
             gasEstimateType: GasEstimateTypes.none,
             gasFeeEstimates: {},
-            networkDetails: {
-              EIPS: {
-                1559: true,
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+            internalAccounts: {
+              accounts: {
+                'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                  address: mockAddress1,
+                  id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
               },
+              selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
             },
-            selectedAddress: '0xAddress',
-            identities: { '0xAddress': { address: '0xAddress' } },
             keyrings: [
               {
                 type: KeyringType.hdKeyTree,
-                accounts: ['0xAddress'],
+                accounts: [mockAddress1],
               },
             ],
             accounts: {
-              '0xAddress': {
-                address: '0xAddress',
+              [mockAddress1]: {
+                address: mockAddress1,
                 balance: '0x0',
               },
             },
-            cachedBalances: {
+            accountsByChainId: {
               0x5: {
-                '0xAddress': '0x0',
+                [mockAddress1]: { balance: '0x0' },
               },
             },
-            providerConfig: {
-              chainId: '0x5',
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
             useTokenDetection: true,
             tokenList: {
               '0x514910771af9ca656af840dff83e8264ecf986ca': {
@@ -1384,6 +1669,26 @@ describe('Send Slice', () => {
   });
 
   describe('Action Creators', () => {
+    const checkIfTypesExistInActionResult = (
+      actionResult,
+      typesAndPayloads,
+    ) => {
+      typesAndPayloads.forEach((targetTypeOrPayload) => {
+        const isType = typeof targetTypeOrPayload === 'string';
+        const type = isType ? targetTypeOrPayload : targetTypeOrPayload.type;
+
+        const action = actionResult.find(
+          ({ type: actionType }) => actionType === type,
+        );
+
+        expect(isType ? action?.type : action)[
+          isType ? 'toBe' : 'toStrictEqual'
+        ](targetTypeOrPayload);
+      });
+
+      return true;
+    };
+
     describe('updateGasPrice', () => {
       it('should update gas price and update draft transaction with validated state', async () => {
         const store = mockStore({
@@ -1424,13 +1729,100 @@ describe('Send Slice', () => {
         const sendState = {
           metamask: {
             blockGasLimit: '',
-            selectedAddress: '',
-            providerConfig: {
-              chainId: '0x1',
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
             },
+            accounts: {},
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
+              details: {},
+            },
+            gas: {
+              gasPrice: '',
+            },
+            recipient: {
+              address: '',
+            },
+            amount: {
+              value: '',
+            },
+            userInputHexData: '',
+          }),
+        };
+        const store = mockStore(sendState);
+
+        const newSendAmount = 'DE0B6B3A7640000';
+
+        await store.dispatch(updateSendAmount(newSendAmount, '1'));
+
+        const actionResult = store.getActions();
+
+        const expectedFirstActionResult = {
+          type: 'send/addHistoryEntry',
+          payload: 'sendFlow - user set amount to 1 ETH',
+        };
+
+        const expectedSecondActionResult = {
+          type: 'send/updateSendAmount',
+          payload: 'DE0B6B3A7640000',
+        };
+
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            expectedFirstActionResult,
+            expectedSecondActionResult,
+            'send/computeEstimatedGasLimit/pending',
+            'GET_LAYER_1_GAS_FEE',
+            'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+            'send/computeEstimatedGasLimit/fulfilled',
+          ]),
+        ).toBe(true);
+      });
+
+      it('should not update history if decimal value is not passed', async () => {
+        const sendState = {
+          metamask: {
+            blockGasLimit: '',
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
+            },
+            accounts: {},
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+          },
+          send: getInitialSendStateWithExistingTxState({
+            sendAsset: {
               details: {},
             },
             gas: {
@@ -1453,37 +1845,125 @@ describe('Send Slice', () => {
 
         const actionResult = store.getActions();
 
-        const expectedFirstActionResult = {
-          type: 'send/addHistoryEntry',
-          payload: 'sendFlow - user set amount to 1 ETH',
-        };
-
         const expectedSecondActionResult = {
           type: 'send/updateSendAmount',
           payload: 'DE0B6B3A7640000',
         };
 
-        expect(actionResult[0]).toStrictEqual(expectedFirstActionResult);
-        expect(actionResult[1]).toStrictEqual(expectedSecondActionResult);
-        expect(actionResult[2].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/pending',
-        );
-        expect(actionResult[3].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
-        );
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            expectedSecondActionResult,
+            'send/computeEstimatedGasLimit/pending',
+            'GET_LAYER_1_GAS_FEE',
+            'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+            'send/computeEstimatedGasLimit/fulfilled',
+          ]),
+        ).toBe(true);
+      });
+
+      it('should create an action to update send amount ERC1155', async () => {
+        const sendState = {
+          metamask: {
+            blockGasLimit: '',
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
+            },
+            accounts: {},
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+          },
+          send: getInitialSendStateWithExistingTxState({
+            sendAsset: {
+              balance: '0x1',
+              details: {
+                address: '0x24204A596025b871BD01F31D89474C1c15785baF',
+                description: 'This is a collection of Rock NFTs.',
+                favorite: false,
+                image:
+                  'https://bafkreifvhjdf6ve4jfv6qytqtux5nd4nwnelioeiqx5x2ez5yrgrzk7ypi.ipfs.dweb.link',
+                isCurrentlyOwned: true,
+                name: 'ERC1155',
+                standard: 'ERC1155',
+                tokenId: '1',
+                tokenURI:
+                  'https://bafybeidxfmwycgzcp4v2togflpqh2gnibuexjy4m4qqwxp7nh3jx5zlh4y.ipfs.dweb.link/1.json',
+                balance: '6',
+              },
+              error: null,
+              type: 'NFT',
+            },
+            gas: {
+              gasPrice: '',
+            },
+            recipient: {
+              address: '',
+            },
+            amount: {
+              value: '',
+            },
+            userInputHexData: '',
+          }),
+        };
+        const store = mockStore(sendState);
+
+        const newSendAmount = '0x12';
+
+        await store.dispatch(updateSendAmount(newSendAmount));
+
+        const expectedActionResult = {
+          type: 'send/updateSendAmount',
+          payload: '0x12',
+        };
+
+        const actionResult = store.getActions();
+
+        expect(null).toBe(null);
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [expectedActionResult]),
+        ).toBe(true);
       });
 
       it('should create an action to update send amount mode to `INPUT` when mode is `MAX`', async () => {
         const sendState = {
           metamask: {
             blockGasLimit: '',
-            selectedAddress: '',
-            providerConfig: {
-              chainId: '0x1',
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
             },
+            accounts: {},
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
               details: {},
             },
             gas: {
@@ -1501,7 +1981,7 @@ describe('Send Slice', () => {
 
         const store = mockStore(sendState);
 
-        await store.dispatch(updateSendAmount());
+        await store.dispatch(updateSendAmount(undefined, '0'));
 
         const actionResult = store.getActions();
 
@@ -1515,27 +1995,45 @@ describe('Send Slice', () => {
           payload: undefined,
         };
 
-        expect(actionResult[0]).toStrictEqual(expectedFirstActionResult);
-        expect(actionResult[1]).toStrictEqual(expectedSecondActionResult);
-        expect(actionResult[2].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/pending',
-        );
-        expect(actionResult[3].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
-        );
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            expectedFirstActionResult,
+            expectedSecondActionResult,
+            'send/computeEstimatedGasLimit/pending',
+            'GET_LAYER_1_GAS_FEE',
+            'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+            'send/computeEstimatedGasLimit/fulfilled',
+          ]),
+        ).toBe(true);
       });
 
       it('should create an action computeEstimateGasLimit and change states from pending to fulfilled with token asset types', async () => {
         const tokenAssetTypeSendState = {
           metamask: {
             blockGasLimit: '',
-            selectedAddress: '',
-            providerConfig: {
-              chainId: '0x1',
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
             },
+            accounts: {},
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
               type: AssetType.token,
               details: {},
             },
@@ -1558,15 +2056,16 @@ describe('Send Slice', () => {
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(4);
-        expect(actionResult[0].type).toStrictEqual('send/addHistoryEntry');
-        expect(actionResult[1].type).toStrictEqual('send/updateSendAmount');
-        expect(actionResult[2].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/pending',
-        );
-        expect(actionResult[3].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
-        );
+        expect(actionResult).toHaveLength(5);
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            'send/updateSendAmount',
+            'send/computeEstimatedGasLimit/pending',
+            'GET_LAYER_1_GAS_FEE',
+            'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+            'send/computeEstimatedGasLimit/fulfilled',
+          ]),
+        ).toBe(true);
       });
     });
 
@@ -1574,24 +2073,39 @@ describe('Send Slice', () => {
       const defaultSendAssetState = {
         metamask: {
           blockGasLimit: '',
-          selectedAddress: '',
-          providerConfig: {
-            chainId: CHAIN_IDS.GOERLI,
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: mockAddress1,
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
           },
-          cachedBalances: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+          accountsByChainId: {
             [CHAIN_IDS.GOERLI]: {
-              '0xAddress': '0x0',
+              [mockAddress1]: { balance: '0x0' },
             },
           },
           accounts: {
-            '0xAddress': {
-              address: '0xAddress',
+            [mockAddress1]: {
+              address: '0x0',
             },
           },
         },
         send: {
           ...getInitialSendStateWithExistingTxState({
-            asset: {
+            sendAsset: {
               type: '',
               details: {},
             },
@@ -1607,7 +2121,7 @@ describe('Send Slice', () => {
             userInputHexData: '',
           }),
           selectedAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
           },
         },
       };
@@ -1623,11 +2137,12 @@ describe('Send Slice', () => {
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(4);
+        expect(actionResult).toHaveLength(6);
 
         expect(actionResult[0]).toMatchObject({
           type: 'send/addHistoryEntry',
-          payload: 'sendFlow - user set asset of type NATIVE with symbol ETH',
+          payload:
+            'sendFlow - user set asset of type NATIVE with symbol GoerliETH',
         });
         expect(actionResult[1].type).toStrictEqual('send/updateAsset');
         expect(actionResult[1].payload).toStrictEqual({
@@ -1638,17 +2153,22 @@ describe('Send Slice', () => {
             details: null,
           },
           initialAssetSet: false,
+          isReceived: undefined,
         });
 
         expect(actionResult[2].type).toStrictEqual(
           'send/computeEstimatedGasLimit/pending',
         );
-        expect(actionResult[3].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
+        expect(actionResult[3].type).toStrictEqual('GET_LAYER_1_GAS_FEE');
+        expect(actionResult[4].type).toStrictEqual(
+          'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+        );
+        expect(actionResult[5].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/fulfilled',
         );
       });
 
-      it('should create actions for updateSendAsset with tokens', async () => {
+      it('should create actions for updateSendAsset with tokens; non-balance property missing', async () => {
         getTokenStandardAndDetailsStub.mockImplementation(() =>
           Promise.resolve({
             standard: 'ERC20',
@@ -1669,8 +2189,8 @@ describe('Send Slice', () => {
         const newSendAsset = {
           type: AssetType.token,
           details: {
+            standard: TokenStandard.ERC20,
             address: 'tokenAddress',
-            symbol: 'tokenSymbol',
             decimals: 'tokenDecimals',
           },
         };
@@ -1679,7 +2199,7 @@ describe('Send Slice', () => {
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(6);
+        expect(actionResult).toHaveLength(8);
         expect(actionResult[0].type).toStrictEqual('SHOW_LOADING_INDICATION');
         expect(actionResult[1].type).toStrictEqual('HIDE_LOADING_INDICATION');
         expect(actionResult[2]).toMatchObject({
@@ -1700,13 +2220,85 @@ describe('Send Slice', () => {
             error: null,
           },
           initialAssetSet: false,
+          isReceived: undefined,
         });
 
         expect(actionResult[4].type).toStrictEqual(
           'send/computeEstimatedGasLimit/pending',
         );
-        expect(actionResult[5].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
+        expect(actionResult[5].type).toStrictEqual('GET_LAYER_1_GAS_FEE');
+        expect(actionResult[6].type).toStrictEqual(
+          'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+        );
+        expect(actionResult[7].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/fulfilled',
+        );
+      });
+      it('should create actions for updateSendAsset with tokens; only balance property missing', async () => {
+        getTokenStandardAndDetailsStub.mockImplementation(() =>
+          Promise.reject(new Error('Should not be called')),
+        );
+        getBalancesInSingleCallStub.mockImplementation((_, [tokenAddress]) =>
+          Promise.resolve({
+            [tokenAddress]: { hex: '0x0' },
+          }),
+        );
+        global.eth = {
+          contract: sinon.stub().returns({
+            at: sinon.stub().returns({
+              balanceOf: sinon.stub().returns(undefined),
+            }),
+          }),
+        };
+        const store = mockStore(defaultSendAssetState);
+
+        const newSendAsset = {
+          type: AssetType.token,
+          details: {
+            standard: TokenStandard.ERC20,
+            address: 'tokenAddress',
+            symbol: 'TokenSymbol',
+            decimals: 18,
+          },
+        };
+
+        await store.dispatch(updateSendAsset(newSendAsset));
+
+        const actionResult = store.getActions();
+
+        expect(actionResult).toHaveLength(8);
+        expect(actionResult[0].type).toStrictEqual('SHOW_LOADING_INDICATION');
+        expect(actionResult[1].type).toStrictEqual('HIDE_LOADING_INDICATION');
+        expect(actionResult[2]).toMatchObject({
+          type: 'send/addHistoryEntry',
+          payload: `sendFlow - user set asset to ERC20 token with symbol TokenSymbol and address tokenAddress`,
+        });
+        expect(actionResult[3].payload).toStrictEqual({
+          asset: {
+            type: AssetType.token,
+            details: {
+              address: 'tokenAddress',
+              symbol: 'TokenSymbol',
+              decimals: 18,
+              standard: 'ERC20',
+              balance: '0x0',
+            },
+            balance: '0x0',
+            error: null,
+          },
+          initialAssetSet: false,
+          isReceived: undefined,
+        });
+
+        expect(actionResult[4].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/pending',
+        );
+        expect(actionResult[5].type).toStrictEqual('GET_LAYER_1_GAS_FEE');
+        expect(actionResult[6].type).toStrictEqual(
+          'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+        );
+        expect(actionResult[7].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/fulfilled',
         );
       });
 
@@ -1745,9 +2337,7 @@ describe('Send Slice', () => {
     describe('updateRecipientUserInput', () => {
       const updateRecipientUserInputState = {
         metamask: {
-          providerConfig: {
-            chainId: '',
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           tokens: [],
           useTokenDetection: true,
           tokenList: {
@@ -1773,6 +2363,24 @@ describe('Send Slice', () => {
               ],
               occurrences: 12,
             },
+          },
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
           },
         },
         send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
@@ -1811,7 +2419,7 @@ describe('Send Slice', () => {
           'send/validateRecipientUserInput',
         );
         expect(actionResult[4].payload).toStrictEqual({
-          chainId: '',
+          chainId: '0x1',
           tokens: [],
           useTokenDetection: true,
           isProbablyAnAssetContract: false,
@@ -1881,16 +2489,17 @@ describe('Send Slice', () => {
         const updateRecipientState = {
           metamask: {
             addressBook: {},
-            identities: {},
-            providerConfig: {
-              chainId: '0x1',
+            internalAccounts: {
+              accounts: {},
+              selectedAccount: '',
             },
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: {
             account: {
               balance: '',
             },
-            asset: {
+            sendAsset: {
               type: '',
             },
             gas: {
@@ -1941,15 +2550,13 @@ describe('Send Slice', () => {
                 },
               ],
             },
-            providerConfig: {
-              chainId: '0x1',
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: {
             account: {
               balance: '',
             },
-            asset: {
+            sendAsset: {
               type: '',
             },
             gas: {
@@ -1989,18 +2596,18 @@ describe('Send Slice', () => {
         const tokenState = {
           metamask: {
             addressBook: {},
-            identities: {},
-            blockGasLimit: '',
-            selectedAddress: '',
-            providerConfig: {
-              chainId: '0x1',
+            internalAccounts: {
+              accounts: {},
+              selectedAccount: '',
             },
+            blockGasLimit: '',
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
           },
           send: {
             account: {
               balance: '',
             },
-            asset: {
+            sendAsset: {
               type: AssetType.token,
               details: {},
             },
@@ -2039,10 +2646,8 @@ describe('Send Slice', () => {
         const updateRecipientState = {
           metamask: {
             addressBook: {},
-            identities: {},
-            providerConfig: {
-              chainId: '',
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
             tokens: [],
             useTokenDetection: true,
             tokenList: {
@@ -2070,6 +2675,25 @@ describe('Send Slice', () => {
                 occurrences: 12,
               },
             },
+            internalAccounts: {
+              accounts: {
+                'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                  address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+                  id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            },
+            accounts: {},
           },
           send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
         };
@@ -2079,36 +2703,36 @@ describe('Send Slice', () => {
         await store.dispatch(resetRecipientInput());
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(11);
+        expect(actionResult).toHaveLength(13);
         expect(actionResult[0]).toMatchObject({
           type: 'send/addHistoryEntry',
           payload: 'sendFlow - user cleared recipient input',
         });
-        expect(actionResult[1].type).toStrictEqual(
-          'send/updateRecipientWarning',
-        );
+        expect(actionResult[1].type).toStrictEqual('DNS/resetDomainResolution');
         expect(actionResult[2].type).toStrictEqual(
-          'send/updateDraftTransactionStatus',
+          'send/updateRecipientWarning',
         );
 
         expect(actionResult[3].type).toStrictEqual(
-          'send/updateRecipientUserInput',
+          'send/updateDraftTransactionStatus',
         );
-        expect(actionResult[4].payload).toStrictEqual(
-          'sendFlow - user typed  into recipient input field',
-        );
-        expect(actionResult[5].type).toStrictEqual(
+        expect(actionResult[4].payload).toStrictEqual('');
+        expect(actionResult[5].type).toStrictEqual('send/updateRecipient');
+        expect(actionResult[6].type).toStrictEqual('send/addHistoryEntry');
+        expect(actionResult[7].type).toStrictEqual(
           'send/validateRecipientUserInput',
         );
-        expect(actionResult[6].type).toStrictEqual('send/updateRecipient');
-        expect(actionResult[7].type).toStrictEqual(
+        expect(actionResult[8].type).toStrictEqual(
           'send/computeEstimatedGasLimit/pending',
         );
-        expect(actionResult[8].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
-        );
-        expect(actionResult[9].type).toStrictEqual('DNS/resetDomainResolution');
+        expect(actionResult[9].type).toStrictEqual('GET_LAYER_1_GAS_FEE');
         expect(actionResult[10].type).toStrictEqual(
+          'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+        );
+        expect(actionResult[11].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/fulfilled',
+        );
+        expect(actionResult[12].type).toStrictEqual(
           'send/validateRecipientUserInput',
         );
       });
@@ -2117,7 +2741,7 @@ describe('Send Slice', () => {
     describe('UpdateSendHexData', () => {
       const sendHexDataState = {
         send: getInitialSendStateWithExistingTxState({
-          asset: {
+          sendAsset: {
             type: '',
           },
         }),
@@ -2148,7 +2772,7 @@ describe('Send Slice', () => {
       it('should create actions to toggle update max mode when send amount mode is not max', async () => {
         const sendMaxModeState = {
           send: {
-            asset: {
+            sendAsset: {
               type: AssetType.token,
               details: {},
             },
@@ -2165,9 +2789,7 @@ describe('Send Slice', () => {
             userInputHexData: '',
           },
           metamask: {
-            providerConfig: {
-              chainId: CHAIN_IDS.GOERLI,
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
           },
         };
 
@@ -2192,11 +2814,73 @@ describe('Send Slice', () => {
         );
       });
 
+      describe('updateSendQuote', () => {
+        const sendQuoteState = {
+          send: getInitialSendStateWithExistingTxState({}),
+        };
+
+        it('compute gas limit', async () => {
+          const store = mockStore(sendQuoteState);
+          store.clearActions();
+
+          await store.dispatch(updateSendQuote(true));
+
+          const actionResult = store.getActions();
+
+          expect(
+            checkIfTypesExistInActionResult(actionResult, [
+              'send/computeEstimatedGasLimit/pending',
+            ]),
+          ).toBe(true);
+        });
+
+        it('basic send: clear swap+send', async () => {
+          sendQuoteState.send.draftTransactions['test-uuid'].swapQuotesError =
+            'defined';
+          const store = mockStore(sendQuoteState);
+
+          store.clearActions();
+
+          await store.dispatch(updateSendQuote(false));
+
+          const actionResult = store.getActions();
+
+          expect(
+            checkIfTypesExistInActionResult(actionResult, [
+              'CLEAR_SWAP_AND_SEND_STATE',
+            ]),
+          ).toBe(true);
+        });
+
+        it('swap+send: compute gas limit', async () => {
+          sendQuoteState.send.draftTransactions['test-uuid'] = {
+            ...sendQuoteState.send.draftTransactions['test-uuid'],
+            receiveAsset: {
+              type: AssetType.token,
+              details: { address: '0x0' },
+            },
+          };
+
+          const store = mockStore(sendQuoteState);
+          store.clearActions();
+
+          await store.dispatch(updateSendQuote(true));
+
+          const actionResult = store.getActions();
+
+          expect(
+            checkIfTypesExistInActionResult(actionResult, [
+              'send/computeEstimatedGasLimit/pending',
+            ]),
+          ).toBe(true);
+        });
+      });
+
       it('should create actions to toggle off max mode when send amount mode is max', async () => {
         const sendMaxModeState = {
           send: {
             ...getInitialSendStateWithExistingTxState({
-              asset: {
+              sendAsset: {
                 type: AssetType.token,
                 details: {},
               },
@@ -2214,9 +2898,27 @@ describe('Send Slice', () => {
             amountMode: AMOUNT_MODES.MAX,
           },
           metamask: {
-            providerConfig: {
-              chainId: CHAIN_IDS.GOERLI,
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
+            internalAccounts: {
+              accounts: {
+                'mock-id': {
+                  address: '0x0',
+                  id: 'mock-id',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'mock-id',
             },
+            accounts: {},
           },
         };
         const store = mockStore(sendMaxModeState);
@@ -2225,7 +2927,7 @@ describe('Send Slice', () => {
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(5);
+        expect(actionResult).toHaveLength(7);
         expect(actionResult[0].type).toStrictEqual('send/updateAmountMode');
         expect(actionResult[1].type).toStrictEqual('send/updateSendAmount');
         expect(actionResult[2]).toMatchObject({
@@ -2235,8 +2937,12 @@ describe('Send Slice', () => {
         expect(actionResult[3].type).toStrictEqual(
           'send/computeEstimatedGasLimit/pending',
         );
-        expect(actionResult[4].type).toStrictEqual(
-          'send/computeEstimatedGasLimit/rejected',
+        expect(actionResult[4].type).toStrictEqual('GET_LAYER_1_GAS_FEE');
+        expect(actionResult[5].type).toStrictEqual(
+          'metamask/gas/SET_CUSTOM_GAS_LIMIT',
+        );
+        expect(actionResult[6].type).toStrictEqual(
+          'send/computeEstimatedGasLimit/fulfilled',
         );
       });
     });
@@ -2245,7 +2951,7 @@ describe('Send Slice', () => {
       const signTransactionState = {
         send: getInitialSendStateWithExistingTxState({
           id: 1,
-          asset: {},
+          sendAsset: {},
           recipient: {},
           amount: {},
           gas: {
@@ -2257,36 +2963,51 @@ describe('Send Slice', () => {
       it('should show confirm tx page when no other conditions for signing have been met', async () => {
         const store = mockStore(signTransactionState);
 
-        await store.dispatch(signTransaction());
+        const history = { push: jest.fn() };
+        await store.dispatch(signTransaction(history));
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(2);
-        expect(actionResult[0]).toMatchObject({
-          type: 'send/addHistoryEntry',
-          payload:
-            'sendFlow - user clicked next and transaction should be added to controller',
-        });
-        expect(actionResult[1].type).toStrictEqual('SHOW_CONF_TX_PAGE');
+        expect(actionResult).toHaveLength(5);
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            {
+              type: 'send/addHistoryEntry',
+              payload:
+                'sendFlow - user clicked next and transaction should be added to controller',
+            },
+            'SHOW_CONF_TX_PAGE',
+          ]),
+        ).toBe(true);
       });
 
       describe('with token transfers', () => {
-        it('should pass the correct transaction parameters to addUnapprovedTransactionAndRouteToConfirmationPage', async () => {
+        it('should pass the correct transaction parameters to addTransactionAndRouteToConfirmationPage', async () => {
           const tokenTransferTxState = {
             metamask: {
-              unapprovedTxs: {
-                1: {
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
+              transactions: [
+                {
                   id: 1,
+                  chainId: CHAIN_IDS.GOERLI,
+                  status: 'unapproved',
                   txParams: {
                     value: 'oldTxValue',
                   },
                 },
-              },
+              ],
             },
             send: {
               ...getInitialSendStateWithExistingTxState({
                 id: 1,
-                asset: {
+                sendAsset: {
+                  details: {
+                    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                  },
+                  type: 'TOKEN',
+                },
+                receiveAsset: {
                   details: {
                     address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
                   },
@@ -2310,32 +3031,198 @@ describe('Send Slice', () => {
 
           const store = mockStore(tokenTransferTxState);
 
-          await store.dispatch(signTransaction());
+          const history = { push: jest.fn() };
+          await store.dispatch(signTransaction(history));
 
           expect(
-            addUnapprovedTransactionAndRouteToConfirmationPageStub.mock
-              .calls[0][1].data,
+            addTransactionAndRouteToConfirmationPageStub.mock.calls[0][0].data,
           ).toStrictEqual(
             '0xa9059cbb0000000000000000000000004f90e18605fd46f9f9fab0e225d88e1acf5f53240000000000000000000000000000000000000000000000000000000000000001',
           );
           expect(
-            addUnapprovedTransactionAndRouteToConfirmationPageStub.mock
-              .calls[0][1].to,
+            addTransactionAndRouteToConfirmationPageStub.mock.calls[0][0].to,
           ).toStrictEqual('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
+        });
+        it('should rethrow addTransactionAndRouteToConfirmationPage errors', async () => {
+          const tokenTransferTxState = {
+            metamask: {
+              providerConfig: {
+                chainId: CHAIN_IDS.GOERLI,
+              },
+              transactions: [
+                {
+                  id: 1,
+                  chainId: CHAIN_IDS.GOERLI,
+                  status: 'unapproved',
+                  txParams: {
+                    value: 'oldTxValue',
+                  },
+                },
+              ],
+            },
+            send: {
+              ...getInitialSendStateWithExistingTxState({
+                id: 1,
+                sendAsset: {
+                  details: {
+                    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                  },
+                  type: 'TOKEN',
+                },
+                receiveAsset: {
+                  details: {
+                    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                  },
+                  type: 'TOKEN',
+                },
+                recipient: {
+                  address: '4F90e18605Fd46F9F9Fab0e225D88e1ACf5F5324',
+                },
+                amount: {
+                  value: '0x1',
+                },
+              }),
+              stage: SEND_STAGES.DRAFT,
+              selectedAccount: {
+                address: '0x6784e8507A1A46443f7bDc8f8cA39bdA92A675A6',
+              },
+            },
+          };
+
+          jest.mock('../../store/actions.ts');
+
+          const store = mockStore(tokenTransferTxState);
+
+          const ERROR = new Error('rejected');
+
+          const history = { push: jest.fn() };
+
+          setBackgroundConnection({
+            addPollingTokenToAppState: jest.fn(),
+            addTransaction: jest.fn((_u, _v) => {
+              throw new Error(ERROR);
+            }),
+            updateTransactionSendFlowHistory: jest.fn((_x, _y, _z, cb) =>
+              cb(null),
+            ),
+          });
+
+          await expect(
+            store.dispatch(signTransaction(history)),
+          ).rejects.toThrow('rejected');
+        });
+      });
+
+      describe('with swap+send', () => {
+        it('should pass the correct transaction parameters to addTransactionAndWaitForPublish', async () => {
+          const swapAndSendState = {
+            metamask: {
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
+              transactions: [
+                {
+                  id: 1,
+                  chainId: CHAIN_IDS.GOERLI,
+                  status: 'unapproved',
+                  txParams: {
+                    value: 'oldTxValue',
+                  },
+                },
+              ],
+            },
+            send: {
+              ...getInitialSendStateWithExistingTxState({
+                id: 1,
+                sendAsset: {
+                  details: {
+                    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                  },
+                  type: 'TOKEN',
+                },
+                receiveAsset: {
+                  type: 'NATIVE',
+                },
+                recipient: {
+                  address: '4F90e18605Fd46F9F9Fab0e225D88e1ACf5F5324',
+                },
+                amount: {
+                  value: '0x1',
+                },
+                currentTransactionUUID: 'test-uuid',
+                quotes: [
+                  {
+                    gasParams: { maxGas: 21000 },
+                    trade: {
+                      data: '0x123123123',
+                      from: '0x12312312312312',
+                      to: '0x1232312213',
+                      value: '0xde0b6b3a7640000', // 1 ether in hex
+                      gas: '0x5208', // 21000 in hex
+                    },
+                    approvalNeeded: {
+                      data: '0x123123123',
+                      to: '0x123123',
+                      from: '0x1232',
+                      value: '0x1000000000000000000',
+                    },
+                    sourceAmount: '1000000000000000000',
+                    destinationAmount: '2000000000000000000',
+                    sourceToken: '0xToken1',
+                    destinationToken: '0xToken2',
+                    sender: '0xSender',
+                    recipient: '0xRecipient',
+                    aggregator: 'aggregator',
+                    aggregatorType: 'type',
+                    error: null,
+                    fee: 0,
+                    adjustAmountReceivedInNative: 2,
+                  },
+                ],
+              }),
+              stage: SEND_STAGES.DRAFT,
+              selectedAccount: {
+                address: '0x6784e8507A1A46443f7bDc8f8cA39bdA92A675A6',
+              },
+            },
+          };
+
+          jest.mock('../../store/actions.ts');
+
+          const store = mockStore(swapAndSendState);
+
+          store.clearActions();
+
+          const history = { push: jest.fn() };
+          await store.dispatch(signTransaction(history));
+
+          expect(
+            setDefaultHomeActiveTabNameStub.mock.calls[0][0],
+          ).toStrictEqual('activity');
+
+          expect(
+            addTransactionAndWaitForPublishStub.mock.calls[0][0].data,
+          ).toStrictEqual('0x123123123');
+          expect(
+            addTransactionAndWaitForPublishStub.mock.calls[0][0].to,
+          ).toStrictEqual('0x123123');
         });
       });
 
       it('should create actions for updateTransaction rejecting', async () => {
         const editStageSignTxState = {
           metamask: {
-            unapprovedTxs: {
-              1: {
+            ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
+            transactions: [
+              {
                 id: 1,
+                chainId: '0x1',
+                status: 'unapproved',
                 txParams: {
                   value: 'oldTxValue',
                 },
               },
-            },
+            ],
           },
           send: {
             ...signTransactionState.send,
@@ -2347,22 +3234,23 @@ describe('Send Slice', () => {
 
         const store = mockStore(editStageSignTxState);
 
-        await store.dispatch(signTransaction());
+        const history = { push: jest.fn() };
+        await store.dispatch(signTransaction(history));
 
         const actionResult = store.getActions();
 
-        expect(actionResult).toHaveLength(3);
-        expect(actionResult[0]).toMatchObject({
-          type: 'send/addHistoryEntry',
-          payload:
-            'sendFlow - user clicked next and transaction should be updated in controller',
-        });
-        expect(actionResult[1].type).toStrictEqual(
-          'UPDATE_TRANSACTION_EDITABLE_PARAMS',
-        );
-        expect(actionResult[2].type).toStrictEqual(
-          'UPDATE_TRANSACTION_GAS_FEES',
-        );
+        expect(actionResult).toHaveLength(5);
+        expect(
+          checkIfTypesExistInActionResult(actionResult, [
+            {
+              type: 'send/addHistoryEntry',
+              payload:
+                'sendFlow - user clicked next and transaction should be updated in controller',
+            },
+            'UPDATE_TRANSACTION_EDITABLE_PARAMS',
+            'UPDATE_TRANSACTION_GAS_FEES',
+          ]),
+        ).toBe(true);
       });
     });
 
@@ -2372,39 +3260,57 @@ describe('Send Slice', () => {
           metamask: {
             gasEstimateType: GasEstimateTypes.none,
             gasFeeEstimates: {},
-            providerConfig: {
-              chainId: CHAIN_IDS.GOERLI,
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
             tokens: [],
             addressBook: {
               [CHAIN_IDS.GOERLI]: {},
             },
-            identities: {},
+            internalAccounts: {
+              accounts: {
+                'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                  address: mockAddress1,
+                  id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            },
             accounts: {
-              '0xAddress': {
-                address: '0xAddress',
+              [mockAddress1]: {
+                address: mockAddress1,
                 balance: '0x0',
               },
             },
-            cachedBalances: {
+            accountsByChainId: {
               [CHAIN_IDS.GOERLI]: {
-                '0xAddress': '0x0',
+                [mockAddress1]: { balance: '0x0' },
               },
             },
             tokenList: {},
-            unapprovedTxs: {
-              1: {
+            transactions: [
+              {
                 id: 1,
+                chainId: CHAIN_IDS.GOERLI,
+                status: 'unapproved',
                 txParams: {
                   data: '',
-                  from: '0xAddress',
+                  from: mockAddress1,
                   to: '0xRecipientAddress',
                   gas: GAS_LIMITS.SIMPLE,
                   gasPrice: '0x3b9aca00', // 1000000000
-                  value: '0xde0b6b3a7640000', // 1000000000000000000
+                  value: '0xde0b6b3a7640000', // 1000000000000000000,
                 },
               },
-            },
+            ],
           },
           send: {
             // We are going to remove this transaction as a part of the flow,
@@ -2414,7 +3320,7 @@ describe('Send Slice', () => {
             ...getInitialSendStateWithExistingTxState({
               id: 1,
               fromAccount: {
-                address: '0xAddress',
+                address: mockAddress1,
               },
             }),
           },
@@ -2436,14 +3342,24 @@ describe('Send Slice', () => {
               value: '0xde0b6b3a7640000',
               error: null,
             },
-            asset: {
+            sendAsset: {
               balance: '0x0',
               details: null,
               error: null,
               type: AssetType.native,
             },
             fromAccount: {
-              address: '0xAddress',
+              address: mockAddress1,
+              id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+              metadata: {
+                name: 'Test Account',
+                keyring: {
+                  type: 'HD Key Tree',
+                },
+              },
+              options: {},
+              methods: ETH_EOA_METHODS,
+              type: EthAccountType.Eoa,
               balance: '0x0',
             },
             gas: {
@@ -2457,6 +3373,14 @@ describe('Send Slice', () => {
             },
             history: ['sendFlow - user clicked edit on transaction with id 1'],
             id: 1,
+            isSwapQuoteLoading: false,
+            quotes: null,
+            receiveAsset: {
+              balance: '0x0',
+              details: null,
+              error: null,
+              type: 'NATIVE',
+            },
             recipient: {
               address: '0xRecipientAddress',
               error: null,
@@ -2466,6 +3390,9 @@ describe('Send Slice', () => {
               type: '',
             },
             status: SEND_STATUSES.VALID,
+            swapQuotesError: null,
+            swapQuotesLatestRequestTimestamp: null,
+            timeToFetchQuotes: null,
             transactionType: '0x0',
             userInputHexData: '',
           },
@@ -2506,44 +3433,61 @@ describe('Send Slice', () => {
         const editTransactionState = {
           metamask: {
             blockGasLimit: '0x3a98',
-            selectedAddress: '',
-            providerConfig: {
-              chainId: CHAIN_IDS.GOERLI,
-            },
+            ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
             tokens: [],
             addressBook: {
               [CHAIN_IDS.GOERLI]: {},
             },
-            identities: {},
             accounts: {
-              '0xAddress': {
-                address: '0xAddress',
+              [mockAddress1]: {
+                address: mockAddress1,
                 balance: '0x0',
               },
             },
-            cachedBalances: {
+            internalAccounts: {
+              accounts: {
+                'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                  address: mockAddress1,
+                  id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                  metadata: {
+                    name: 'Test Account',
+                    keyring: {
+                      type: 'HD Key Tree',
+                    },
+                  },
+                  options: {},
+                  methods: ETH_EOA_METHODS,
+                  type: EthAccountType.Eoa,
+                },
+              },
+              selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            },
+            accountsByChainId: {
               [CHAIN_IDS.GOERLI]: {
-                '0xAddress': '0x0',
+                [mockAddress1]: { balance: '0x0' },
               },
             },
             tokenList: {},
-            unapprovedTxs: {
-              1: {
+            transactions: [
+              {
                 id: 1,
+                chainId: CHAIN_IDS.GOERLI,
+                status: 'unapproved',
                 txParams: {
                   data: generateERC721TransferData({
                     toAddress: BURN_ADDRESS,
-                    fromAddress: '0xAddress',
+                    fromAddress: mockAddress1,
                     tokenId: BigNumber.from(15000).toString(),
                   }),
-                  from: '0xAddress',
+                  from: mockAddress1,
                   to: '0xNftAddress',
                   gas: GAS_LIMITS.BASE_TOKEN_ESTIMATE,
                   gasPrice: '0x3b9aca00', // 1000000000
                   value: '0x0',
                 },
               },
-            },
+            ],
           },
           send: {
             ...getInitialSendStateWithExistingTxState({
@@ -2579,14 +3523,24 @@ describe('Send Slice', () => {
               error: null,
               value: '0x1',
             },
-            asset: {
+            sendAsset: {
               balance: '0x0',
               details: null,
               error: null,
               type: AssetType.native,
             },
             fromAccount: {
-              address: '0xAddress',
+              address: mockAddress1,
+              id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+              metadata: {
+                name: 'Test Account',
+                keyring: {
+                  type: 'HD Key Tree',
+                },
+              },
+              options: {},
+              methods: ETH_EOA_METHODS,
+              type: EthAccountType.Eoa,
               balance: '0x0',
             },
             gas: {
@@ -2600,6 +3554,14 @@ describe('Send Slice', () => {
             },
             history: ['sendFlow - user clicked edit on transaction with id 1'],
             id: 1,
+            isSwapQuoteLoading: false,
+            quotes: null,
+            receiveAsset: {
+              balance: '0x0',
+              details: null,
+              error: null,
+              type: 'NATIVE',
+            },
             recipient: {
               address: BURN_ADDRESS,
               error: null,
@@ -2609,9 +3571,12 @@ describe('Send Slice', () => {
               recipientWarningAcknowledged: false,
             },
             status: SEND_STATUSES.VALID,
+            swapQuotesError: null,
+            swapQuotesLatestRequestTimestamp: null,
+            timeToFetchQuotes: null,
             transactionType: '0x0',
             userInputHexData:
-              editTransactionState.metamask.unapprovedTxs[1].txParams.data,
+              editTransactionState.metamask.transactions[0].txParams.data,
           },
         });
         expect(actionResult[2].type).toStrictEqual('SHOW_LOADING_INDICATION');
@@ -2636,6 +3601,7 @@ describe('Send Slice', () => {
               type: AssetType.NFT,
             },
             initialAssetSet: true,
+            isReceived: undefined,
           },
         });
         expect(actionResult[6].type).toStrictEqual(
@@ -2678,10 +3644,26 @@ describe('Send Slice', () => {
       const editTransactionState = {
         metamask: {
           blockGasLimit: '0x3a98',
-          selectedAddress: '',
-          providerConfig: {
-            chainId: CHAIN_IDS.GOERLI,
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: mockAddress1,
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
           },
+          ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+
           tokens: [
             {
               address: '0xTokenAddress',
@@ -2697,21 +3679,22 @@ describe('Send Slice', () => {
           addressBook: {
             [CHAIN_IDS.GOERLI]: {},
           },
-          identities: {},
           accounts: {
-            '0xAddress': {
-              address: '0xAddress',
+            [mockAddress1]: {
+              address: mockAddress1,
               balance: '0x0',
             },
           },
-          cachedBalances: {
+          accountsByChainId: {
             [CHAIN_IDS.GOERLI]: {
-              '0xAddress': '0x0',
+              [mockAddress1]: { balance: '0x0' },
             },
           },
-          unapprovedTxs: {
-            1: {
+          transactions: [
+            {
               id: 1,
+              chainId: CHAIN_IDS.GOERLI,
+              status: 'unapproved',
               txParams: {
                 data: generateERC20TransferData({
                   toAddress: BURN_ADDRESS,
@@ -2722,14 +3705,14 @@ describe('Send Slice', () => {
                     decimals: 18,
                   },
                 }),
-                from: '0xAddress',
+                from: mockAddress1,
                 to: '0xTokenAddress',
                 gas: GAS_LIMITS.BASE_TOKEN_ESTIMATE,
                 gasPrice: '0x3b9aca00', // 1000000000
                 value: '0x0',
               },
             },
-          },
+          ],
         },
         send: {
           ...getInitialSendStateWithExistingTxState({
@@ -2740,7 +3723,7 @@ describe('Send Slice', () => {
             },
           }),
           selectedAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
             balance: '0x0',
           },
           stage: SEND_STAGES.EDIT,
@@ -2770,14 +3753,24 @@ describe('Send Slice', () => {
             error: null,
             value: '0x3a98',
           },
-          asset: {
+          sendAsset: {
             balance: '0x0',
             details: null,
             error: null,
             type: AssetType.native,
           },
           fromAccount: {
-            address: '0xAddress',
+            address: mockAddress1,
+            id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            metadata: {
+              name: 'Test Account',
+              keyring: {
+                type: 'HD Key Tree',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
             balance: '0x0',
           },
           gas: {
@@ -2791,6 +3784,14 @@ describe('Send Slice', () => {
           },
           history: ['sendFlow - user clicked edit on transaction with id 1'],
           id: 1,
+          isSwapQuoteLoading: false,
+          quotes: null,
+          receiveAsset: {
+            balance: '0x0',
+            details: null,
+            error: null,
+            type: 'NATIVE',
+          },
           recipient: {
             address: BURN_ADDRESS,
             error: null,
@@ -2800,9 +3801,12 @@ describe('Send Slice', () => {
             recipientWarningAcknowledged: false,
           },
           status: SEND_STATUSES.VALID,
+          swapQuotesError: null,
+          swapQuotesLatestRequestTimestamp: null,
+          timeToFetchQuotes: null,
           transactionType: '0x0',
           userInputHexData:
-            editTransactionState.metamask.unapprovedTxs[1].txParams.data,
+            editTransactionState.metamask.transactions[0].txParams.data,
         },
       });
       expect(actionResult[2].type).toStrictEqual('SHOW_LOADING_INDICATION');
@@ -2828,6 +3832,7 @@ describe('Send Slice', () => {
             },
           },
           initialAssetSet: true,
+          isReceived: undefined,
         },
       });
       expect(actionResult[6].type).toStrictEqual(
@@ -2859,6 +3864,214 @@ describe('Send Slice', () => {
       expect(draftTransaction.amount.value).toStrictEqual(
         action.payload.amount.value,
       );
+    });
+
+    it('should set up the appropriate state for editing a swap+send transaction', async () => {
+      const editTransactionState = {
+        metamask: {
+          blockGasLimit: '0x3a98',
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: mockAddress1,
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                options: {},
+                methods: ETH_EOA_METHODS,
+                type: EthAccountType.Eoa,
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+          tokens: [
+            {
+              address: '0xTokenAddress',
+              symbol: 'SYMB',
+            },
+          ],
+          tokenList: {
+            '0xTokenAddress': {
+              symbol: 'SYMB',
+              address: '0xTokenAddress',
+            },
+          },
+          addressBook: {
+            [CHAIN_IDS.GOERLI]: {},
+          },
+          accounts: {
+            [mockAddress1]: {
+              address: mockAddress1,
+              balance: '0x0',
+            },
+          },
+          accountsByChainId: {
+            [CHAIN_IDS.GOERLI]: {
+              [mockAddress1]: { balance: '0x0' },
+            },
+          },
+          transactions: [
+            {
+              id: 1,
+              chainId: CHAIN_IDS.GOERLI,
+              status: 'unapproved',
+              txParams: {
+                data: generateERC20TransferData({
+                  toAddress: BURN_ADDRESS,
+                  amount: '0x3a98',
+                  sendToken: {
+                    address: '0xTokenAddress',
+                    symbol: 'SYMB',
+                    decimals: 18,
+                  },
+                }),
+                from: mockAddress1,
+                to: '0xTokenAddress',
+                gas: GAS_LIMITS.BASE_TOKEN_ESTIMATE,
+                gasPrice: '0x3b9aca00', // 1000000000
+                value: '0x0',
+              },
+            },
+          ],
+        },
+        send: {
+          ...getInitialSendStateWithExistingTxState({
+            id: 1,
+            recipient: {
+              address: 'Address',
+              nickname: 'NickName',
+            },
+          }),
+          selectedAccount: {
+            address: mockAddress1,
+            balance: '0x0',
+          },
+          stage: SEND_STAGES.EDIT,
+          prevSwapAndSendInput: {
+            amountMode: AMOUNT_MODES.INPUT,
+            sendAsset: {
+              balance: '0x0',
+              details: null,
+              error: null,
+              type: AssetType.native,
+            },
+            receiveAsset: {
+              type: AssetType.token,
+              balance: '0x0',
+              details: {
+                address: '0xTokenAddress',
+                symbol: 'SYMB',
+                decimals: 18,
+                standard: 'ERC20',
+              },
+              error: null,
+            },
+            recipient: {
+              address: '0xRecipientAddress',
+            },
+            amount: { value: '0x3a98fffffffffffff' },
+            test: 'test',
+          },
+        },
+      };
+
+      global.eth = {
+        contract: sinon.stub().returns({
+          at: sinon.stub().returns({
+            balanceOf: sinon.stub().returns(undefined),
+          }),
+        }),
+        getCode: jest.fn(() => '0xa'),
+      };
+
+      const store = mockStore(editTransactionState);
+
+      store.clearActions();
+      await store.dispatch(editExistingTransaction(AssetType.token, 1));
+      const actionResult = store.getActions();
+
+      expect(
+        checkIfTypesExistInActionResult(actionResult, [
+          {
+            type: 'send/addNewDraft',
+            payload: {
+              amount: {
+                error: null,
+                value: '0x0',
+              },
+              fromAccount: {
+                address: '0xdafea492d9c6733ae3d56b7ed1adb60692c98123',
+                balance: '0x0',
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                  name: 'Test Account',
+                },
+                methods: [
+                  'personal_sign',
+                  'eth_signTransaction',
+                  'eth_signTypedData_v1',
+                  'eth_signTypedData_v3',
+                  'eth_signTypedData_v4',
+                ],
+                options: {},
+                type: 'eip155:eoa',
+              },
+              gas: {
+                error: null,
+                gasLimit: '0x0',
+                gasPrice: '0x0',
+                gasTotal: '0x0',
+                maxFeePerGas: '0x0',
+                maxPriorityFeePerGas: '0x0',
+                wasManuallyEdited: false,
+              },
+              history: [
+                'sendFlow - user clicked edit on transaction with id 1 (swap and send)',
+              ],
+              id: 1,
+              isSwapQuoteLoading: false,
+              quotes: null,
+              receiveAsset: {
+                balance: '0x0',
+                details: {
+                  address: '0xTokenAddress',
+                  decimals: 18,
+                  standard: 'ERC20',
+                  symbol: 'SYMB',
+                },
+                error: null,
+                type: 'TOKEN',
+              },
+              recipient: {
+                address: '0xRecipientAddress',
+              },
+              sendAsset: {
+                balance: '0x0',
+                details: null,
+                error: null,
+                type: 'NATIVE',
+              },
+              status: 'VALID',
+              swapQuotesError: null,
+              swapQuotesLatestRequestTimestamp: null,
+              timeToFetchQuotes: null,
+              test: 'test',
+              transactionType: '0x0',
+              userInputHexData: null,
+            },
+          },
+          'send/updateSendAmount',
+          'send/initializeSendState/pending',
+        ]),
+      ).toBe(true);
     });
   });
 
@@ -2910,7 +4123,8 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: CHAIN_IDS.MAINNET },
+                ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
                 featureFlags: { advancedInlineGas: false },
               },
               send: initialState,
@@ -2923,7 +4137,7 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: '0x539' },
+                ...mockNetworkState({ chainId: '0x539' }),
                 featureFlags: { advancedInlineGas: false },
               },
               send: initialState,
@@ -2936,7 +4150,8 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: CHAIN_IDS.MAINNET },
+                ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
                 featureFlags: { advancedInlineGas: true },
               },
               send: initialState,
@@ -2948,7 +4163,8 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: CHAIN_IDS.MAINNET },
+                ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
                 featureFlags: { advancedInlineGas: false },
                 gasEstimateType: GasEstimateTypes.ethGasPrice,
               },
@@ -2962,7 +4178,8 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: CHAIN_IDS.MAINNET },
+                ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
                 featureFlags: { advancedInlineGas: false },
                 gasEstimateType: GasEstimateTypes.ethGasPrice,
               },
@@ -2976,7 +4193,8 @@ describe('Send Slice', () => {
           expect(
             getGasInputMode({
               metamask: {
-                providerConfig: { chainId: CHAIN_IDS.MAINNET },
+                ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+
                 featureFlags: { advancedInlineGas: true },
               },
               send: {
@@ -2994,7 +4212,7 @@ describe('Send Slice', () => {
         expect(
           getSendAsset({ send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT }),
         ).toMatchObject(
-          getTestUUIDTx(INITIAL_SEND_STATE_FOR_EXISTING_DRAFT).asset,
+          getTestUUIDTx(INITIAL_SEND_STATE_FOR_EXISTING_DRAFT).sendAsset,
         );
       });
 
@@ -3002,7 +4220,7 @@ describe('Send Slice', () => {
         expect(
           getSendAssetAddress({
             send: getInitialSendStateWithExistingTxState({
-              asset: {
+              sendAsset: {
                 balance: '0x0',
                 details: { address: '0x0' },
                 type: AssetType.token,
@@ -3019,7 +4237,7 @@ describe('Send Slice', () => {
         expect(
           getIsAssetSendable({
             send: getInitialSendStateWithExistingTxState({
-              asset: {
+              sendAsset: {
                 type: AssetType.token,
                 details: { isERC721: true },
               },
@@ -3107,18 +4325,52 @@ describe('Send Slice', () => {
       });
     });
 
-    describe('recipient selectors', () => {
+    describe('sender/recipient selectors', () => {
+      it('has a selector to get sender address', () => {
+        expect(
+          getSender({
+            send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
+            metamask: {
+              ensResolutionsByAddress: {},
+              internalAccounts: {
+                accounts: {},
+                selectedAccount: '',
+              },
+              addressBook: {},
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+            },
+          }),
+        ).toBe(undefined);
+        expect(
+          getSender({
+            send: getInitialSendStateWithExistingTxState({
+              fromAccount: { address: '0xb' },
+            }),
+            metamask: {
+              ensResolutionsByAddress: {},
+              addressBook: {},
+              internalAccounts: {
+                accounts: {},
+                selectedAccount: '',
+              },
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
+            },
+          }),
+        ).toBe('0xb');
+      });
+
       it('has a selector to get recipient address', () => {
         expect(
           getSendTo({
             send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
             metamask: {
               ensResolutionsByAddress: {},
-              identities: {},
-              addressBook: {},
-              providerConfig: {
-                chainId: '0x5',
+              internalAccounts: {
+                accounts: {},
+                selectedAccount: '',
               },
+              addressBook: {},
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
             },
           }),
         ).toBe('');
@@ -3130,10 +4382,11 @@ describe('Send Slice', () => {
             metamask: {
               ensResolutionsByAddress: {},
               addressBook: {},
-              identities: {},
-              providerConfig: {
-                chainId: '0x5',
+              internalAccounts: {
+                accounts: {},
+                selectedAccount: '',
               },
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
             },
           }),
         ).toBe('0xb');
@@ -3177,11 +4430,12 @@ describe('Send Slice', () => {
             send: INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
             metamask: {
               ensResolutionsByAddress: {},
-              identities: {},
-              addressBook: {},
-              providerConfig: {
-                chainId: '0x5',
+              internalAccounts: {
+                accounts: {},
+                selectedAccount: '',
               },
+              addressBook: {},
+              ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
             },
           }),
         ).toMatchObject(
@@ -3253,6 +4507,86 @@ describe('Send Slice', () => {
             },
           }),
         ).toBe(SEND_STAGES.ADD_RECIPIENT);
+      });
+    });
+
+    describe('swap and send selectors', () => {
+      it('has a selector to get best quote', () => {
+        const send = JSON.parse(
+          JSON.stringify(INITIAL_SEND_STATE_FOR_EXISTING_DRAFT),
+        );
+        send.currentTransactionUUID = 'test-uuid';
+
+        send.draftTransactions['test-uuid'].receiveAsset = {
+          type: 'TOKEN',
+          balance: '0x0',
+          details: {
+            address: '0xTokenAddress',
+            decimals: 18,
+            symbol: 'SYMB',
+          },
+          error: null,
+        };
+
+        send.draftTransactions['test-uuid'].quotes = null;
+
+        expect(getBestQuote({ send })).toBe(undefined);
+
+        send.draftTransactions['test-uuid'].quotes = [
+          { adjustAmountReceivedInNative: 1, destinationAmount: 3 },
+          { adjustAmountReceivedInNative: 2, destinationAmount: 2 },
+          { adjustAmountReceivedInNative: 3, destinationAmount: 1 },
+        ];
+
+        waitFor(() => {
+          expect(getBestQuote({ send })).toStrictEqual({
+            adjustAmountReceivedInNative: 3,
+            destinationAmount: 1,
+          });
+        });
+
+        send.draftTransactions['test-uuid'].swapQuotesError = 'error';
+
+        waitFor(() => {
+          expect(getBestQuote({ send })).toBe(undefined);
+        });
+      });
+
+      it('has a selector to get swap blocked tokens', () => {
+        expect(
+          getSwapsBlockedTokens({
+            send: {
+              ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
+              swapsBlockedTokens: ['target'],
+            },
+          }),
+        ).toStrictEqual(['target']);
+      });
+
+      it('has a selector to get if swap+send is disabled for that network', () => {
+        expect(
+          getIsSwapAndSendDisabledForNetwork({
+            metamask: {
+              ...mockNetworkState({ chainId: '0x123' }),
+            },
+            send: {
+              ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
+              disabledSwapAndSendNetworks: ['0x123'],
+            },
+          }),
+        ).toStrictEqual(true);
+
+        expect(
+          getIsSwapAndSendDisabledForNetwork({
+            metamask: {
+              ...mockNetworkState({ chainId: '0x123' }),
+            },
+            send: {
+              ...INITIAL_SEND_STATE_FOR_EXISTING_DRAFT,
+              disabledSwapAndSendNetworks: ['0x456'],
+            },
+          }),
+        ).toStrictEqual(false);
       });
     });
   });

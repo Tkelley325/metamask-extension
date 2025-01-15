@@ -1,8 +1,10 @@
 .mm-button-secondary {
-  &:hover {
+  &:hover:not(&--disabled) {
     color: var(--color-primary-inverse);
     background-color: var(--color-primary-default);
-    box-shadow: var(--component-button-primary-shadow);
+    box-shadow:
+      var(--shadow-size-sm)
+      var(--color-shadow-primary);;
   }
 
   &:active {
@@ -12,7 +14,7 @@
   }
 
   // Danger type
-  &--type-danger {
+  &--type-danger:not(&--disabled) {
     color: var(--color-error-default);
     border: 1px solid var(--color-error-default);
     background-color: transparent;
@@ -20,7 +22,9 @@
     &:hover {
       color: var(--color-error-inverse);
       background-color: var(--color-error-default);
-      box-shadow: var(--component-button-danger-shadow);
+      box-shadow:
+        var(--shadow-size-sm)
+        var(--color-shadow-error);
     }
 
     &:active {

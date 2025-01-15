@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Box from '../../../components/ui/box';
-import Typography from '../../../components/ui/typography';
+import { Box, Text } from '../../../components/component-library';
 import ToggleButton from '../../../components/ui/toggle-button';
 import {
   JustifyContent,
-  TypographyVariant,
-  FONT_WEIGHT,
+  TextVariant,
+  AlignItems,
+  Display,
+  TextColor,
 } from '../../../helpers/constants/design-system';
+import { useI18nContext } from '../../../hooks/useI18nContext';
 
 export const Setting = ({
   value,
@@ -15,21 +17,40 @@ export const Setting = ({
   title,
   description,
   showToggle = true,
+  dataTestId,
+  disabled = false,
 }) => {
+  const t = useI18nContext();
+
   return (
-    <Box justifyContent={JustifyContent.center} margin={3}>
+    <Box
+      display={Display.Flex}
+      justifyContent={JustifyContent.spaceBetween}
+      alignItems={AlignItems.flexStart}
+      marginTop={3}
+      marginBottom={3}
+      className="privacy-settings__setting__wrapper"
+      data-testid={dataTestId}
+    >
       <div className="privacy-settings__setting">
-        <Typography
-          variant={TypographyVariant.H5}
-          fontWeight={FONT_WEIGHT.BOLD}
+        <Text variant={TextVariant.bodyMdMedium}>{title}</Text>
+        <Text
+          variant={TextVariant.bodySm}
+          color={TextColor.textAlternative}
+          as="div"
         >
-          {title}
-        </Typography>
-        <Typography variant={TypographyVariant.H6}>{description}</Typography>
+          {description}
+        </Text>
       </div>
       {showToggle ? (
         <div className="privacy-settings__setting__toggle">
-          <ToggleButton value={value} onToggle={(val) => setValue(!val)} />
+          <ToggleButton
+            value={value}
+            onToggle={(val) => setValue(!val)}
+            offLabel={t('off')}
+            onLabel={t('on')}
+            disabled={disabled}
+          />
         </div>
       ) : null}
     </Box>
@@ -42,4 +63,6 @@ Setting.propTypes = {
   title: PropTypes.string,
   description: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   showToggle: PropTypes.bool,
+  dataTestId: PropTypes.string,
+  disabled: PropTypes.bool,
 };

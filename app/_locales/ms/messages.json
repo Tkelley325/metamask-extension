@@ -75,9 +75,6 @@
   "asset": {
     "message": "Aset"
   },
-  "attemptingConnect": {
-    "message": "Sedang cuba menyambungkan kepada rantaian blok."
-  },
   "attributions": {
     "message": "Atribusi"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Salin alamat kepada papan klip"
   },
-  "copyPrivateKey": {
-    "message": "Ini kunci persendirian anda (klik untuk menyalin)"
-  },
   "copyToClipboard": {
     "message": "Salin ke papan keratan"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Padam"
   },
-  "deleteNetwork": {
-    "message": "Padamkan Rangkaian?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Anda pasti anda ingin padamkan rangkaian ini?"
-  },
   "details": {
     "message": "Butiran"
   },
@@ -235,15 +223,6 @@
   "editContact": {
     "message": "Edit Kenalan"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "Nama ENS tidak ditemui di rangkaian semasa. Cuba beralih kepada Rangkaian Ethereum Utama."
-  },
-  "ensRegistrationError": {
-    "message": "Ralat dalam pendaftaran nama ENS"
-  },
-  "enterPassword": {
-    "message": "Masukkan kata laluan"
-  },
   "enterPasswordContinue": {
     "message": "Masukkan kata laluan untuk teruskan"
   },
@@ -255,9 +234,6 @@
   },
   "expandView": {
     "message": "Kembangkan Paparan"
-  },
-  "exportPrivateKey": {
-    "message": "Eksport Kekunci Persendirian"
   },
   "failed": {
     "message": "Gagal"
@@ -361,12 +337,6 @@
   "invalidAddressRecipient": {
     "message": "Alamat penerima tidak sah"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Bukan rangkaian ETH, tetapkan kepada huruf kecil"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "URL Block Explorer tidak sah"
-  },
   "invalidRPC": {
     "message": "URL RPC tidak sah"
   },
@@ -460,9 +430,6 @@
   "next": {
     "message": "Seterusnya"
   },
-  "noAddressForName": {
-    "message": "Tiada alamat yang ditetapkan untuk nama ini."
-  },
   "noConversionRateAvailable": {
     "message": "Tiada Kadar Penukaran yang Tersedia"
   },
@@ -521,12 +488,6 @@
   "prev": {
     "message": "Sebelumnya"
   },
-  "primaryCurrencySetting": {
-    "message": "Mata Wang Utama"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Pilih natif untuk mengutamakan nilai paparan dalam mata wang natif rantaian (cth. ETH). Pilih Fiat untuk mengutamakan nilai paparan dalam mata wang fiat yang anda pilih."
-  },
   "privacyMsg": {
     "message": "Dasar Privasi"
   },
@@ -540,14 +501,8 @@
   "privateNetwork": {
     "message": "Rangkaian Persendirian"
   },
-  "queue": {
-    "message": "Baris Gilir"
-  },
   "readdToken": {
     "message": "Anda boleh tambah token ini kembali pada masa depan dengan pergi ke \"Tambah token\" di dalam menu pilihan akaun anda."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Cari, alamat awam (0x), atau ENS"
   },
   "reject": {
     "message": "Tolak"
@@ -607,12 +562,6 @@
   "search": {
     "message": "Carian"
   },
-  "searchResults": {
-    "message": "Hasil Carian"
-  },
-  "searchTokens": {
-    "message": "Cari Token"
-  },
   "securityAndPrivacy": {
     "message": "Keselamatan & Privasi"
   },
@@ -634,9 +583,6 @@
   "send": {
     "message": "Hantar"
   },
-  "sendTokens": {
-    "message": "Hantar Token"
-  },
   "settings": {
     "message": "Tetapan"
   },
@@ -651,9 +597,6 @@
   },
   "showHexDataDescription": {
     "message": "Pilih ini untuk menunjukkan medan data hex pada skrin hantar"
-  },
-  "showPrivateKeys": {
-    "message": "Tunjukkan Kunci Persendirian"
   },
   "sigRequest": {
     "message": "Permintaan Tandatangan"
@@ -772,9 +715,6 @@
   "tryAgain": {
     "message": "Cuba lagi"
   },
-  "typePassword": {
-    "message": "Taip kata laluan MetaMask anda"
-  },
   "unapproved": {
     "message": "Belum Diluluskan"
   },
@@ -783,12 +723,6 @@
   },
   "unknown": {
     "message": "Tidak diketahui"
-  },
-  "unknownCameraError": {
-    "message": "Terdapat ralat semasa cuba mengakses kamera anda. Sila cuba sekali lagi..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Alamak! Ada yang tak kena...."
   },
   "unknownNetwork": {
     "message": "Rangkaian Persendirian Tidak Dikenali"
@@ -801,9 +735,6 @@
   },
   "unlockMessage": {
     "message": "Web ternyahpusat menanti"
-  },
-  "updatedWithDate": {
-    "message": "Dikemaskini $1"
   },
   "urlErrorMsg": {
     "message": "URI memerlukan awalan HTTP/HTTPS yang sesuai."

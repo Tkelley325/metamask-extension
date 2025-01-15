@@ -14,7 +14,7 @@ const render = () => {
   });
 
   const props = {
-    selectedPath: TREZOR_HD_PATHS[0].path,
+    selectedPath: TREZOR_HD_PATHS[0].value,
     device: 'trezor',
     accounts: [
       {
@@ -80,6 +80,13 @@ describe('AccountList', () => {
         'This account has already been connected to MetaMask',
       ),
     ).toHaveLength(2);
+  });
+
+  it('renders AccountList component and find expected titles on explorer links', () => {
+    render();
+    expect(screen.getAllByTitle('View account on etherscan.io')).toHaveLength(
+      5,
+    );
   });
 
   it('disables the Prev button as the first account has an index of 0', () => {

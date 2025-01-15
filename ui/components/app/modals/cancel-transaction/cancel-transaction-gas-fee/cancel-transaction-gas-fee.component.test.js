@@ -1,21 +1,23 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
+import mockState from '../../../../../../test/data/mock-state.json';
 import { renderWithProvider } from '../../../../../../test/lib/render-helpers';
+import { mockNetworkState } from '../../../../../../test/stub/networks';
+import { CHAIN_IDS } from '../../../../../../shared/constants/network';
 import CancelTransactionGasFee from './cancel-transaction-gas-fee.component';
 
 describe('CancelTransactionGasFee Component', () => {
-  const mockState = {
+  const defaultState = {
     metamask: {
-      providerConfig: {
-        chainId: '0x4',
-      },
-      preferences: {
-        useNativeCurrencyAsPrimaryCurrency: false,
-      },
+      ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+      currencyRates: {},
+      preferences: {},
+      completedOnboarding: true,
+      internalAccounts: mockState.metamask.internalAccounts,
     },
   };
 
-  const mockStore = configureMockStore()(mockState);
+  const mockStore = configureMockStore()(defaultState);
 
   it('should render', () => {
     const props = {

@@ -75,9 +75,6 @@
   "asset": {
     "message": "سرمایه"
   },
-  "attemptingConnect": {
-    "message": "در حال تلاش برای اتصال با زنجیره بلوکی"
-  },
   "attributions": {
     "message": "مواصفات"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "کاپی آدرس به کلیپ بورد"
   },
-  "copyPrivateKey": {
-    "message": "این کلید خصوصی شما است (برای کاپی نمودن کلیک کنید)"
-  },
   "copyToClipboard": {
     "message": "کپی در بریده‌دان"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "حذف"
   },
-  "deleteNetwork": {
-    "message": "شبکه حذف شود؟"
-  },
-  "deleteNetworkDescription": {
-    "message": "آیا مطمئن هستید که این شبکه حذف شود؟"
-  },
   "details": {
     "message": "جزئیات"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "ویرایش تماس"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "نام ENS در شبکه کنونی دریافت نشد. به تبدیل آن به شبکه اصلی ایتریم تلاش نمایید."
-  },
-  "ensRegistrationError": {
-    "message": "خطا در ثبت نام ENS"
-  },
-  "enterPassword": {
-    "message": "رمز عبور را وارد کنید"
-  },
   "enterPasswordContinue": {
     "message": "برای ادامه رمز عبور را وارد کنید"
   },
@@ -259,18 +238,11 @@
   "expandView": {
     "message": "توسعه ساحه دید"
   },
-  "exportPrivateKey": {
-    "message": "صدور کلید شخصی"
-  },
   "failed": {
     "message": "ناموفق شد"
   },
   "fast": {
     "message": "سریع"
-  },
-  "fiat": {
-    "message": "حکم قانونی",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "وارد کردن فایل کار نمیکند؟ اینجا کلیک نمایید!",
@@ -372,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "آدرس دریافت کننده نامعتبر است"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "شبکه ETH نه، به حروف کوچک تنظیم کنید"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Block Explorer URL نا معتبر"
-  },
   "invalidRPC": {
     "message": "RPC URL نا معتبر"
   },
@@ -477,9 +443,6 @@
   "next": {
     "message": "بعدی"
   },
-  "noAddressForName": {
-    "message": "هیچ آدرسی برای این نام تنظیم نشده است."
-  },
   "noConversionRateAvailable": {
     "message": "هیچ نرخ تغییر موجود نمیباشد"
   },
@@ -541,12 +504,6 @@
   "prev": {
     "message": "قبلی"
   },
-  "primaryCurrencySetting": {
-    "message": "واحد پول اصلی"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "برای اولویت دهی نمایش قیمت ها در واحد پولی اصلی زنجیره (مثلًا ETH)، اصلی را انتخاب کنید. برای اولویت دهی نمایش قیمت ها در فیات واحد پولی شما، فیات را انتخاب کنید."
-  },
   "privacyMsg": {
     "message": "خط‌مشی رازداری"
   },
@@ -560,14 +517,8 @@
   "privateNetwork": {
     "message": "شبکه شخصی"
   },
-  "queue": {
-    "message": "صف"
-  },
   "readdToken": {
     "message": "شما میتوانید این رمزیاب را دوباره برای آینده با رفتن به گزینه \"Add token\" در مینوی تنظیمات حساب ها، اضافه نمایید."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "جستجو، آدرس عمومی (0x)، یا ENS"
   },
   "reject": {
     "message": "عدم پذیرش"
@@ -627,12 +578,6 @@
   "search": {
     "message": "جستجو"
   },
-  "searchResults": {
-    "message": "نتایج جستجو"
-  },
-  "searchTokens": {
-    "message": "رمزیاب های جستجو"
-  },
   "securityAndPrivacy": {
     "message": "امنیت و حریم خصوصی"
   },
@@ -654,9 +599,6 @@
   "send": {
     "message": "ارسال"
   },
-  "sendTokens": {
-    "message": "رمزیاب ها را ارسال کنید"
-  },
   "settings": {
     "message": "تنظیمات"
   },
@@ -671,9 +613,6 @@
   },
   "showHexDataDescription": {
     "message": "برای نمایش بخش اطلاعات hex در صفحه ارسال این را انتخاب نمایید"
-  },
-  "showPrivateKeys": {
-    "message": "نمایش کلید های شخصی"
   },
   "sigRequest": {
     "message": "درخواست امضاء"
@@ -795,9 +734,6 @@
   "tryAgain": {
     "message": "امتحان مجدد"
   },
-  "typePassword": {
-    "message": "رمز عبور MetaMask تان را تایپ نمایید"
-  },
   "unapproved": {
     "message": "تصدیق ناشده"
   },
@@ -806,12 +742,6 @@
   },
   "unknown": {
     "message": "ناشناس"
-  },
-  "unknownCameraError": {
-    "message": "هنگام تلاش برای دسترسی به کمره شما خطایی به وجود آمد. لطفًا دوباره تلاش کنید..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "اوه! مشکلی ایجاد شد"
   },
   "unknownNetwork": {
     "message": "شبکه خصوصی ناشناخته"
@@ -824,9 +754,6 @@
   },
   "unlockMessage": {
     "message": "وب غیر متمرکز شده انتظار میکشد"
-  },
-  "updatedWithDate": {
-    "message": "بروزرسانی شد 1$1"
   },
   "urlErrorMsg": {
     "message": "URl ها نیازمند پیشوند مناسب HTTP/HTTPS اند."

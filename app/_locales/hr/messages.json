@@ -75,9 +75,6 @@
   "asset": {
     "message": "Imovina"
   },
-  "attemptingConnect": {
-    "message": "Pokušaj povezivanja na podatkovni blok."
-  },
   "attributions": {
     "message": "Svojstva"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Kopiraj adresu u međuspremnik"
   },
-  "copyPrivateKey": {
-    "message": "Ovo je vaš privatni ključ (kliknite za kopiranje)"
-  },
   "copyToClipboard": {
     "message": "Kopiraj u međuspremnik"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Izbriši"
   },
-  "deleteNetwork": {
-    "message": "Izbrisati mrežu?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Sigurno želite izbrisati ovu mrežu?"
-  },
   "details": {
     "message": "Detalji"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "Uredi kontakt"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "Naziv ENS nije pronađen na trenutačnoj mreži. Pokušajte prebaciti na glavnu mrežu Ethereum."
-  },
-  "ensRegistrationError": {
-    "message": "Greška u registraciji naziva ENS"
-  },
-  "enterPassword": {
-    "message": "Upiši lozinku"
-  },
   "enterPasswordContinue": {
     "message": "Upišite lozinku za nastavak"
   },
@@ -258,9 +237,6 @@
   },
   "expandView": {
     "message": "Proširi prikaz"
-  },
-  "exportPrivateKey": {
-    "message": "Izvezi privatni ključ"
   },
   "failed": {
     "message": "Neuspješno"
@@ -368,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "Adresa primatelja nije valjana"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Ne mreža ETH, postavite na mala slova"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Nevaljani URL Block Explorer-a"
-  },
   "invalidRPC": {
     "message": "Nevaljani URL RPC-a"
   },
@@ -470,9 +440,6 @@
   "next": {
     "message": "Sljedeće"
   },
-  "noAddressForName": {
-    "message": "Nijedna adresa nije postavljena za ovaj naziv."
-  },
   "noConversionRateAvailable": {
     "message": "Nijedan konverzijski tečaj nije dostupan"
   },
@@ -534,12 +501,6 @@
   "prev": {
     "message": "Prethodno"
   },
-  "primaryCurrencySetting": {
-    "message": "Glavna valuta"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Odaberite da se prvo prikazuju valute u osnovnoj valuti bloka (npr. ETH). Odaberite mogućnost Fiat za prikazivanje valuta u odabranoj valuti Fiat."
-  },
   "privacyMsg": {
     "message": "Pravilnik o zaštiti privatnosti"
   },
@@ -553,14 +514,8 @@
   "privateNetwork": {
     "message": "Privatna mreža"
   },
-  "queue": {
-    "message": "Red čekanja"
-  },
   "readdToken": {
     "message": "Ovaj token možete dodati kasnije odlaskom pod stavku „Dodaj token” u izborniku mogućnosti računa. "
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Pretraži, javne adrese (0x) ili ENS"
   },
   "reject": {
     "message": "Odbaci"
@@ -620,12 +575,6 @@
   "search": {
     "message": "Traži"
   },
-  "searchResults": {
-    "message": "Rezultati pretraživanja"
-  },
-  "searchTokens": {
-    "message": "Pretraži tokene"
-  },
   "securityAndPrivacy": {
     "message": "Sigurnost i privatnost"
   },
@@ -647,9 +596,6 @@
   "send": {
     "message": "Pošalji"
   },
-  "sendTokens": {
-    "message": "Pošalji tokene"
-  },
   "settings": {
     "message": "Postavke"
   },
@@ -664,9 +610,6 @@
   },
   "showHexDataDescription": {
     "message": "Odaberite ovu stavku za prikaz polja namijenjenog za podatke hex na zaslonu za slanje"
-  },
-  "showPrivateKeys": {
-    "message": "Prikaži privatne ključe"
   },
   "sigRequest": {
     "message": "Zahtjev za potpisom"
@@ -785,9 +728,6 @@
   "tryAgain": {
     "message": "Pokušaj ponovo"
   },
-  "typePassword": {
-    "message": "Upišite svoju lozinku MetaMask."
-  },
   "unapproved": {
     "message": "Neodobreno"
   },
@@ -796,12 +736,6 @@
   },
   "unknown": {
     "message": "Nepoznato"
-  },
-  "unknownCameraError": {
-    "message": "Došlo je do greške prilikom pokušaja pristupanja vašoj kameri. Pokušajte ponovno..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Ups! Nešto je pošlo po zlu..."
   },
   "unknownNetwork": {
     "message": "Nepoznata privatna mreža"
@@ -814,9 +748,6 @@
   },
   "unlockMessage": {
     "message": "Decentralizirani internet čeka"
-  },
-  "updatedWithDate": {
-    "message": "Ažurirano $1"
   },
   "urlErrorMsg": {
     "message": "URI-jevima se zahtijeva prikladan prefiks HTTP/HTTPS."

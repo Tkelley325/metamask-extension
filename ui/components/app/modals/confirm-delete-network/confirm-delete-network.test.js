@@ -9,8 +9,8 @@ describe('Confirm Delete Network', () => {
   const props = {
     hideModal: jest.fn(),
     onConfirm: jest.fn(),
-    removeNetworkConfiguration: jest.fn().mockResolvedValue(),
-    target: 'target',
+    removeNetwork: jest.fn().mockResolvedValue(),
+    target: '0x1',
   };
 
   it('should match snapshot', () => {
@@ -23,6 +23,17 @@ describe('Confirm Delete Network', () => {
     expect(container).toMatchSnapshot();
   });
 
+  it('should mention network name in modal', () => {
+    const mockStore = configureMockStore()(mockState);
+    const { getByText } = renderWithProvider(
+      <ConfirmDeleteNetwork {...props} />,
+      mockStore,
+    );
+    const expectedTitle = 'Delete Custom Mainnet RPC network?';
+
+    expect(getByText(expectedTitle)).toBeInTheDocument();
+  });
+
   it('clicks cancel to hide modal', async () => {
     const { queryByText } = renderWithProvider(
       <ConfirmDeleteNetwork.WrappedComponent {...props} />,
@@ -30,7 +41,7 @@ describe('Confirm Delete Network', () => {
 
     fireEvent.click(queryByText('[cancel]'));
 
-    expect(props.removeNetworkConfiguration).not.toHaveBeenCalled();
+    expect(props.removeNetwork).not.toHaveBeenCalled();
     expect(props.onConfirm).not.toHaveBeenCalled();
 
     expect(props.hideModal).toHaveBeenCalled();
@@ -44,7 +55,7 @@ describe('Confirm Delete Network', () => {
     fireEvent.click(queryByText('[delete]'));
 
     await waitFor(() => {
-      expect(props.removeNetworkConfiguration).toHaveBeenCalled();
+      expect(props.removeNetwork).toHaveBeenCalled();
       expect(props.onConfirm).toHaveBeenCalled();
       expect(props.hideModal).toHaveBeenCalled();
     });

@@ -1,5 +1,7 @@
 import { GasEstimateTypes } from '../../shared/constants/gas';
 import { getInitialSendStateWithExistingTxState } from '../../test/jest/mocks';
+import { CHAIN_IDS } from '../../shared/constants/network';
+import { mockNetworkState } from '../../test/stub/networks';
 import {
   getCustomGasLimit,
   getCustomGasPrice,
@@ -24,9 +26,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             low: '1',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x77359400' },
@@ -41,9 +41,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             low: '1',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: null },
@@ -58,9 +56,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             low: '1',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: undefined },
@@ -75,9 +71,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             low: undefined,
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x77359400' },
@@ -95,9 +89,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '150',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: null },
@@ -112,9 +104,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: undefined,
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x77359400' },
@@ -129,9 +119,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x205d0bae00' },
@@ -146,9 +134,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x1bf08eb000' },
@@ -163,9 +149,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x28bed01600' },
@@ -180,9 +164,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         gas: {
           customData: { price: '0x30e4f9b400' },
@@ -197,9 +179,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         send: getInitialSendStateWithExistingTxState({
           gas: {
@@ -219,9 +199,7 @@ describe('custom-gas selectors', () => {
           gasFeeEstimates: {
             high: '139',
           },
-          networkDetails: {
-            EIPS: {},
-          },
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
         },
         send: getInitialSendStateWithExistingTxState({
           gas: {

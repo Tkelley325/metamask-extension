@@ -1,19 +1,16 @@
 import React, { useState, useContext } from 'react';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { useSelector } from 'react-redux';
-///: END:ONLY_INCLUDE_IN
 import PropTypes from 'prop-types';
 import Fuse from 'fuse.js';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '../../../components/ui/text-field';
 import { I18nContext } from '../../../contexts/i18n';
-import SearchIcon from '../../../components/ui/icon/search-icon';
 import { isEqualCaseInsensitive } from '../../../../shared/modules/string-utils';
-import { Icon, IconName } from '../../../components/component-library';
+import {
+  Icon,
+  IconName,
+  IconSize,
+} from '../../../components/component-library';
 import { IconColor } from '../../../helpers/constants/design-system';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { getSnapsRouteObjects } from '../../../selectors';
-///: END:ONLY_INCLUDE_IN
 
 export default function SettingsSearch({
   onSearch,
@@ -23,15 +20,10 @@ export default function SettingsSearch({
   const t = useContext(I18nContext);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchIconColor, setSearchIconColor] = useState(
-    'var(--color-icon-muted)',
-  );
+
+  const [searchIconColor, setSearchIconColor] = useState(IconColor.iconMuted);
 
   const settingsRoutesListArray = Object.values(settingsRoutesList);
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
-  const snaps = useSelector(getSnapsRouteObjects);
-  settingsRoutesListArray.push(...snaps);
-  ///: END:ONLY_INCLUDE_IN
   const settingsSearchFuse = new Fuse(settingsRoutesListArray, {
     shouldSort: true,
     threshold: 0.3,
@@ -44,14 +36,12 @@ export default function SettingsSearch({
   });
 
   const handleSearch = (_searchQuery) => {
-    const sanitizedSearchQuery = _searchQuery
-      .replace(/[^A-Za-z0-9\s&_]/gu, '')
-      .trimStart();
+    const sanitizedSearchQuery = _searchQuery.trimStart();
     setSearchQuery(sanitizedSearchQuery);
     if (sanitizedSearchQuery === '') {
-      setSearchIconColor('var(--color-icon-muted)');
+      setSearchIconColor(IconColor.iconMuted);
     } else {
-      setSearchIconColor('var(--color-icon-default)');
+      setSearchIconColor(IconColor.iconDefault);
     }
 
     const fuseSearchResult = settingsSearchFuse.search(sanitizedSearchQuery);
@@ -70,7 +60,11 @@ export default function SettingsSearch({
   const renderStartAdornment = () => {
     return (
       <InputAdornment position="start" style={{ marginRight: '12px' }}>
-        <SearchIcon color={searchIconColor} />
+        <Icon
+          size={IconSize.Sm}
+          name={IconName.Search}
+          color={searchIconColor}
+        />
       </InputAdornment>
     );
   };
@@ -85,7 +79,11 @@ export default function SettingsSearch({
             onClick={() => handleSearch('')}
             style={{ cursor: 'pointer' }}
           >
-            <Icon name={IconName.Close} color={IconColor.iconDefault} />
+            <Icon
+              name={IconName.Close}
+              color={IconColor.iconDefault}
+              size={IconSize.Xs}
+            />
           </InputAdornment>
         )}
       </>
@@ -105,6 +103,7 @@ export default function SettingsSearch({
       autoComplete="off"
       startAdornment={renderStartAdornment()}
       endAdornment={renderEndAdornment()}
+      theme="bordered"
     />
   );
 }

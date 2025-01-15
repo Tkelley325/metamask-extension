@@ -1,95 +1,93 @@
-const { withFixtures } = require('../helpers');
+const {
+  defaultGanacheOptions,
+  withFixtures,
+  unlockWallet,
+  WINDOW_TITLES,
+} = require('../helpers');
 const FixtureBuilder = require('../fixture-builder');
 const { TEST_SNAPS_WEBSITE_URL } = require('./enums');
 
 describe('Test Snap bip-32', function () {
   it('tests various functions of bip-32', async function () {
-    const ganacheOptions = {
-      accounts: [
-        {
-          secretKey:
-            '0x7C9529A67102755B7E6102D6D950AC5D5863C98713805CEC576B945B15B71EAC',
-        },
-      ],
-    };
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
-        failOnConsoleError: false,
-        title: this.test.title,
+        ganacheOptions: defaultGanacheOptions,
+        title: this.test.fullTitle(),
       },
       async ({ driver }) => {
-        await driver.navigate();
-
-        // enter pw into extension
-        await driver.fill('#password', 'correct horse battery staple');
-        await driver.press('#password', driver.Key.ENTER);
+        await unlockWallet(driver);
 
         // navigate to test snaps page and connect
         await driver.driver.get(TEST_SNAPS_WEBSITE_URL);
-        await driver.delay(1000);
 
-        // find and scroll to the bip32 test and connect
-        const snapButton1 = await driver.findElement('#connectBip32');
+        // wait for page to load
+        await driver.waitForSelector({
+          text: 'Installed Snaps',
+          tag: 'h2',
+        });
+
+        // find and scroll to the bip32 snap
+        const snapButton1 = await driver.findElement('#connectbip32');
         await driver.scrollToElement(snapButton1);
-        await driver.delay(1000);
-        await driver.clickElement('#connectBip32');
-        await driver.delay(1000);
+
+        // added delay for firefox (deflake)
+        await driver.delayFirefox(3000);
+
+        // wait for and click connect to bip-32
+        await driver.waitForSelector('#connectbip32');
+        await driver.clickElement('#connectbip32');
 
         // switch to metamask extension and click connect
-        let windowHandles = await driver.waitUntilXWindowHandles(
-          2,
-          1000,
-          10000,
-        );
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.Dialog);
+        await driver.waitForSelector({
+          text: 'Connect',
+          tag: 'button',
+        });
         await driver.clickElement({
           text: 'Connect',
           tag: 'button',
         });
 
-        await driver.waitForSelector({ text: 'Install' });
+        // wait for confirm to appear
+        await driver.waitForSelector({ text: 'Confirm' });
 
-        await driver.clickElement('[data-testid="snap-install-scroll"]');
+        // click and dismiss possible scroll element
+        await driver.clickElementSafe('[data-testid="snap-install-scroll"]');
 
-        await driver.clickElement({
-          text: 'Install',
-          tag: 'button',
-        });
-
-        // wait for permissions popover, click checkboxes and confirm
-        await driver.delay(500);
-        await driver.clickElement('#key-access-bip32-m-44h-0h-secp256k1-0');
-        await driver.clickElement('#key-access-bip32-m-44h-0h-ed25519-1');
-        await driver.clickElement(
-          '#public-key-access-bip32-m-44h-0h-secp256k1-0',
-        );
+        // click confirm
         await driver.clickElement({
           text: 'Confirm',
           tag: 'button',
         });
 
+        // wait for permissions popover, click checkboxes and confirm
+        await driver.waitForSelector('.mm-checkbox__input');
+        await driver.clickElement('.mm-checkbox__input');
+        await driver.waitForSelector(
+          '[data-testid="snap-install-warning-modal-confirm"]',
+        );
+        await driver.clickElement(
+          '[data-testid="snap-install-warning-modal-confirm"]',
+        );
+
+        // wait for and click OK and wait for window to close
         await driver.waitForSelector({ text: 'OK' });
-        await driver.clickElement({
+        await driver.clickElementAndWaitForWindowToClose({
           text: 'OK',
           tag: 'button',
         });
 
         // switch back to test-snaps window
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // wait for npm installation success
         await driver.waitForSelector({
-          css: '#connectBip32',
+          css: '#connectbip32',
           text: 'Reconnect to BIP-32 Snap',
         });
 
         // scroll to and click get public key
-        await driver.delay(1000);
         await driver.waitForSelector({ text: 'Get Public Key' });
         await driver.clickElement('#bip32GetPublic');
 
@@ -113,20 +111,15 @@ describe('Test Snap bip-32', function () {
         await driver.fill('#bip32Message-secp256k1', 'foo bar');
         await driver.clickElement('#sendBip32-secp256k1');
 
-        // hit 'approve' on the signature confirmation
-        windowHandles = await driver.waitUntilXWindowHandles(2, 1000, 10000);
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
-        await driver.clickElement({
+        // hit 'approve' on the signature confirmation and wait for window to close
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.Dialog);
+        await driver.clickElementAndWaitForWindowToClose({
           text: 'Approve',
           tag: 'button',
         });
 
         // switch back to the test-snaps window
-        windowHandles = await driver.waitUntilXWindowHandles(1, 1000, 10000);
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // check results of the secp256k1 signature with waitForSelector
         await driver.waitForSelector({
@@ -139,23 +132,25 @@ describe('Test Snap bip-32', function () {
         await driver.scrollToElement(snapButton4);
 
         // wait then run ed25519 test
-        await driver.delay(500);
+        await driver.waitForSelector('#bip32Message-ed25519');
         await driver.fill('#bip32Message-ed25519', 'foo bar');
         await driver.clickElement('#sendBip32-ed25519');
 
-        // hit 'approve' on the custom confirm
-        windowHandles = await driver.waitUntilXWindowHandles(2, 1000, 10000);
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
-        await driver.clickElement({
+        // switch to dialog window
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.Dialog);
+
+        // wait for and click 'approve' and wait for window to close
+        await driver.waitForSelector({
+          text: 'Approve',
+          tag: 'button',
+        });
+        await driver.clickElementAndWaitForWindowToClose({
           text: 'Approve',
           tag: 'button',
         });
 
-        windowHandles = await driver.waitUntilXWindowHandles(1, 1000, 10000);
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        // switch back to test-snaps window
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // check results of ed25519 signature with waitForSelector
         await driver.waitForSelector({

@@ -1,34 +1,40 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { isEqual } from 'lodash';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
 import {
   SnapCaveatType,
   WALLET_SNAP_PERMISSION_KEY,
-} from '@metamask/rpc-methods';
-///: END:ONLY_INCLUDE_IN
+} from '@metamask/snaps-rpc-methods';
 import { SubjectType } from '@metamask/permission-controller';
 import { MetaMetricsEventCategory } from '../../../../shared/constants/metametrics';
 import { PageContainerFooter } from '../../ui/page-container';
 import PermissionsConnectFooter from '../permissions-connect-footer';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { RestrictedMethods } from '../../../../shared/constants/permissions';
+import {
+  CaveatTypes,
+  RestrictedMethods,
+} from '../../../../shared/constants/permissions';
+
 import SnapPrivacyWarning from '../snaps/snap-privacy-warning';
 import { getDedupedSnaps } from '../../../helpers/utils/util';
-///: END:ONLY_INCLUDE_IN
+import { containsEthPermissionsAndNonEvmAccount } from '../../../helpers/utils/permissions';
+import {
+  BackgroundColor,
+  Display,
+  FlexDirection,
+} from '../../../helpers/constants/design-system';
+import { Box } from '../../component-library';
+// eslint-disable-next-line import/no-restricted-paths
+import { PermissionNames } from '../../../../app/scripts/controllers/permissions';
 import { PermissionPageContainerContent } from '.';
 
 export default class PermissionPageContainer extends Component {
   static propTypes = {
     approvePermissionsRequest: PropTypes.func.isRequired,
     rejectPermissionsRequest: PropTypes.func.isRequired,
-    selectedIdentities: PropTypes.array,
-    allIdentitiesSelected: PropTypes.bool,
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+    selectedAccounts: PropTypes.array,
+    allAccountsSelected: PropTypes.bool,
     currentPermissions: PropTypes.object,
     snapsInstallPrivacyWarningShown: PropTypes.bool.isRequired,
     setSnapsInstallPrivacyWarningShownStatus: PropTypes.func,
-    ///: END:ONLY_INCLUDE_IN
     request: PropTypes.object,
     requestMetadata: PropTypes.object,
     targetSubjectMetadata: PropTypes.shape({
@@ -38,16 +44,16 @@ export default class PermissionPageContainer extends Component {
       extensionId: PropTypes.string,
       iconUrl: PropTypes.string,
     }),
+    history: PropTypes.object.isRequired,
+    connectPath: PropTypes.string.isRequired,
   };
 
   static defaultProps = {
     request: {},
     requestMetadata: {},
-    selectedIdentities: [],
-    allIdentitiesSelected: false,
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+    selectedAccounts: [],
+    allAccountsSelected: false,
     currentPermissions: {},
-    ///: END:ONLY_INCLUDE_IN
   };
 
   static contextTypes = {
@@ -55,37 +61,28 @@ export default class PermissionPageContainer extends Component {
     trackEvent: PropTypes.func,
   };
 
-  state = {
-    selectedPermissions: this.getRequestedMethodState(
-      this.getRequestedMethodNames(this.props),
-    ),
-  };
+  state = {};
 
-  componentDidUpdate() {
-    const newMethodNames = this.getRequestedMethodNames(this.props);
+  getRequestedPermissions() {
+    const { request } = this.props;
 
-    if (!isEqual(Object.keys(this.state.selectedPermissions), newMethodNames)) {
-      // this should be a new request, so just overwrite
-      this.setState({
-        selectedPermissions: this.getRequestedMethodState(newMethodNames),
-      });
-    }
-  }
+    // if the request contains a diff this means its an incremental permission request
+    const permissions =
+      request?.diff?.permissionDiffMap ?? request.permissions ?? {};
 
-  getRequestedMethodState(methodNames) {
-    return methodNames.reduce((acc, methodName) => {
-      ///: BEGIN:ONLY_INCLUDE_IN(snaps)
-      if (methodName === RestrictedMethods.wallet_snap) {
-        acc[methodName] = this.getDedupedSnapPermissions();
+    return Object.entries(permissions).reduce(
+      (acc, [permissionName, permissionValue]) => {
+        if (permissionName === RestrictedMethods.wallet_snap) {
+          acc[permissionName] = this.getDedupedSnapPermissions();
+          return acc;
+        }
+        acc[permissionName] = permissionValue;
         return acc;
-      }
-      ///: END:ONLY_INCLUDE_IN
-      acc[methodName] = true;
-      return acc;
-    }, {});
+      },
+      {},
+    );
   }
 
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   getDedupedSnapPermissions() {
     const { request, currentPermissions } = this.props;
     const snapKeys = getDedupedSnaps(request, currentPermissions);
@@ -109,11 +106,6 @@ export default class PermissionPageContainer extends Component {
       isShowingSnapsPrivacyWarning: true,
     });
   }
-  ///: END:ONLY_INCLUDE_IN
-
-  getRequestedMethodNames(props) {
-    return Object.keys(props.request.permissions || {});
-  }
 
   componentDidMount() {
     this.context.trackEvent({
@@ -125,13 +117,16 @@ export default class PermissionPageContainer extends Component {
       },
     });
 
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
     if (this.props.request.permissions[WALLET_SNAP_PERMISSION_KEY]) {
       if (this.props.snapsInstallPrivacyWarningShown === false) {
         this.showSnapsPrivacyWarning();
       }
     }
-    ///: END:ONLY_INCLUDE_IN
+  }
+
+  goBack() {
+    const { history, connectPath } = this.props;
+    history.push(connectPath);
   }
 
   onCancel = () => {
@@ -144,22 +139,27 @@ export default class PermissionPageContainer extends Component {
       request: _request,
       approvePermissionsRequest,
       rejectPermissionsRequest,
-      selectedIdentities,
+      selectedAccounts,
     } = this.props;
+
+    const approvedAccounts = selectedAccounts.map(
+      (selectedAccount) => selectedAccount.address,
+    );
+
+    const permittedChainsPermission =
+      _request.permissions?.[PermissionNames.permittedChains];
+    const approvedChainIds = permittedChainsPermission?.caveats.find(
+      (caveat) => caveat.type === CaveatTypes.restrictNetworkSwitching,
+    )?.value;
 
     const request = {
       ..._request,
       permissions: { ..._request.permissions },
-      approvedAccounts: selectedIdentities.map(
-        (selectedIdentity) => selectedIdentity.address,
-      ),
+      ...(_request.permissions?.eth_accounts && { approvedAccounts }),
+      ...(_request.permissions?.[PermissionNames.permittedChains] && {
+        approvedChainIds,
+      }),
     };
-
-    Object.keys(this.state.selectedPermissions).forEach((key) => {
-      if (!this.state.selectedPermissions[key]) {
-        delete request.permissions[key];
-      }
-    });
 
     if (Object.keys(request.permissions).length > 0) {
       approvePermissionsRequest(request);
@@ -168,15 +168,25 @@ export default class PermissionPageContainer extends Component {
     }
   };
 
+  onLeftFooterClick = () => {
+    const requestedPermissions = this.getRequestedPermissions();
+    if (requestedPermissions[PermissionNames.permittedChains] === undefined) {
+      this.goBack();
+    } else {
+      this.onCancel();
+    }
+  };
+
   render() {
     const {
       requestMetadata,
       targetSubjectMetadata,
-      selectedIdentities,
-      allIdentitiesSelected,
+      selectedAccounts,
+      allAccountsSelected,
     } = this.props;
 
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+    const requestedPermissions = this.getRequestedPermissions();
+
     const setIsShowingSnapsPrivacyWarning = (value) => {
       this.setState({
         isShowingSnapsPrivacyWarning: value,
@@ -187,42 +197,50 @@ export default class PermissionPageContainer extends Component {
       setIsShowingSnapsPrivacyWarning(false);
       this.props.setSnapsInstallPrivacyWarningShownStatus(true);
     };
-    ///: END:ONLY_INCLUDE_IN
+
+    const footerLeftActionText = requestedPermissions[
+      PermissionNames.permittedChains
+    ]
+      ? this.context.t('cancel')
+      : this.context.t('back');
 
     return (
       <>
-        {
-          ///: BEGIN:ONLY_INCLUDE_IN(snaps)
-          <>
-            {this.state.isShowingSnapsPrivacyWarning && (
-              <SnapPrivacyWarning
-                onAccepted={() => confirmSnapsPrivacyWarning()}
-                onCanceled={() => this.onCancel()}
-              />
-            )}
-          </>
-          ///: END:ONLY_INCLUDE_IN
-        }
+        {this.state.isShowingSnapsPrivacyWarning && (
+          <SnapPrivacyWarning
+            onAccepted={() => confirmSnapsPrivacyWarning()}
+            onCanceled={() => this.onCancel()}
+          />
+        )}
         <PermissionPageContainerContent
           requestMetadata={requestMetadata}
           subjectMetadata={targetSubjectMetadata}
-          selectedPermissions={this.state.selectedPermissions}
-          selectedIdentities={selectedIdentities}
-          allIdentitiesSelected={allIdentitiesSelected}
+          selectedPermissions={requestedPermissions}
+          selectedAccounts={selectedAccounts}
+          allAccountsSelected={allAccountsSelected}
         />
-        <div className="permission-approval-container__footers">
+        <Box
+          display={Display.Flex}
+          backgroundColor={BackgroundColor.backgroundAlternative}
+          flexDirection={FlexDirection.Column}
+        >
           {targetSubjectMetadata?.subjectType !== SubjectType.Snap && (
             <PermissionsConnectFooter />
           )}
           <PageContainerFooter
+            footerClassName="permission-page-container-footer"
             cancelButtonType="default"
-            onCancel={() => this.onCancel()}
-            cancelText={this.context.t('cancel')}
+            onCancel={() => this.onLeftFooterClick()}
+            cancelText={footerLeftActionText}
             onSubmit={() => this.onSubmit()}
-            submitText={this.context.t('connect')}
+            submitText={this.context.t('confirm')}
             buttonSizeLarge={false}
+            disabled={containsEthPermissionsAndNonEvmAccount(
+              selectedAccounts,
+              requestedPermissions,
+            )}
           />
-        </div>
+        </Box>
       </>
     );
   }

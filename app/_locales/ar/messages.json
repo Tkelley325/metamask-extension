@@ -79,9 +79,6 @@
   "asset": {
     "message": "الأصل"
   },
-  "attemptingConnect": {
-    "message": "محاولة الاتصال بسلسلة الكتل."
-  },
   "attributions": {
     "message": "الصفات"
   },
@@ -179,9 +176,6 @@
   "copyAddress": {
     "message": "نسخ العنوان إلى الحافظة"
   },
-  "copyPrivateKey": {
-    "message": "هذا هو مفتاحك الخاص (انقر للنسخ)"
-  },
   "copyToClipboard": {
     "message": "نسخ إلى الحافظة"
   },
@@ -215,12 +209,6 @@
   "delete": {
     "message": "حذف"
   },
-  "deleteNetwork": {
-    "message": "هل تريد حذف الشبكة؟"
-  },
-  "deleteNetworkDescription": {
-    "message": "هل أنت متأكد أنك تريد حذف هذه الشبكة؟"
-  },
   "details": {
     "message": "التفاصيل"
   },
@@ -242,15 +230,6 @@
   "editContact": {
     "message": "تعديل جهة الاتصال"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "لم يتم العثور على اسم ENS على الشبكة الحالية. حاول التبديل إلى شبكة الإيثيريوم الرئيسية."
-  },
-  "ensRegistrationError": {
-    "message": "خطأ في تسجيل اسم ENS"
-  },
-  "enterPassword": {
-    "message": "أدخل كلمة مرور"
-  },
   "enterPasswordContinue": {
     "message": "أدخل كلمة المرور للمتابعة"
   },
@@ -262,9 +241,6 @@
   },
   "expandView": {
     "message": "توسيع العرض"
-  },
-  "exportPrivateKey": {
-    "message": "تصدير المفتاح الخاص"
   },
   "failed": {
     "message": "فشل"
@@ -372,12 +348,6 @@
   "invalidAddressRecipient": {
     "message": "عنوان المستلم غير صحيح"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "لا تجعلها شبكة ETH، قم بتعيين الأحرف صغيرة"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "غير صحيح Block Explorer رابط"
-  },
   "invalidRPC": {
     "message": "رابط آر بي سي غير صحيح"
   },
@@ -474,9 +444,6 @@
   "next": {
     "message": "التالي"
   },
-  "noAddressForName": {
-    "message": "لم يتم تعيين عنوان لهذا الاسم."
-  },
   "noConversionRateAvailable": {
     "message": "لا يوجد معدل تحويل متاح"
   },
@@ -538,12 +505,6 @@
   "prev": {
     "message": "السابق"
   },
-  "primaryCurrencySetting": {
-    "message": "العملة الأساسية"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "حدد خيار \"المحلية\" لتحديد أولويات عرض القيم بالعملة المحلية للسلسلة (مثلاً ETH). حدد Fiat لتحديد أولويات عرض القيم بعملات fiat المحددة الخاصة بك."
-  },
   "privacyMsg": {
     "message": "سياسة الخصوصية"
   },
@@ -557,14 +518,8 @@
   "privateNetwork": {
     "message": "شبكة خاصة"
   },
-  "queue": {
-    "message": "اللائحة"
-  },
   "readdToken": {
     "message": "يمكنك إضافة هذه العملة الرمزية مرة أخرى في المستقبل من خلال الانتقال إلى \"إضافة عملة رمزية\" في قائمة خيارات الحسابات الخاصة بك."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "البحث، العنوان العام (0x)، أو ENS"
   },
   "reject": {
     "message": "رفض"
@@ -624,12 +579,6 @@
   "search": {
     "message": "البحث"
   },
-  "searchResults": {
-    "message": "نتائج البحث"
-  },
-  "searchTokens": {
-    "message": "البحث عن العملات الرمزية"
-  },
   "securityAndPrivacy": {
     "message": "الأمن والخصوصية"
   },
@@ -651,9 +600,6 @@
   "send": {
     "message": "إرسال"
   },
-  "sendTokens": {
-    "message": "إرسال عملات رمزية"
-  },
   "settings": {
     "message": "الإعدادات"
   },
@@ -668,9 +614,6 @@
   },
   "showHexDataDescription": {
     "message": "حدد هذا لإظهار حقل بيانات سداسي عشرية على شاشة الإرسال"
-  },
-  "showPrivateKeys": {
-    "message": "عرض المفاتيح الخاصة"
   },
   "sigRequest": {
     "message": "طلب التوقيع"
@@ -792,9 +735,6 @@
   "tryAgain": {
     "message": "إعادة المحاولة"
   },
-  "typePassword": {
-    "message": "أدخل كلمة مرور MetaMask الخاصة بك"
-  },
   "unapproved": {
     "message": "تم الرفض"
   },
@@ -803,12 +743,6 @@
   },
   "unknown": {
     "message": "غير معروف"
-  },
-  "unknownCameraError": {
-    "message": "حدث خطأ أثناء محاولة الوصول إلى الكاميرا. يُرجى إعادة المحاولة..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "عذرًا! وقع خطأٌ ما..."
   },
   "unknownNetwork": {
     "message": "شبكة خاصة مجهولة"
@@ -821,9 +755,6 @@
   },
   "unlockMessage": {
     "message": "شبكة الويب اللامركزية بانتظارك"
-  },
-  "updatedWithDate": {
-    "message": "تم تحديث $1"
   },
   "urlErrorMsg": {
     "message": "تتطلب الروابط بادئة HTTP/HTTPS مناسبة."

@@ -1,8 +1,11 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import { fireEvent, screen } from '@testing-library/react';
-import { detectNewTokens } from '../../../store/actions';
+import { detectTokens } from '../../../store/actions';
 import { renderWithProvider } from '../../../../test/lib/render-helpers';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
+import { mockNetworkState } from '../../../../test/stub/networks';
+import ImportControl from '../../app/assets/asset-list/import-control';
 import { ImportTokenLink } from '.';
 
 const mockPushHistory = jest.fn();
@@ -19,16 +22,17 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../store/actions.ts', () => ({
-  detectNewTokens: jest.fn().mockReturnValue({ type: '' }),
+  detectTokens: jest.fn().mockImplementation(() => ({ type: 'DETECT_TOKENS' })),
+  showImportTokensModal: jest
+    .fn()
+    .mockImplementation(() => ({ type: 'UI_IMPORT_TOKENS_POPOVER_OPEN' })),
 }));
 
 describe('Import Token Link', () => {
   it('should match snapshot for goerli chainId', () => {
     const mockState = {
       metamask: {
-        providerConfig: {
-          chainId: '0x5',
-        },
+        ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
       },
     };
 
@@ -42,9 +46,7 @@ describe('Import Token Link', () => {
   it('should match snapshot for mainnet chainId', () => {
     const mockState = {
       metamask: {
-        providerConfig: {
-          chainId: '0x1',
-        },
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
       },
     };
 
@@ -55,41 +57,37 @@ describe('Import Token Link', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should detectNewTokens when clicking refresh', () => {
+  it('should detectTokens when clicking refresh', () => {
     const mockState = {
       metamask: {
-        providerConfig: {
-          chainId: '0x5',
-        },
+        ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
       },
     };
 
     const store = configureMockStore()(mockState);
 
-    renderWithProvider(<ImportTokenLink />, store);
+    renderWithProvider(<ImportTokenLink />, store); // should this be RefreshTokenLink?
 
     const refreshList = screen.getByTestId('refresh-list-button');
     fireEvent.click(refreshList);
 
-    expect(detectNewTokens).toHaveBeenCalled();
+    expect(detectTokens).toHaveBeenCalled();
   });
 
   it('should push import token route', () => {
     const mockState = {
       metamask: {
-        providerConfig: {
-          chainId: '0x5',
-        },
+        ...mockNetworkState({ chainId: CHAIN_IDS.GOERLI }),
       },
     };
 
     const store = configureMockStore()(mockState);
 
-    renderWithProvider(<ImportTokenLink />, store);
+    renderWithProvider(<ImportControl />, store);
 
     const importToken = screen.getByTestId('import-token-button');
     fireEvent.click(importToken);
 
-    expect(mockPushHistory).toHaveBeenCalledWith('/import-token');
+    expect(screen.getByText('Import')).toBeInTheDocument();
   });
 });

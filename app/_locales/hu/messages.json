@@ -75,9 +75,6 @@
   "asset": {
     "message": "Eszköz"
   },
-  "attemptingConnect": {
-    "message": "Próbálunk csatlakozni a blokklánchoz."
-  },
   "attributions": {
     "message": "Attribúciók"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Másolja a címet a vágólapra"
   },
-  "copyPrivateKey": {
-    "message": "Ez a saját titkos kulcsod (kattints rá a másoláshoz)"
-  },
   "copyToClipboard": {
     "message": "Másolás a vágólapra"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Törlés"
   },
-  "deleteNetwork": {
-    "message": "Törli a hálózatot?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Biztosan törli ezt a hálózatot?"
-  },
   "details": {
     "message": "Részletek"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "Kapcsolatok szerkesztése"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS név nem található a jelenlegi hálózaton. Próbálj váltani Ethereum főhálózatra."
-  },
-  "ensRegistrationError": {
-    "message": "Hiba történt az ENS név regisztrációjakor"
-  },
-  "enterPassword": {
-    "message": "Adja meg a jelszót"
-  },
   "enterPasswordContinue": {
     "message": "A folytatáshoz adja meg a jelszót"
   },
@@ -258,9 +237,6 @@
   },
   "expandView": {
     "message": "Nézet nagyítása"
-  },
-  "exportPrivateKey": {
-    "message": "Privát kulcs exportálása"
   },
   "failed": {
     "message": "Sikertelen"
@@ -368,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "A címzett címe érvénytelen "
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Nem ETH hálózat, állítsa kisbetűre"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Helytelen Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "Helytelen RPC URL"
   },
@@ -470,9 +440,6 @@
   "next": {
     "message": "Következő"
   },
-  "noAddressForName": {
-    "message": "Nem lett cím beállítva ehhez a névhez."
-  },
   "noConversionRateAvailable": {
     "message": "Nincs elérhető átváltási díj"
   },
@@ -534,12 +501,6 @@
   "prev": {
     "message": "Előző"
   },
-  "primaryCurrencySetting": {
-    "message": "Elsődleges pénznem"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Válaszd a helyit, hogy az értékek elsősorban a helyi pénznemben jelenjenek meg (pl. ETH). Válaszd a Fiatot, hogy az értékek elsősorban a választott fiat pénznemben jelenjenek meg."
-  },
   "privacyMsg": {
     "message": "Adatvédelmi szabályzat"
   },
@@ -553,14 +514,8 @@
   "privateNetwork": {
     "message": "Magánhálózat"
   },
-  "queue": {
-    "message": "Nyomtatólista"
-  },
   "readdToken": {
     "message": "Ezt a tokent a jövőben is hozzáadhatja, ha a fiókbeállítások menü „Token hozzáadása” elemére lép."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Keresés, nyilvános cím (0x) vagy ENS"
   },
   "reject": {
     "message": "Elutasítás"
@@ -620,12 +575,6 @@
   "search": {
     "message": "Keresés"
   },
-  "searchResults": {
-    "message": "Keresési eredmények"
-  },
-  "searchTokens": {
-    "message": "Keresés a tokenek között"
-  },
   "securityAndPrivacy": {
     "message": "Biztonság és adatvédelem"
   },
@@ -647,9 +596,6 @@
   "send": {
     "message": "Küldés"
   },
-  "sendTokens": {
-    "message": "Token küldése"
-  },
   "settings": {
     "message": "Beállítások"
   },
@@ -664,9 +610,6 @@
   },
   "showHexDataDescription": {
     "message": "Válassza ezt, ha a hex adatmezőt a küldő képernyőn szeretné megnézni"
-  },
-  "showPrivateKeys": {
-    "message": "Mutassa a privát kulcsokat"
   },
   "sigRequest": {
     "message": "Aláírás kérése"
@@ -785,9 +728,6 @@
   "tryAgain": {
     "message": "Újra"
   },
-  "typePassword": {
-    "message": "Írd be MetaMask jelszavadat"
-  },
   "unapproved": {
     "message": "Jóvá nem hagyott"
   },
@@ -796,12 +736,6 @@
   },
   "unknown": {
     "message": "Ismeretlen"
-  },
-  "unknownCameraError": {
-    "message": "Hiba történt a kamerához való hozzáférés közben. Kérjük, próbálja újra..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Hoppá! Valami hiba történt..."
   },
   "unknownNetwork": {
     "message": "Ismeretlen magánhálózat"
@@ -814,9 +748,6 @@
   },
   "unlockMessage": {
     "message": "A decentralizált hálózat csak önre vár"
-  },
-  "updatedWithDate": {
-    "message": "$1 frissítve"
   },
   "urlErrorMsg": {
     "message": "Az URI-hez szükség van a megfelelő HTTP/HTTPS előtagra."

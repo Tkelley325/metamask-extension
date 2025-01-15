@@ -75,9 +75,6 @@
   "asset": {
     "message": "Turtas"
   },
-  "attemptingConnect": {
-    "message": "Mėginama prisijungti prie „blockchain“."
-  },
   "attributions": {
     "message": "Požymiai"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Kopijuoti adresą į iškarpinę"
   },
-  "copyPrivateKey": {
-    "message": "Tai yra jūsų asmeninis raktas (spustelėkite, kad nukopijuotumėte)"
-  },
   "copyToClipboard": {
     "message": "Kopijuoti į iškarpinę"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Ištrinti"
   },
-  "deleteNetwork": {
-    "message": "Panaikinti tinklą?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Ar tikrai norite panaikinti šį tinklą?"
-  },
   "details": {
     "message": "Išsami informacija"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "Taisyti kontaktą"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS pavadinimas dabartiniame tinkle nerastas. Mėginkite perjungti į pagrindinį „Ethereum“ tinklą."
-  },
-  "ensRegistrationError": {
-    "message": "ENS pavadinimo registracijos klaida"
-  },
-  "enterPassword": {
-    "message": "Įveskite slaptažodį"
-  },
   "enterPasswordContinue": {
     "message": "Norėdami tęsti, įveskite slaptažodį"
   },
@@ -259,18 +238,11 @@
   "expandView": {
     "message": "Išskleisti rodinį"
   },
-  "exportPrivateKey": {
-    "message": "Eksportuoti asmeninį raktą"
-  },
   "failed": {
     "message": "Nepavyko"
   },
   "fast": {
     "message": "Greitas"
-  },
-  "fiat": {
-    "message": "Standartinė valiuta",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "Failo importavimas neveikia? Spustelėkite čia!",
@@ -372,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "Gavėjo adresas netinkamas"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Ne ETH tinklas, nustatykite į mažąsias raides"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Netinkamas Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "Netinkamas RPC URL"
   },
@@ -477,9 +443,6 @@
   "next": {
     "message": "Toliau"
   },
-  "noAddressForName": {
-    "message": "Šiam pavadinimui nenurodytas adresas."
-  },
   "noConversionRateAvailable": {
     "message": "Nėra keitimo kurso"
   },
@@ -541,12 +504,6 @@
   "prev": {
     "message": "Peržiūra"
   },
-  "primaryCurrencySetting": {
-    "message": "Pagrindinė valiuta"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Rinkitės vietinę, kad vertės pirmiausia būtų rodomos vietine grandinės valiuta (pvz., ETH). Rinkitės standartinę, kad vertės pirmiausia būtų rodomos jūsų pasirinkta standartine valiuta."
-  },
   "privacyMsg": {
     "message": "Privatumo politika"
   },
@@ -560,14 +517,8 @@
   "privateNetwork": {
     "message": "Privatus tinklas"
   },
-  "queue": {
-    "message": "Eilė"
-  },
   "readdToken": {
     "message": "Šį žetoną galite bet kada galite įtraukti ir vėl, tiesiog savo paskyros parinkčių meniu nueikite  į „Įtraukti žetoną“."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Ieška, viešieji adresai (0x) arba ENS"
   },
   "reject": {
     "message": "Atmesti"
@@ -627,12 +578,6 @@
   "search": {
     "message": "Ieškoti"
   },
-  "searchResults": {
-    "message": "Paieškos rezultatai"
-  },
-  "searchTokens": {
-    "message": "Ieškoti žetonų"
-  },
   "securityAndPrivacy": {
     "message": "Sauga ir privatumas"
   },
@@ -654,9 +599,6 @@
   "send": {
     "message": "Siųsti"
   },
-  "sendTokens": {
-    "message": "Siųsti žetonus"
-  },
   "settings": {
     "message": "Nustatymai"
   },
@@ -671,9 +613,6 @@
   },
   "showHexDataDescription": {
     "message": "Pasirinkite tai, kad siuntimo ekrane būtų rodomas šešioliktainių duomenų laukas"
-  },
-  "showPrivateKeys": {
-    "message": "Rodyti asmeninius raktus"
   },
   "sigRequest": {
     "message": "Parašo užklausa"
@@ -795,9 +734,6 @@
   "tryAgain": {
     "message": "Bandyti dar kartą"
   },
-  "typePassword": {
-    "message": "Įveskite savo „MetaMask“ slaptažodį"
-  },
   "unapproved": {
     "message": "Nepatvirtinta"
   },
@@ -806,12 +742,6 @@
   },
   "unknown": {
     "message": "Nežinoma"
-  },
-  "unknownCameraError": {
-    "message": "Kreipiantis į jūsų kamerą iškilo problema. Bandykite dar kartą..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Vaje! Kažkas negerai..."
   },
   "unknownNetwork": {
     "message": "Nežinomas privatusis tinklas"
@@ -824,9 +754,6 @@
   },
   "unlockMessage": {
     "message": "Laukiančios decentralizuotos svetainės"
-  },
-  "updatedWithDate": {
-    "message": "Atnaujinta $1"
   },
   "urlErrorMsg": {
     "message": "URI reikia atitinkamo HTTP/HTTPS priešdėlio."

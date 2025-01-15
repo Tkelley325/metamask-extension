@@ -3,16 +3,18 @@ import abi from 'human-standard-token-abi';
 import BigNumber from 'bignumber.js';
 import * as ethUtil from 'ethereumjs-util';
 import { DateTime } from 'luxon';
-import { getFormattedIpfsUrl } from '@metamask/assets-controllers';
-import slip44 from '@metamask/slip44';
+import {
+  getFormattedIpfsUrl,
+  fetchTokenContractExchangeRates,
+  CodefiTokenPricesServiceV2,
+} from '@metamask/assets-controllers';
 import * as lodash from 'lodash';
 import bowser from 'bowser';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { getSnapPrefix } from '@metamask/snaps-utils';
-import { WALLET_SNAP_PERMISSION_KEY } from '@metamask/rpc-methods';
-import { isObject } from '@metamask/utils';
-///: END:ONLY_INCLUDE_IN
+import { WALLET_SNAP_PERMISSION_KEY } from '@metamask/snaps-rpc-methods';
+import { stripSnapPrefix } from '@metamask/snaps-utils';
+import { isObject, isStrictHexString } from '@metamask/utils';
 import { CHAIN_IDS, NETWORK_TYPES } from '../../../shared/constants/network';
+import { logErrorWithMessage } from '../../../shared/modules/error';
 import {
   toChecksumHexAddress,
   stripHexPrefix,
@@ -24,20 +26,34 @@ import {
 } from '../../../shared/constants/labels';
 import { Numeric } from '../../../shared/modules/Numeric';
 import { OUTDATED_BROWSER_VERSIONS } from '../constants/common';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import {
-  SNAPS_DERIVATION_PATHS,
-  SNAPS_METADATA,
-} from '../../../shared/constants/snaps';
-///: END:ONLY_INCLUDE_IN
-
 // formatData :: ( date: <Unix Timestamp> ) -> String
+import { isEqualCaseInsensitive } from '../../../shared/modules/string-utils';
+import { hexToDecimal } from '../../../shared/modules/conversion.utils';
+import { SNAPS_VIEW_ROUTE } from '../constants/routes';
+// TODO: Remove restricted import
+// eslint-disable-next-line import/no-restricted-paths
+import { normalizeSafeAddress } from '../../../app/scripts/lib/multichain/address';
+
 export function formatDate(date, format = "M/d/y 'at' T") {
   if (!date) {
     return '';
   }
   return DateTime.fromMillis(date).toFormat(format);
 }
+
+/**
+ * @param {number} unixTimestamp - timestamp as seconds since unix epoch
+ * @returns {string} formatted date string e.g. "14 July 2034, 22:22"
+ */
+export const formatUTCDateFromUnixTimestamp = (unixTimestamp) => {
+  if (!unixTimestamp) {
+    return unixTimestamp;
+  }
+
+  return DateTime.fromSeconds(unixTimestamp)
+    .toUTC()
+    .toFormat('dd LLLL yyyy, HH:mm');
+};
 
 export function formatDateWithYearContext(
   date,
@@ -53,6 +69,30 @@ export function formatDateWithYearContext(
     now.year === dateTime.year ? formatThisYear : fallback,
   );
 }
+
+export function formatDateWithSuffix(timestamp) {
+  const date = DateTime.fromMillis(timestamp * 1000); // Convert to milliseconds
+  const { day } = date;
+  const suffix = getOrdinalSuffix(day);
+
+  return date.toFormat(`MMM d'${suffix}', yyyy`);
+}
+
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) {
+    return 'th';
+  } // because 11th, 12th, 13th
+  switch (day % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+}
 /**
  * Determines if the provided chainId is a default MetaMask chain
  *
@@ -66,6 +106,7 @@ export function isDefaultMetaMaskChain(chainId) {
     chainId === CHAIN_IDS.GOERLI ||
     chainId === CHAIN_IDS.SEPOLIA ||
     chainId === CHAIN_IDS.LINEA_GOERLI ||
+    chainId === CHAIN_IDS.LINEA_SEPOLIA ||
     chainId === CHAIN_IDS.LOCALHOST
   ) {
     return true;
@@ -92,7 +133,7 @@ export function addressSummary(
   if (!address) {
     return '';
   }
-  let checked = toChecksumHexAddress(address);
+  let checked = normalizeSafeAddress(address);
   if (!includeHex) {
     checked = stripHexPrefix(checked);
   }
@@ -113,6 +154,7 @@ export function isValidDomainName(address) {
     .match(
       /^(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+[a-z0-9][-a-z0-9]*[a-z0-9]$/u,
     );
+
   return match !== null;
 }
 
@@ -203,28 +245,81 @@ export function getRandomFileName() {
 }
 
 /**
+ * Shortens the given string, preserving the beginning and end.
+ * Returns the string it is no longer than truncatedCharLimit.
+ *
+ * @param {string} stringToShorten - The string to shorten.
+ * @param {object} options - The options to use when shortening the string.
+ * @param {number} options.truncatedCharLimit - The maximum length of the string.
+ * @param {number} options.truncatedStartChars - The number of characters to preserve at the beginning.
+ * @param {number} options.truncatedEndChars - The number of characters to preserve at the end.
+ * @param {boolean} options.skipCharacterInEnd - Skip the character at the end.
+ * @returns {string} The shortened string.
+ */
+export function shortenString(
+  stringToShorten = '',
+  {
+    truncatedCharLimit,
+    truncatedStartChars,
+    truncatedEndChars,
+    skipCharacterInEnd,
+  } = {
+    truncatedCharLimit: TRUNCATED_NAME_CHAR_LIMIT,
+    truncatedStartChars: TRUNCATED_ADDRESS_START_CHARS,
+    truncatedEndChars: TRUNCATED_ADDRESS_END_CHARS,
+    skipCharacterInEnd: false,
+  },
+) {
+  if (stringToShorten.length < truncatedCharLimit) {
+    return stringToShorten;
+  }
+
+  return `${stringToShorten.slice(0, truncatedStartChars)}...${
+    skipCharacterInEnd ? '' : stringToShorten.slice(-truncatedEndChars)
+  }`;
+}
+
+/**
  * Shortens an Ethereum address for display, preserving the beginning and end.
  * Returns the given address if it is no longer than 10 characters.
  * Shortened addresses are 13 characters long.
  *
- * Example output: 0xabcd...1234
+ * Example output: 0xabcde...12345
  *
  * @param {string} address - The address to shorten.
  * @returns {string} The shortened address, or the original if it was no longer
  * than 10 characters.
  */
 export function shortenAddress(address = '') {
-  if (address.length < TRUNCATED_NAME_CHAR_LIMIT) {
-    return address;
-  }
-
-  return `${address.slice(0, TRUNCATED_ADDRESS_START_CHARS)}...${address.slice(
-    -TRUNCATED_ADDRESS_END_CHARS,
-  )}`;
+  return shortenString(address, {
+    truncatedCharLimit: TRUNCATED_NAME_CHAR_LIMIT,
+    truncatedStartChars: TRUNCATED_ADDRESS_START_CHARS,
+    truncatedEndChars: TRUNCATED_ADDRESS_END_CHARS,
+    skipCharacterInEnd: false,
+  });
 }
 
 export function getAccountByAddress(accounts = [], targetAddress) {
   return accounts.find(({ address }) => address === targetAddress);
+}
+
+/**
+ * Sort the given list of account their selecting order (descending). Meaning the
+ * first account of the sorted list will be the last selected account.
+ *
+ * @param {import('@metamask/keyring-api').InternalAccount[]} accounts - The internal accounts list.
+ * @returns {import('@metamask/keyring-api').InternalAccount[]} The sorted internal account list.
+ */
+export function sortSelectedInternalAccounts(accounts) {
+  // This logic comes from the `AccountsController`:
+  // TODO: Expose a free function from this controller and use it here
+  return accounts.sort((accountA, accountB) => {
+    // Sort by `.lastSelected` in descending order
+    return (
+      (accountB.metadata.lastSelected ?? 0) -
+      (accountA.metadata.lastSelected ?? 0)
+    );
+  });
 }
 
 /**
@@ -438,8 +533,8 @@ const SOLIDITY_TYPES = solidityTypes();
 const stripArrayType = (potentialArrayType) =>
   potentialArrayType.replace(/\[[[0-9]*\]*/gu, '');
 
-const stripOneLayerofNesting = (potentialArrayType) =>
-  potentialArrayType.replace(/\[[[0-9]*\]/u, '');
+export const stripOneLayerofNesting = (potentialArrayType) =>
+  potentialArrayType.replace(/\[(\d*)\]/u, '');
 
 const isArrayType = (potentialArrayType) =>
   potentialArrayType.match(/\[[[0-9]*\]*/u) !== null;
@@ -492,13 +587,42 @@ export const sanitizeMessage = (msg, primaryType, types) => {
   return { value: sanitizedStruct, type: primaryType };
 };
 
-export function getAssetImageURL(image, ipfsGateway) {
+export async function getAssetImageURL(image, ipfsGateway) {
   if (!image || typeof image !== 'string') {
     return '';
   }
 
   if (ipfsGateway && image.startsWith('ipfs://')) {
-    return getFormattedIpfsUrl(ipfsGateway, image, true);
+    // With v11.1.0, we started seeing errors thrown that included this
+    // line in the stack trace. The cause is that the `getIpfsCIDv1AndPath`
+    // method within assets-controllers/src/assetsUtil.ts can throw
+    // if part of the ipfsUrl, i.e. the `image` variable within this function,
+    // contains characters not in the Base58 alphabet. Details on that are
+    // here https://digitalbazaar.github.io/base58-spec/#alphabet. This happens
+    // with some NFTs, when we attempt to parse part of their IPFS image address
+    // with the `CID.parse` function (CID is part of the multiform package)
+    //
+    // Before v11.1.0 `getFormattedIpfsUrl` was not used in the extension codebase.
+    // Its use within assets-controllers always ensures that errors are caught
+    // and ignored. So while we were handling NFTs that can cause this error before,
+    // we were always catching and ignoring the error. As of PR #20172, we started
+    // passing all NFTs image URLs to `getAssetImageURL` from nft-items.js, which is
+    // why we started seeing these errors cause crashes for users in v11.1.0
+    //
+    // For the sake of a quick fix, we are wrapping this call in a try-catch, which
+    // the assets-controllers already do in some form in all cases where this function
+    // is called. This probably does not affect user experience, as we would not have
+    // correctly rendered these NFTs before v11.1.0 either (due to the same error
+    // disuccessed in this code comment).
+    //
+    // In the future, we can look into solving the root cause, which might require
+    // no longer using multiform's CID.parse() method within the assets-controller
+    try {
+      return await getFormattedIpfsUrl(ipfsGateway, image, true);
+    } catch (e) {
+      logErrorWithMessage(e);
+      return '';
+    }
   }
   return image;
 }
@@ -517,21 +641,6 @@ export function roundToDecimalPlacesRemovingExtraZeroes(
 }
 
 /**
- * Gets the name of the SLIP-44 protocol corresponding to the specified
- * `coin_type`.
- *
- * @param {string | number} coinType - The SLIP-44 `coin_type` value whose name
- * to retrieve.
- * @returns {string | undefined} The name of the protocol if found.
- */
-export function coinTypeToProtocolName(coinType) {
-  if (String(coinType) === '1') {
-    return 'Test Networks';
-  }
-  return slip44[coinType]?.name || undefined;
-}
-
-/**
  * Tests "nullishness". Used to guard a section of a component from being
  * rendered based on a value.
  *
@@ -542,31 +651,14 @@ export function isNullish(value) {
   return value === null || value === undefined;
 }
 
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-/**
- * @param {string[]} path
- * @param {string} curve
- * @returns {string | null}
- */
-export function getSnapDerivationPathName(path, curve) {
-  const pathMetadata = SNAPS_DERIVATION_PATHS.find(
-    (derivationPath) =>
-      derivationPath.curve === curve &&
-      lodash.isEqual(derivationPath.path, path),
-  );
+export const getSnapName = (snapsMetadata) => {
+  return (snapId) => {
+    return snapsMetadata[snapId]?.name ?? stripSnapPrefix(snapId);
+  };
+};
 
-  return pathMetadata?.name ?? null;
-}
-
-export const removeSnapIdPrefix = (snapId) =>
-  snapId?.replace(getSnapPrefix(snapId), '');
-
-export const getSnapName = (snapId, subjectMetadata) => {
-  if (SNAPS_METADATA[snapId]?.name) {
-    return SNAPS_METADATA[snapId].name;
-  }
-
-  return subjectMetadata?.name ?? removeSnapIdPrefix(snapId);
+export const getSnapRoute = (snapId) => {
+  return `${SNAPS_VIEW_ROUTE}/${encodeURIComponent(snapId)}`;
 };
 
 export const getDedupedSnaps = (request, permissions) => {
@@ -588,7 +680,7 @@ export const getDedupedSnaps = (request, permissions) => {
   return dedupedSnaps.length > 0 ? dedupedSnaps : requestedSnapKeys;
 };
 
-///: END:ONLY_INCLUDE_IN
+export const IS_FLASK = process.env.METAMASK_BUILD_TYPE === 'flask';
 
 /**
  * The method escape RTL character in string
@@ -630,4 +722,138 @@ export const getNetworkNameFromProviderType = (providerName) => {
  */
 export const isAbleToExportAccount = (keyringType = '') => {
   return !keyringType.includes('Hardware') && !keyringType.includes('Snap');
+};
+
+/**
+ * Checks if a tokenId in Hex or decimal format already exists in an object.
+ *
+ * @param {string} address - collection address.
+ * @param {string} tokenId - tokenId to search for
+ * @param {*} obj - object to look into
+ * @returns {boolean} `false` if tokenId does not already exist.
+ */
+export const checkTokenIdExists = (address, tokenId, obj) => {
+  // check if input tokenId is hexadecimal
+  // If it is convert to decimal and compare with existing tokens
+  const isHex = isStrictHexString(tokenId);
+  let convertedTokenId = tokenId;
+  if (isHex) {
+    // Convert to decimal
+    convertedTokenId = hexToDecimal(tokenId);
+  }
+  // Convert the input address to checksum address
+  const checkSumAdr = toChecksumHexAddress(address);
+  if (obj[checkSumAdr]) {
+    const value = obj[checkSumAdr];
+    return lodash.some(value.nfts, (nft) => {
+      return (
+        nft.address === checkSumAdr &&
+        (isEqualCaseInsensitive(nft.tokenId, tokenId) ||
+          isEqualCaseInsensitive(nft.tokenId, convertedTokenId.toString()))
+      );
+    });
+  }
+  return false;
+};
+
+/**
+ * Retrieves token prices
+ *
+ * @param {string} nativeCurrency - native currency to fetch prices for.
+ * @param {Hex[]} tokenAddresses - set of contract addresses
+ * @param {Hex} chainId - current chainId
+ * @returns The prices for the requested tokens.
+ */
+export const fetchTokenExchangeRates = async (
+  nativeCurrency,
+  tokenAddresses,
+  chainId,
+) => {
+  try {
+    return await fetchTokenContractExchangeRates({
+      tokenPricesService: new CodefiTokenPricesServiceV2(),
+      nativeCurrency,
+      tokenAddresses,
+      chainId,
+    });
+  } catch (err) {
+    return {};
+  }
+};
+
+export const hexToText = (hex) => {
+  if (!hex) {
+    return hex;
+  }
+  try {
+    const stripped = stripHexPrefix(hex);
+    const buff = Buffer.from(stripped, 'hex');
+    return buff.length === 32 ? hex : buff.toString('utf8');
+  } catch (e) {
+    return hex;
+  }
+};
+
+/**
+ * Extract and return first character (letter or number) of a provided string.
+ * If not possible, return question mark.
+ * Note: This function is used for generating fallback avatars for different entities (websites, Snaps, etc.)
+ * Note: Only letters and numbers will be returned if possible (special characters are ignored).
+ *
+ * @param {string} subjectName - Name of a subject.
+ * @returns Single character, chosen from the first character or number, question mark otherwise.
+ */
+export const getAvatarFallbackLetter = (subjectName) => {
+  return subjectName?.match(/[a-z0-9]/iu)?.[0] ?? '?';
+};
+
+/**
+ * Get abstracted Snap permissions filtered by weight.
+ *
+ * @param weightedPermissions - Set of Snap permissions that have 'weight' property assigned.
+ * @param weightThreshold - Number that represents weight threshold for filtering.
+ * @param minPermissionCount - Minimum number of permissions to show,
+ * if filtered permissions count are less than the value specified.
+ * @returns Subset of permissions passing weight criteria.
+ */
+export const getFilteredSnapPermissions = (
+  weightedPermissions,
+  weightThreshold = Infinity,
+  minPermissionCount = 3,
+) => {
+  const filteredPermissions = weightedPermissions.filter(
+    (permission) => permission.weight <= weightThreshold,
+  );
+
+  // If there are not enough permissions that fall into desired set filtered by weight,
+  // then fill the gap, no matter what the weight is
+  if (minPermissionCount && filteredPermissions.length < minPermissionCount) {
+    const remainingPermissions = weightedPermissions.filter(
+      (permission) => permission.weight > weightThreshold,
+    );
+    // Add permissions until desired count is reached
+    return filteredPermissions.concat(
+      remainingPermissions.slice(
+        0,
+        minPermissionCount - filteredPermissions.length,
+      ),
+    );
+  }
+
+  return filteredPermissions;
+};
+/**
+ * Helper function to calculate the token amount 1dAgo using price percentage a day ago.
+ *
+ * @param {*} tokenFiatBalance - current token fiat balance
+ * @param {*} tokenPricePercentChange1dAgo - price percentage 1day ago
+ * @returns token amount 1day ago
+ */
+export const getCalculatedTokenAmount1dAgo = (
+  tokenFiatBalance,
+  tokenPricePercentChange1dAgo,
+) => {
+  return tokenPricePercentChange1dAgo !== undefined && tokenFiatBalance
+    ? tokenFiatBalance / (1 + tokenPricePercentChange1dAgo / 100)
+    : tokenFiatBalance ?? 0;
 };

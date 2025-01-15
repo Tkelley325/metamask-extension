@@ -11,8 +11,8 @@ import {
   ButtonIcon,
   ButtonIconSize,
   IconName,
+  Text,
 } from '../../../../components/component-library';
-import { Text } from '../../../../components/component-library/text/deprecated';
 
 import Tooltip from '../../../../components/ui/tooltip';
 import { useI18nContext } from '../../../../hooks/useI18nContext';
@@ -51,12 +51,15 @@ function ViewContact({
         <Box
           className="settings-page__header address-book__header"
           paddingLeft={6}
+          paddingRight={6}
         >
           <AvatarAccount size={AvatarAccountSize.Lg} address={address} />
           <Text
             className="address-book__header__name"
             variant={TextVariant.bodyLgMedium}
             marginInlineStart={4}
+            style={{ overflow: 'hidden' }}
+            ellipsis
           >
             {name || address}
           </Text>

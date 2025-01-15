@@ -62,6 +62,11 @@ export default {
       control: 'multi-select',
       table: { category: 'display' },
     },
+    minWidth: {
+      options: Object.values(BlockSize),
+      control: 'multi-select',
+      table: { category: 'display' },
+    },
     height: {
       options: Object.values(BlockSize),
       control: 'select',
@@ -224,6 +229,7 @@ BoxDefaultStory.args = {
   display: Display.Flex,
   justifyContent: JustifyContent.center,
   alignItems: AlignItems.center,
+  minWidth: BlockSize.Zero,
   width: BlockSize.Half,
   height: BlockSize.Half,
   borderColor: BorderColor.borderDefault,
@@ -387,6 +393,11 @@ export const BackgroundColorStory = () => {
       <Box padding={3} backgroundColor={BackgroundColor.overlayDefault}>
         <Text color={TextColor.overlayInverse}>
           BackgroundColor.overlayDefault
+        </Text>
+      </Box>
+      <Box padding={3} backgroundColor={BackgroundColor.overlayAlternative}>
+        <Text color={TextColor.overlayInverse}>
+          BackgroundColor.overlayAlternative
         </Text>
       </Box>
       <Box padding={3} backgroundColor={BackgroundColor.primaryDefault}>

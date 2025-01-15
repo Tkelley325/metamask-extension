@@ -1,3 +1,5 @@
+@use 'design-system';
+
 .request-decrypt-message {
   &__container {
     width: 380px;
@@ -11,13 +13,13 @@
     position: relative;
     height: 100%;
 
-    @include screen-sm-max {
+    @include design-system.screen-sm-max {
       width: 100%;
       top: 0;
       box-shadow: none;
     }
 
-    @include screen-sm-min {
+    @include design-system.screen-sm-min {
       height: 620px;
     }
   }
@@ -61,7 +63,7 @@
   }
 
   &__header__text {
-    @include H3;
+    @include design-system.H3;
 
     color: var(--color-text-alternative);
     z-index: 3;
@@ -97,11 +99,11 @@
   }
 
   &__account-text {
-    @include H6;
+    @include design-system.H6;
   }
 
   &__account-item {
-    @include H7;
+    @include design-system.H7;
 
     height: 22px;
     background-color: var(--color-background-default);
@@ -130,7 +132,7 @@
   }
 
   &__balance-text {
-    @include H6;
+    @include design-system.H6;
 
     text-align: right;
   }
@@ -154,7 +156,7 @@
   }
 
   &__notice {
-    @include H6;
+    @include design-system.H6;
 
     text-align: center;
     margin-top: 15px;
@@ -162,19 +164,37 @@
     width: 100%;
   }
 
+  &__message-container {
+    position: relative;
+
+    .scroll-to-bottom__button {
+      position: absolute;
+      margin-left: auto;
+      margin-right: auto;
+      left: 0;
+      right: 0;
+      bottom: 28px;
+
+      &:hover {
+        background-color: var(--color-primary-default);
+      }
+    }
+  }
+
   &__message {
     overflow-wrap: break-word;
     margin: 20px;
     overflow: hidden;
-    border: 1px solid var(--color-border-alternative);
-    padding: 5px;
     border-radius: 5px;
     position: relative;
+    border: 1px solid var(--color-border-muted);
+    padding: 13px 16px;
 
     &-text {
-      @include H7;
+      @include design-system.H7;
 
       height: 115px;
+      overflow-y: scroll;
     }
 
     &-cover {
@@ -191,6 +211,7 @@
       height: 100%;
       width: 100%;
       top: 0;
+      left: 0;
       cursor: pointer;
 
       &__container {
@@ -206,7 +227,6 @@
         align-items: center;
         justify-content: center;
 
-
         &__icon {
           color: var(--color-icon-default);
           display: flex;
@@ -214,7 +234,7 @@
         }
 
         &__text {
-          @include H7;
+          @include design-system.H7;
         }
       }
 
@@ -224,11 +244,12 @@
     }
 
     &-copy {
-      @include H7;
+      @include design-system.H7;
 
       justify-content: space-evenly;
       margin-left: 20px;
       margin-right: 20px;
+      margin-top: 24px;
       display: flex;
       cursor: pointer;
     }
@@ -236,6 +257,7 @@
     &-copy-text {
       margin-right: 10px;
       display: inline;
+      color: var(--color-primary-default);
     }
 
     &-copy-tooltip {

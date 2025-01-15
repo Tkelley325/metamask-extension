@@ -39,9 +39,6 @@
   "approved": {
     "message": "Schváleno"
   },
-  "attemptingConnect": {
-    "message": "Pokouším se připojit k blockchainu."
-  },
   "attributions": {
     "message": "Zásluhy"
   },
@@ -71,9 +68,6 @@
   },
   "copiedExclamation": {
     "message": "Zkopírováno!"
-  },
-  "copyPrivateKey": {
-    "message": "Toto je váš privátní klíč (kliknutím zkopírujte)"
   },
   "copyToClipboard": {
     "message": "Kopírovat do schránky"
@@ -105,21 +99,11 @@
   "edit": {
     "message": "Upravit"
   },
-  "enterPassword": {
-    "message": "Zadejte heslo"
-  },
   "etherscanView": {
     "message": "Prohlédněte si účet na Etherscan"
   },
-  "exportPrivateKey": {
-    "message": "Exportovat privátní klíč"
-  },
   "failed": {
     "message": "Neúspěšné"
-  },
-  "fiat": {
-    "message": "FIAT",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "Import souboru nefunguje? Klikněte sem!",
@@ -168,9 +152,6 @@
   },
   "invalidAddressRecipient": {
     "message": "Adresa příjemce je neplatná"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Neplatné Block Explorer URI"
   },
   "invalidRPC": {
     "message": "Neplatné RPC URI"
@@ -232,9 +213,6 @@
   "next": {
     "message": "Další"
   },
-  "noAddressForName": {
-    "message": "Pro toto jméno nebyla nastavena žádná adresa."
-  },
   "noTransactions": {
     "message": "Žádné transakce"
   },
@@ -289,9 +267,6 @@
   "search": {
     "message": "Hledat"
   },
-  "searchTokens": {
-    "message": "Hledat tokeny"
-  },
   "seedPhraseReq": {
     "message": "klíčové fráze mají 12 slov"
   },
@@ -301,14 +276,8 @@
   "send": {
     "message": "Odeslat"
   },
-  "sendTokens": {
-    "message": "Odeslat tokeny"
-  },
   "settings": {
     "message": "Nastavení"
-  },
-  "showPrivateKeys": {
-    "message": "Zobrazit privátní klíče"
   },
   "sigRequest": {
     "message": "Požadavek podpisu"
@@ -357,9 +326,6 @@
   },
   "transactionError": {
     "message": "Chyba transakce. Vyhozena výjimka v kódu kontraktu."
-  },
-  "typePassword": {
-    "message": "Zadejte své heslo"
   },
   "unapproved": {
     "message": "Neschváleno"

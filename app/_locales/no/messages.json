@@ -75,9 +75,6 @@
   "asset": {
     "message": "Ressurs"
   },
-  "attemptingConnect": {
-    "message": "Prøver å opprette forbindelse med blokkjede"
-  },
   "attributions": {
     "message": "Henvisninger"
   },
@@ -172,9 +169,6 @@
   "copyAddress": {
     "message": "Kopier adresse til  utklippstavlen "
   },
-  "copyPrivateKey": {
-    "message": "Dette er din private nøkkel (klikk for å kopiere)"
-  },
   "copyToClipboard": {
     "message": "Kopiér til utklippstavlen"
   },
@@ -208,12 +202,6 @@
   "delete": {
     "message": "Slett"
   },
-  "deleteNetwork": {
-    "message": "Slette nettverk? "
-  },
-  "deleteNetworkDescription": {
-    "message": "Er du sikker på at du vil slette dette nettverket?"
-  },
   "details": {
     "message": "Detaljer"
   },
@@ -235,15 +223,6 @@
   "editContact": {
     "message": "Rediger kontakt"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS-navn ikke funnet i det gjeldende nettverket. Prøv å bytte til hovednettverket for Ethereum."
-  },
-  "ensRegistrationError": {
-    "message": "Feil i ENS-navneregistrering"
-  },
-  "enterPassword": {
-    "message": "Skriv inn passord "
-  },
   "enterPasswordContinue": {
     "message": "Skriv inn passord for å fortsette"
   },
@@ -255,9 +234,6 @@
   },
   "expandView": {
     "message": "Utvid visning"
-  },
-  "exportPrivateKey": {
-    "message": "Eksporter privat nøkkel"
   },
   "failed": {
     "message": "Mislyktes"
@@ -359,12 +335,6 @@
   "invalidAddressRecipient": {
     "message": "Mottaksadresse er ugyldig "
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Ikke ETH-nettverk, bruk små bokstaver"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Ugyldig Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "Ugyldig RPC URL"
   },
@@ -461,9 +431,6 @@
   "next": {
     "message": "Neste"
   },
-  "noAddressForName": {
-    "message": "Ingen adresse har blitt angitt for dette navnet. "
-  },
   "noConversionRateAvailable": {
     "message": "Ingen konverteringsrate tilgjengelig "
   },
@@ -525,12 +492,6 @@
   "prev": {
     "message": "Tidligere"
   },
-  "primaryCurrencySetting": {
-    "message": "Hovedvaluta "
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Velg nasjonal for å prioritere å vise verdier i nasjonal valuta i kjeden (f.eks. ETH). Velg Fiat for å prioritere visning av verdier i den valgte fiat-valutaen."
-  },
   "privacyMsg": {
     "message": "Personvernerklæring"
   },
@@ -544,14 +505,8 @@
   "privateNetwork": {
     "message": "Privat nettverk "
   },
-  "queue": {
-    "message": "Kø"
-  },
   "readdToken": {
     "message": "Du kan legge til dette tokenet igjen i fremtiden ved å gå til \"Legg til token\" i menyen for kontoalternativer."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Søk, offentlig adresse (0x) eller ENS"
   },
   "reject": {
     "message": "Avslå"
@@ -611,12 +566,6 @@
   "search": {
     "message": "Søk"
   },
-  "searchResults": {
-    "message": "Søkeresultater"
-  },
-  "searchTokens": {
-    "message": "Søk i sjetonger"
-  },
   "securityAndPrivacy": {
     "message": "Sikkerhet og personvern"
   },
@@ -635,9 +584,6 @@
   "selectType": {
     "message": "Velg type "
   },
-  "sendTokens": {
-    "message": "Send tokener"
-  },
   "settings": {
     "message": "Innstillinger"
   },
@@ -652,9 +598,6 @@
   },
   "showHexDataDescription": {
     "message": "Velg dette for å vise hex-datafeltet på sendskjermen"
-  },
-  "showPrivateKeys": {
-    "message": "Vis private nøkler"
   },
   "sigRequest": {
     "message": "Signaturforespørsel "
@@ -770,9 +713,6 @@
   "tryAgain": {
     "message": "Prøv igjen"
   },
-  "typePassword": {
-    "message": "Skriv inn MetaMask-passordet"
-  },
   "unapproved": {
     "message": "Ikke godkjent "
   },
@@ -781,12 +721,6 @@
   },
   "unknown": {
     "message": "Ukjent"
-  },
-  "unknownCameraError": {
-    "message": "Det oppsto en feil under forsøket på å få tilgang til kameraet ditt. Vær så snill og prøv på nytt..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Oisann! Noe gikk galt.... "
   },
   "unknownNetwork": {
     "message": "Ukjent privat nettverk"
@@ -799,9 +733,6 @@
   },
   "unlockMessage": {
     "message": "Det desentraliserte internett venter deg"
-  },
-  "updatedWithDate": {
-    "message": "Oppdatert $1"
   },
   "urlErrorMsg": {
     "message": "URI-er krever det aktuelle HTTP/HTTPS-prefikset."

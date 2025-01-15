@@ -75,9 +75,6 @@
   "asset": {
     "message": "Актив"
   },
-  "attemptingConnect": {
-    "message": "Опит за свързване с blockchain."
-  },
   "attributions": {
     "message": "Функции"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Копирайте адреса в клипборда"
   },
-  "copyPrivateKey": {
-    "message": "Това е Вашият личен ключ (кликнете, за да го копирате)"
-  },
   "copyToClipboard": {
     "message": "Копиране в буферната памет"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Изтриване"
   },
-  "deleteNetwork": {
-    "message": "Да се изтрие ли мрежата?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Наистина ли искате да изтриете тази мрежа?"
-  },
   "details": {
     "message": "Подробности"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "Редактиране на контакт"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "Името на ENS не е намерено в текущата мрежа. Опитайте да преминете към основната мрежа на етереум."
-  },
-  "ensRegistrationError": {
-    "message": "Грешка при регистрацията на име на ENS"
-  },
-  "enterPassword": {
-    "message": "Въведете парола"
-  },
   "enterPasswordContinue": {
     "message": "Въведете парола, за да продължите"
   },
@@ -258,9 +237,6 @@
   },
   "expandView": {
     "message": "Разгъване на изглед"
-  },
-  "exportPrivateKey": {
-    "message": "Експортиране на частен ключ"
   },
   "failed": {
     "message": "Неуспешно"
@@ -368,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "Адресът на получателя е невалиден"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Не е ETH мрежа, задаване на малки букви"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Невалиден Block Explorer URL адрес"
-  },
   "invalidRPC": {
     "message": "Невалиден RPC URL адрес"
   },
@@ -473,9 +443,6 @@
   "next": {
     "message": "Напред"
   },
-  "noAddressForName": {
-    "message": "За това име не е зададен адрес."
-  },
   "noConversionRateAvailable": {
     "message": "Няма наличен процент на преобръщане"
   },
@@ -537,12 +504,6 @@
   "prev": {
     "message": "Предишен"
   },
-  "primaryCurrencySetting": {
-    "message": "Основна валута"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Изберете местна, за да приоритизирате показването на стойности в основната валута на веригата (например ETH). Изберете Fiat, за да поставите приоритет на показването на стойности в избраната от вас fiat валута."
-  },
   "privacyMsg": {
     "message": "Политика за поверителност"
   },
@@ -556,14 +517,8 @@
   "privateNetwork": {
     "message": "Частна мрежа"
   },
-  "queue": {
-    "message": "Опашка"
-  },
   "readdToken": {
     "message": "Можете да добавите този жетон в бъдеще, като отидете на „Добавяне на жетон“ в менюто с опции на акаунти."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Търсене, публичен адрес (0x) или ENS"
   },
   "reject": {
     "message": "Отхвърляне"
@@ -623,12 +578,6 @@
   "search": {
     "message": "Търсене"
   },
-  "searchResults": {
-    "message": "Резултати от търсенето"
-  },
-  "searchTokens": {
-    "message": "Търсене на маркери"
-  },
   "securityAndPrivacy": {
     "message": "Сигурност и поверителност"
   },
@@ -650,9 +599,6 @@
   "send": {
     "message": "Изпращане"
   },
-  "sendTokens": {
-    "message": "Изпращане на жетони"
-  },
   "settings": {
     "message": "Настройки"
   },
@@ -667,9 +613,6 @@
   },
   "showHexDataDescription": {
     "message": "Изберете това, за да се покаже полето с шестнадесетични данни на екрана за изпращане"
-  },
-  "showPrivateKeys": {
-    "message": "Показване на частни ключове"
   },
   "sigRequest": {
     "message": "Заявка за подпис"
@@ -791,9 +734,6 @@
   "tryAgain": {
     "message": "Нов опит"
   },
-  "typePassword": {
-    "message": "Въведете паролата си за MetaMask"
-  },
   "unapproved": {
     "message": "Неодобрено"
   },
@@ -802,12 +742,6 @@
   },
   "unknown": {
     "message": "Неизвестно"
-  },
-  "unknownCameraError": {
-    "message": "При опита за достъп до камерата Ви възникна грешка. Моля, опитайте отново..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Упс! Нещо се обърка...."
   },
   "unknownNetwork": {
     "message": "Неизвестна частна мрежа"
@@ -820,9 +754,6 @@
   },
   "unlockMessage": {
     "message": "Децентрализираната мрежа очаква"
-  },
-  "updatedWithDate": {
-    "message": "Актуализирано $1 "
   },
   "urlErrorMsg": {
     "message": "URI изискват съответния HTTP / HTTPS префикс."

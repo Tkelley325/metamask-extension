@@ -1,171 +1,223 @@
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import nock from 'nock';
 import { renderWithProvider } from '../../../../test/lib/render-helpers';
+import { mockNetworkState } from '../../../../test/stub/networks';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 import NewNetworkInfo from './new-network-info';
 
 const fetchWithCache =
   require('../../../../shared/lib/fetch-with-cache').default;
 
-const state = {
-  metamask: {
-    providerConfig: {
-      ticker: 'ETH',
-      nickname: '',
-      chainId: '0x1',
-      type: 'mainnet',
+const localStorageMock = (function () {
+  let store = {};
+  return {
+    getItem(key) {
+      return store[key];
     },
-    useTokenDetection: false,
-    nativeCurrency: 'ETH',
-  },
-};
 
+    setItem(key, value) {
+      store[key] = value.toString();
+    },
+
+    clear() {
+      store = {};
+    },
+
+    removeItem(key) {
+      delete store[key];
+    },
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+const responseOfTokenList = [];
 describe('NewNetworkInfo', () => {
   afterEach(() => {
     nock.cleanAll();
   });
 
-  it('should render title', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x1')
-      .reply(
-        200,
-        '[{"address":"0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f","symbol":"SNX","decimals":18,"name":"Synthetix Network Token","iconUrl":"https://assets.coingecko.com/coins/images/3406/large/SNX.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","synthetix","zapper","zerion","zeroEx"],"occurrences":12},{"address":"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","symbol":"UNI","decimals":18,"name":"Uniswap","iconUrl":"https://images.prismic.io/token-price-prod/d0352dd9-5de8-4633-839d-bc3422c44d9c_UNI%404x.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","zapper","zerion","zeroEx"],"occurrences":11}]',
+  describe('fetch token successfully', () => {
+    const state = {
+      metamask: {
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+        useExternalServices: true,
+        useTokenDetection: false,
+        currencyRates: {},
+      },
+    };
+
+    it('should match snapshot and render component', async () => {
+      nock('https://token.api.cx.metamask.io')
+        .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+        .reply(200, responseOfTokenList);
+
+      const store = configureMockStore()(state);
+      const { getByText, getByTestId } = renderWithProvider(
+        <NewNetworkInfo />,
+        store,
+      );
+      // wait for the fetch to finish
+      await waitFor(() => {
+        expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+      });
+      // render title
+      expect(getByText("You're now using")).toBeInTheDocument();
+      // render the network name
+      expect(getByText('Ethereum Mainnet')).toBeInTheDocument();
+      expect(
+        getByTestId('new-network-info__bullet-paragraph').textContent,
+      ).toMatchInlineSnapshot(
+        `"Gas is ETH The native token on this network is ETH. It is the token used for gas fees. "`,
+      );
+    });
+
+    it('should render a question mark icon image for non-main network', async () => {
+      nock('https://token.api.cx.metamask.io')
+        .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+        .reply(200, responseOfTokenList);
+
+      const updateTokenDetectionSupportStatus = await fetchWithCache({
+        url: 'https://token.api.cx.metamask.io/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false',
+        functionName: 'getTokenDetectionSupportStatus',
+      });
+
+      state.metamask.nativeCurrency = '';
+
+      const store = configureMockStore()(
+        state,
+        updateTokenDetectionSupportStatus,
+      );
+      const { container, getByTestId } = renderWithProvider(
+        <NewNetworkInfo />,
+        store,
+      );
+      // wait for the fetch to finish
+      await waitFor(() => {
+        expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+      });
+
+      const questionMark = container.querySelector('.question');
+
+      expect(questionMark).toBeDefined();
+    });
+
+    it('should not render first bullet when provider ticker is null', async () => {
+      nock('https://token.api.cx.metamask.io')
+        .get('/tokens/0x3?occurrenceFloor=100&includeNativeAssets=false')
+        .reply(200, '{"error":"ChainId 0x3 is not supported"}');
+
+      const store = configureMockStore()({
+        metamask: {
+          ...state.metamask,
+          ...mockNetworkState({ chainId: '0x3', ticker: undefined }),
+        },
+      });
+      const { container, getByTestId } = renderWithProvider(
+        <NewNetworkInfo />,
+        store,
+      );
+      // wait for the fetch to finish
+      await new Promise((r) => setTimeout(r, 2000));
+      await waitFor(() => {
+        expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+      });
+      const firstBox = container.querySelector(
+        'new-network-info__content-box-1',
       );
 
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x1',
-    );
+      expect(firstBox).toBeNull();
+    });
 
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { getByText } = renderWithProvider(<NewNetworkInfo />, store);
+    describe('add token link', () => {
+      const newState = {
+        metamask: {
+          ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
 
-    expect(getByText('You have switched to')).toBeInTheDocument();
-  });
+          useExternalServices: true,
+          useTokenDetection: true,
+          currencyRates: {},
+        },
+      };
 
-  it('should render a question mark icon image', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x1')
-      .reply(
-        200,
-        '[{"address":"0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f","symbol":"SNX","decimals":18,"name":"Synthetix Network Token","iconUrl":"https://assets.coingecko.com/coins/images/3406/large/SNX.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","synthetix","zapper","zerion","zeroEx"],"occurrences":12},{"address":"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","symbol":"UNI","decimals":18,"name":"Uniswap","iconUrl":"https://images.prismic.io/token-price-prod/d0352dd9-5de8-4633-839d-bc3422c44d9c_UNI%404x.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","zapper","zerion","zeroEx"],"occurrences":11}]',
-      );
+      it('should not render link when auto token detection is set true and token detection is supported', async () => {
+        nock('https://token.api.cx.metamask.io')
+          .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+          .reply(200, responseOfTokenList);
 
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x1',
-    );
+        const store = configureMockStore()(newState);
+        const { getByTestId, queryByTestId } = renderWithProvider(
+          <NewNetworkInfo />,
+          store,
+        );
+        // should not render add token link
+        await waitFor(() => {
+          expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+        });
+        expect(
+          queryByTestId('new-network-info__add-token-manually'),
+        ).toBeNull();
+      });
 
-    state.metamask.nativeCurrency = '';
+      it('should render link when auto token detection is set true and token detection is not supported', async () => {
+        nock('https://token.api.cx.metamask.io')
+          .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+          .replyWithError('something awful happened');
 
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { container } = renderWithProvider(<NewNetworkInfo />, store);
-    const questionMark = container.querySelector('.question');
+        const store = configureMockStore()(newState);
+        const { getByTestId } = renderWithProvider(<NewNetworkInfo />, store);
+        // render add token link when token is supported
+        await waitFor(() => {
+          expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+        });
+      });
 
-    expect(questionMark).toBeDefined();
-  });
+      it('should render link when auto token detection is set false but token detection is not supported', async () => {
+        nock('https://token.api.cx.metamask.io')
+          .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+          .reply(403);
 
-  it('should render Ethereum Mainnet caption', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x1')
-      .reply(
-        200,
-        '[{"address":"0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f","symbol":"SNX","decimals":18,"name":"Synthetix Network Token","iconUrl":"https://assets.coingecko.com/coins/images/3406/large/SNX.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","synthetix","zapper","zerion","zeroEx"],"occurrences":12},{"address":"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","symbol":"UNI","decimals":18,"name":"Uniswap","iconUrl":"https://images.prismic.io/token-price-prod/d0352dd9-5de8-4633-839d-bc3422c44d9c_UNI%404x.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","zapper","zerion","zeroEx"],"occurrences":11}]',
-      );
+        const store = configureMockStore()(state);
+        const { getByTestId } = renderWithProvider(<NewNetworkInfo />, store);
+        // render add token link when token is supported
+        await waitFor(() => {
+          expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+        });
+        expect(
+          getByTestId('new-network-info__add-token-manually'),
+        ).toBeInTheDocument();
+      });
 
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x1',
-    );
+      it('should render link when auto token detection is set false and token detection is supported', async () => {
+        nock('https://token.api.cx.metamask.io')
+          .get('/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false')
+          .reply(200, responseOfTokenList);
 
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { getByText } = renderWithProvider(<NewNetworkInfo />, store);
+        const updateTokenDetectionSupportStatus = await fetchWithCache({
+          url: 'https://token.api.cx.metamask.io/tokens/0x1?occurrenceFloor=100&includeNativeAssets=false',
+          functionName: 'getTokenDetectionSupportStatus',
+        });
 
-    expect(getByText('Ethereum Mainnet')).toBeInTheDocument();
-  });
-
-  it('should render things to keep in mind text', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x1')
-      .reply(
-        200,
-        '[{"address":"0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f","symbol":"SNX","decimals":18,"name":"Synthetix Network Token","iconUrl":"https://assets.coingecko.com/coins/images/3406/large/SNX.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","synthetix","zapper","zerion","zeroEx"],"occurrences":12},{"address":"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","symbol":"UNI","decimals":18,"name":"Uniswap","iconUrl":"https://images.prismic.io/token-price-prod/d0352dd9-5de8-4633-839d-bc3422c44d9c_UNI%404x.png","aggregators":["aave","bancor","cmc","cryptocom","coinGecko","oneInch","paraswap","pmm","zapper","zerion","zeroEx"],"occurrences":11}]',
-      );
-
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x1',
-    );
-
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { getByText } = renderWithProvider(<NewNetworkInfo />, store);
-
-    expect(getByText('Things to keep in mind:')).toBeInTheDocument();
-  });
-
-  it('should render things to keep in mind text when token detection support is not available', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x3')
-      .reply(200, '{"error":"ChainId 0x3 is not supported"}');
-
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x3',
-    );
-
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { getByText } = renderWithProvider(<NewNetworkInfo />, store);
-
-    expect(getByText('Things to keep in mind:')).toBeInTheDocument();
-  });
-
-  it('should not render first bullet when provider ticker is null', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x3')
-      .reply(200, '{"error":"ChainId 0x3 is not supported"}');
-
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x3',
-    );
-
-    state.metamask.providerConfig.ticker = null;
-
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { container } = renderWithProvider(<NewNetworkInfo />, store);
-    const firstBox = container.querySelector('new-network-info__content-box-1');
-
-    expect(firstBox).toBeNull();
-  });
-
-  it('should render click to manually add link', async () => {
-    nock('https://token-api.metaswap.codefi.network')
-      .get('/tokens/0x3')
-      .reply(200, '{"error":"ChainId 0x3 is not supported"}');
-
-    const updateTokenDetectionSupportStatus = await fetchWithCache(
-      'https://token-api.metaswap.codefi.network/tokens/0x3',
-    );
-
-    const store = configureMockStore()(
-      state,
-      updateTokenDetectionSupportStatus,
-    );
-    const { getByText } = renderWithProvider(<NewNetworkInfo />, store);
-
-    expect(getByText('Click here to manually add the tokens.')).toBeDefined();
+        const store = configureMockStore()(
+          state,
+          updateTokenDetectionSupportStatus,
+        );
+        const { getByText, getByTestId } = renderWithProvider(
+          <NewNetworkInfo />,
+          store,
+        );
+        // wait for the fetch to finish
+        await waitFor(() => {
+          expect(getByTestId('new-network-info__wrapper')).toBeInTheDocument();
+        });
+        // render add token link when token is supported
+        expect(
+          getByText(
+            'Your tokens may not automatically show up in your wallet. You can always add tokens manually.',
+          ),
+        ).toBeInTheDocument();
+      });
+    });
   });
 });

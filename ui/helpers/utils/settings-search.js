@@ -1,25 +1,47 @@
 /* eslint-disable require-unicode-regexp */
-import { SETTINGS_CONSTANTS } from '../constants/settings';
+import SETTINGS_CONSTANTS from '../constants/settings';
 
 let settingsRoutes;
 
+/** @returns {SettingRouteConfig[]} */
 export function getSettingsRoutes() {
   if (settingsRoutes) {
     return settingsRoutes;
   }
-  settingsRoutes = SETTINGS_CONSTANTS.filter((routeObject) =>
-    routeObject.featureFlag ? process.env[routeObject.featureFlag] : true,
+  settingsRoutes = SETTINGS_CONSTANTS.filter(
+    (routeObject) =>
+      (routeObject.featureFlag ? process.env[routeObject.featureFlag] : true) &&
+      !routeObject.hidden,
   );
   return settingsRoutes;
 }
 
+/**
+ * @param {Function} t - context.t function
+ * @param {string} tabMessage
+ * @returns {SettingRouteConfig[]}
+ */
 function getFilteredSettingsRoutes(t, tabMessage) {
   return getSettingsRoutes().filter((routeObject) => {
     return routeObject.tabMessage(t) === tabMessage;
   });
 }
 
-export function getNumberOfSettingsInSection(t, tabMessage) {
+export function getSpecificSettingsRoute(t, tabMessage, sectionMessage) {
+  return getSettingsRoutes().find((routeObject) => {
+    return (
+      routeObject.tabMessage(t) === tabMessage &&
+      routeObject.sectionMessage(t) === sectionMessage
+    );
+  });
+}
+
+/**
+ * @param {Function} t - context.t function
+ * @param {string} tabMessage
+ * @returns {number}
+ */
+export function getNumberOfSettingRoutesInTab(t, tabMessage) {
   return getFilteredSettingsRoutes(t, tabMessage).length;
 }
 
@@ -32,10 +54,12 @@ export function handleSettingsRefs(t, tabMessage, settingsRefs) {
   if (settingsRefsIndex === -1) {
     return;
   }
+
   const settingsRef =
     settingsSearchJsonFiltered.length === 1
       ? settingsRefs
       : settingsRefs[settingsRefsIndex];
+
   if (settingsRef?.current) {
     settingsRef.current.scrollIntoView({
       behavior: 'smooth',
@@ -46,24 +70,35 @@ export function handleSettingsRefs(t, tabMessage, settingsRefs) {
   }
 }
 
-function colorText(menuElement, regex) {
+export function colorText(menuElement, regex) {
   if (menuElement !== null) {
     let elemText = menuElement.innerHTML;
     elemText = elemText.replace('&amp;', '&');
     elemText = elemText.replace(
-      /(<span style="background:#ffd33d">|<\/span>)/gim,
+      /(<span class="settings-page__header__search__list__item__highlight">|<\/span>)/gim,
       '',
     );
     menuElement.innerHTML = elemText.replace(
       regex,
-      '<span style="background:#ffd33d">$&</span>',
+      '<span class="settings-page__header__search__list__item__highlight">$&</span>',
     );
   }
 }
 
+/**
+ * Replaces any special characters in the input string that have a meaning in regular expressions
+ * (such as \, *, +, ?, etc.) with their escaped versions (e.g., \ becomes \\).
+ *
+ * @param input - The input string to be escaped for use in a regular expression.
+ * @returns The escaped string safe for use in a regular expression.
+ */
+export const escapeRegExp = (input) => {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapes special characters
+};
+
 export function highlightSearchedText() {
   const searchElem = document.getElementById('search-settings');
-  const searchRegex = new RegExp(searchElem.value, 'gi');
+  const searchRegex = new RegExp(escapeRegExp(searchElem.value), 'gi');
   const results = document.querySelectorAll(
     '.settings-page__header__search__list__item',
   );

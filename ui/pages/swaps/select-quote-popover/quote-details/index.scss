@@ -1,3 +1,5 @@
+@use "design-system";
+
 .quote-details {
   display: flex;
   flex-flow: column;
@@ -5,7 +7,7 @@
   padding-right: 16px;
 
   &__detail-header {
-    @include H7;
+    @include design-system.H7;
 
     color: var(--color-text-alternative);
     margin-bottom: 2px;
@@ -13,7 +15,7 @@
   }
 
   &__detail-content {
-    @include H6;
+    @include design-system.H6;
 
     color: var(--color-text-default);
 
@@ -27,10 +29,6 @@
     justify-content: flex-start;
     align-items: center;
     height: inherit;
-
-    .view-quote__conversion-rate-eth-label {
-      color: var(--color-text-default);
-    }
 
     i {
       color: var(--color-primary-default);
@@ -66,14 +64,6 @@
     }
   }
 
-  .view-quote__conversion-rate-token-label {
-    @include H6;
-
-    color: var(--color-text-default);
-    font-weight: bold;
-    margin-left: 2px;
-  }
-
   &__metafox-logo {
     width: 17px;
     margin-right: 4px;
@@ -89,7 +79,7 @@
   }
 
   &__font-small {
-    @include H7;
+    @include design-system.H7;
   }
 
   &__bold {

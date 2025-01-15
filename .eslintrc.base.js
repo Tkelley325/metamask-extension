@@ -12,6 +12,9 @@ module.exports = {
   },
 
   rules: {
+    // TODO: re-enable once the proposed feature at https://github.com/gajus/eslint-plugin-jsdoc/pull/964#issuecomment-1936470252 is available
+    'jsdoc/check-line-alignment': 'off',
+
     'default-param-last': 'off',
     'prefer-object-spread': 'error',
     'require-atomic-updates': 'off',
@@ -72,5 +75,8 @@ module.exports = {
     // upgrading eslint and dependencies. This rule should be evaluated and
     // if agreeable turned on upstream in @metamask/eslint-config
     'import/no-named-as-default-member': 'off',
+
+    // This is necessary to run eslint on Windows and not get a thousand CRLF errors
+    'prettier/prettier': ['error', { endOfLine: 'auto' }],
   },
 };

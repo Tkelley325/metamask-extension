@@ -5,15 +5,7 @@ import reduceApp from './app';
 const actions = actionConstants;
 
 describe('App State', () => {
-  const metamaskState = {
-    selectedAddress: '0xAddress',
-    identities: {
-      '0xAddress': {
-        name: 'account 1',
-        address: '0xAddress',
-      },
-    },
-  };
+  const metamaskState = {};
 
   it('app init state', () => {
     const initState = reduceApp(metamaskState, {});
@@ -152,14 +144,14 @@ describe('App State', () => {
 
   it('shows confirm tx page', () => {
     const txs = {
-      unapprovedTxs: {
-        1: {
+      transactions: [
+        {
           id: 1,
         },
-        2: {
+        {
           id: 2,
         },
-      },
+      ],
     };
     const oldState = { ...metamaskState, ...txs };
     const state = reduceApp(oldState, {
@@ -174,14 +166,14 @@ describe('App State', () => {
 
   it('completes tx continues to show pending txs current view context', () => {
     const txs = {
-      unapprovedTxs: {
-        1: {
+      transactions: [
+        {
           id: 1,
         },
-        2: {
+        {
           id: 2,
         },
-      },
+      ],
     };
 
     const oldState = { ...metamaskState, ...txs };
@@ -302,20 +294,68 @@ describe('App State', () => {
     expect(state.accountDetail.privateKey).toStrictEqual('private key');
   });
 
-  it('set mouse user state', () => {
-    const state = reduceApp(metamaskState, {
-      type: actions.SET_MOUSE_USER_STATE,
-      payload: true,
-    });
-
-    expect(state.isMouseUser).toStrictEqual(true);
-  });
-
   it('smart transactions - SET_SMART_TRANSACTIONS_ERROR', () => {
     const state = reduceApp(metamaskState, {
       type: actions.SET_SMART_TRANSACTIONS_ERROR,
       payload: 'Server Side Error',
     });
     expect(state.smartTransactionsError).toStrictEqual('Server Side Error');
+  });
+  it('shows delete metametrics modal', () => {
+    const state = reduceApp(metamaskState, {
+      type: actions.DELETE_METAMETRICS_DATA_MODAL_OPEN,
+    });
+
+    expect(state.showDeleteMetaMetricsDataModal).toStrictEqual(true);
+  });
+  it('hides delete metametrics modal', () => {
+    const deleteMetaMetricsDataModalState = {
+      showDeleteMetaMetricsDataModal: true,
+    };
+    const oldState = { ...metamaskState, ...deleteMetaMetricsDataModalState };
+
+    const state = reduceApp(oldState, {
+      type: actions.DELETE_METAMETRICS_DATA_MODAL_CLOSE,
+    });
+
+    expect(state.showDeleteMetaMetricsDataModal).toStrictEqual(false);
+  });
+  it('shows delete metametrics error modal', () => {
+    const state = reduceApp(metamaskState, {
+      type: actions.DATA_DELETION_ERROR_MODAL_OPEN,
+    });
+
+    expect(state.showDataDeletionErrorModal).toStrictEqual(true);
+  });
+  it('hides delete metametrics error modal', () => {
+    const deleteMetaMetricsErrorModalState = {
+      showDataDeletionErrorModal: true,
+    };
+    const oldState = { ...metamaskState, ...deleteMetaMetricsErrorModalState };
+
+    const state = reduceApp(oldState, {
+      type: actions.DATA_DELETION_ERROR_MODAL_CLOSE,
+    });
+
+    expect(state.showDataDeletionErrorModal).toStrictEqual(false);
+  });
+
+  it('displays error in settings', () => {
+    const state = reduceApp(metamaskState, {
+      type: actions.SHOW_SETTINGS_PAGE_ERROR,
+      payload: 'settings page error',
+    });
+
+    expect(state.errorInSettings).toStrictEqual('settings page error');
+  });
+
+  it('hides error in settings', () => {
+    const displayErrorInSettings = { errorInSettings: 'settings page error' };
+    const oldState = { ...metamaskState, ...displayErrorInSettings };
+    const state = reduceApp(oldState, {
+      type: actions.HIDE_SETTINGS_PAGE_ERROR,
+    });
+
+    expect(state.errorInSettings).toBeNull();
   });
 });

@@ -3,19 +3,24 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {
   AlignItems,
+  BackgroundColor,
   BlockSize,
   BorderRadius,
-  BackgroundColor,
   Display,
   IconColor,
   JustifyContent,
   Size,
+  TextAlign,
   TextColor,
   TextVariant,
-  TextAlign,
 } from '../../../helpers/constants/design-system';
-import { ButtonBase, ButtonIcon, IconName, Box } from '../../component-library';
-import { Text } from '../../component-library/text/deprecated';
+import {
+  Box,
+  ButtonBase,
+  ButtonIcon,
+  IconName,
+  Text,
+} from '../../component-library';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import { Menu } from '../../ui/menu';
 
@@ -105,8 +110,11 @@ export const ProductTour = ({
             paddingTop={2}
             color={TextColor.infoInverse}
             variant={TextVariant.bodyMd}
+            data-testid="multichain-product-tour-menu-popover-step-counter"
           >
-            {currentStep}/{totalSteps}
+            {currentStep && totalSteps
+              ? `${currentStep} / ${totalSteps}`
+              : null}
           </Text>
           <ButtonBase
             backgroundColor={BackgroundColor.primaryInverse}

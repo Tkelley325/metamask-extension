@@ -75,9 +75,6 @@
   "asset": {
     "message": "ಆಸ್ತಿ"
   },
-  "attemptingConnect": {
-    "message": "ಬ್ಲಾಕ್‌ಚೈನ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ."
-  },
   "attributions": {
     "message": "ಗುಣಲಕ್ಷಣಗಳು"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "ವಿಳಾಸವನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಿ"
   },
-  "copyPrivateKey": {
-    "message": "ಇದು ನಿಮ್ಮ ಖಾಸಗಿ ಕೀ ಆಗಿದೆ (ನಕಲಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ)"
-  },
   "copyToClipboard": {
     "message": "ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಿ"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "ಅಳಿಸಿ"
   },
-  "deleteNetwork": {
-    "message": "ನೆಟ್‌ವರ್ಕ್ ಅಳಿಸುವುದೇ?"
-  },
-  "deleteNetworkDescription": {
-    "message": "ನೀವು ಈ ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ಖಚಿತವಾಗಿ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?"
-  },
   "details": {
     "message": "ವಿವರಗಳು"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "ಸಂಪರ್ಕವನ್ನು ಸಂಪಾದಿಸಿ"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ಪ್ರಸ್ತುತ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ENS ಹೆಸರು ಕಂಡುಬಂದಿಲ್ಲ. ಮುಖ್ಯವಾಗಿರುವ ಎಥೆರಿಯಮ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ."
-  },
-  "ensRegistrationError": {
-    "message": "ENS ಹೆಸರಿನ ನೋಂದಣಿಯಲ್ಲಿ ದೋಷ"
-  },
-  "enterPassword": {
-    "message": "ಪಾಸ್‌ವರ್ಡ್‌ ಅನ್ನು ನಮೂದಿಸಿ"
-  },
   "enterPasswordContinue": {
     "message": "ಮುಂದುವರೆಯಲು ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"
   },
@@ -259,18 +238,11 @@
   "expandView": {
     "message": "ವಿಸ್ತರಿಸಿದ ವೀಕ್ಷಣೆ"
   },
-  "exportPrivateKey": {
-    "message": "ಖಾಸಗಿ ಕೀಲಿಯನ್ನು ರಫ್ತು ಮಾಡಿ"
-  },
   "failed": {
     "message": "ವಿಫಲವಾಗಿದೆ"
   },
   "fast": {
     "message": "ವೇಗ"
-  },
-  "fiat": {
-    "message": "ಫಿಯೆಟ್",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "ಫೈಲ್ ಆಮದು ಮಾಡುವಿಕೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿಲ್ಲವೇ? ಇಲ್ಲಿ ಕ್ಲಿಕ್ ಮಾಡಿ!",
@@ -372,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "ಸ್ವೀಕೃತಿದಾರರ ವಿಳಾಸವು ಅಮಾನ್ಯವಾಗಿದೆ"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "ETH ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಲ್ಲ, ಸಣ್ಣಕ್ಷರಕ್ಕೆ ಹೊಂದಿಸಲಾಗಿದೆ"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "ಅಮಾನ್ಯವಾದ Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "ಅಮಾನ್ಯವಾದ RPC URL"
   },
@@ -477,9 +443,6 @@
   "next": {
     "message": "ಮುಂದೆ"
   },
-  "noAddressForName": {
-    "message": "ಈ ಹೆಸರಿಗೆ ಯಾವುದೇ ವಿಳಾಸವನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ."
-  },
   "noConversionRateAvailable": {
     "message": "ಯಾವುದೇ ಪರಿವರ್ತನೆ ದರ ಲಭ್ಯವಿಲ್ಲ"
   },
@@ -541,12 +504,6 @@
   "prev": {
     "message": "ಹಿಂದಿನ"
   },
-  "primaryCurrencySetting": {
-    "message": "ಪ್ರಾಥಮಿಕ ಕರೆನ್ಸಿ"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "ಸರಪಳಿಯ ಸ್ಥಳೀಯ ಕರೆನ್ಸಿಯಲ್ಲಿ ಮೌಲ್ಯಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ಆದ್ಯತೆ ನೀಡಲು ಸ್ಥಳೀಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಉದಾ. ETH). ನಿಮ್ಮ ಆಯ್ಕೆಮಾಡಿದ ಫಿಯೆಟ್ ಕರೆನ್ಸಿಯಲ್ಲಿ ಮೌಲ್ಯಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ಆದ್ಯತೆ ನೀಡಲು ಫಿಯೆಟ್ ಆಯ್ಕೆಮಾಡಿ."
-  },
   "privacyMsg": {
     "message": "ಗೌಪ್ಯತೆ ನೀತಿ"
   },
@@ -560,14 +517,8 @@
   "privateNetwork": {
     "message": "ಖಾಸಗಿ ನೆಟ್‌ವರ್ಕ್"
   },
-  "queue": {
-    "message": "ಸರತಿ"
-  },
   "readdToken": {
     "message": "ನಿಮ್ಮ ಖಾತೆಗಳ ಆಯ್ಕೆಗಳ ಮೆನುವಿನಲ್ಲಿ \"ಟೋಕನ್ ಸೇರಿಸು\" ಗೆ ಹೋಗುವ ಮೂಲಕ ನೀವು ಈ ಟೋಕನ್ ಅನ್ನು ಭವಿಷ್ಯದಲ್ಲಿ ಮರಳಿ ಸೇರಿಸಬಹುದು."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "ಸಾರ್ವಜನಿಕ ವಿಳಾಸ (0x) ಅಥವಾ ENS ಹುಡುಕಿ"
   },
   "reject": {
     "message": "ತಿರಸ್ಕರಿಸಿ"
@@ -627,12 +578,6 @@
   "search": {
     "message": "ಹುಡುಕಾಟ"
   },
-  "searchResults": {
-    "message": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳು"
-  },
-  "searchTokens": {
-    "message": "ಟೋಕನ್‌ಗಳನ್ನು ಹುಡುಕಿ"
-  },
   "securityAndPrivacy": {
     "message": "ಭದ್ರತೆ ಮತ್ತು ಗೌಪ್ಯತೆ"
   },
@@ -654,9 +599,6 @@
   "send": {
     "message": "ಕಳುಹಿಸು"
   },
-  "sendTokens": {
-    "message": "ಟೋಕನ್‌ಗಳನ್ನು ಕಳುಹಿಸಿ"
-  },
   "settings": {
     "message": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು"
   },
@@ -671,9 +613,6 @@
   },
   "showHexDataDescription": {
     "message": "ಕಳುಹಿಸುವ ಪರದೆಯಲ್ಲಿ ಹೆಕ್ಸ್ ಡೇಟಾ ಕ್ಷೇತ್ರವನ್ನು ತೋರಿಸಲು ಇದನ್ನು ಆಯ್ಕೆಮಾಡಿ"
-  },
-  "showPrivateKeys": {
-    "message": "ಖಾಸಗಿ ಕೀಗಳನ್ನು ತೋರಿಸಿ"
   },
   "sigRequest": {
     "message": "ಸಹಿಯ ವಿನಂತಿ"
@@ -795,9 +734,6 @@
   "tryAgain": {
     "message": "ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"
   },
-  "typePassword": {
-    "message": "ನಿಮ್ಮ MetaMask ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಟೈಪ್ ಮಾಡಿ"
-  },
   "unapproved": {
     "message": "ಅನುಮೋದಿಸದಿರುವುದು"
   },
@@ -806,12 +742,6 @@
   },
   "unknown": {
     "message": "ಅಪರಿಚಿತ"
-  },
-  "unknownCameraError": {
-    "message": "ನಿಮ್ಮ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಪ್ರಯತ್ನಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "ಓಹ್! ಏನೋ ತಪ್ಪಾಗಿದೆ...."
   },
   "unknownNetwork": {
     "message": "ಅಪರಿಚಿತ ಖಾಸಗಿ ನೆಟ್‌ವರ್ಕ್"
@@ -824,9 +754,6 @@
   },
   "unlockMessage": {
     "message": "ವಿಕೇಂದ್ರೀಕೃತ ವೆಬ್ ನಿರೀಕ್ಷಿಸುತ್ತಿದೆ"
-  },
-  "updatedWithDate": {
-    "message": "$1 ನವೀಕರಿಸಲಾಗಿದೆ"
   },
   "urlErrorMsg": {
     "message": "URI ಗಳಿಗೆ ಸೂಕ್ತವಾದ HTTP/HTTPS ಪೂರ್ವಪ್ರತ್ಯಯದ ಅಗತ್ಯವಿದೆ."

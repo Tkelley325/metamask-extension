@@ -2,10 +2,10 @@ import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
+import { setBackgroundConnection } from '../../../store/background-connection';
 import {
   renderWithProvider,
   createSwapsMockStore,
-  setBackgroundConnection,
   fireEvent,
 } from '../../../../test/jest';
 import {
@@ -13,6 +13,8 @@ import {
   setSwapToToken,
   setFromTokenInputValue,
 } from '../../../ducks/swaps/swaps';
+import { mockNetworkState } from '../../../../test/stub/networks';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 import PrepareSwapPage from './prepare-swap-page';
 
 const middleware = [thunk];
@@ -27,6 +29,7 @@ const createProps = (customProps = {}) => {
 
 setBackgroundConnection({
   resetPostFetchState: jest.fn(),
+  ignoreTokens: jest.fn(),
   setBackgroundSwapRouteState: jest.fn(),
   clearSwapsQuotes: jest.fn(),
   stopPollingForQuotes: jest.fn(),
@@ -36,8 +39,8 @@ setBackgroundConnection({
   setFromTokenInputValue: jest.fn(),
 });
 
-jest.mock('../../../../shared/lib/token-util.ts', () => {
-  const actual = jest.requireActual('../../../../shared/lib/token-util.ts');
+jest.mock('../../../../shared/lib/token-util', () => {
+  const actual = jest.requireActual('../../../../shared/lib/token-util');
   return {
     ...actual,
     fetchTokenBalance: jest.fn(() => Promise.resolve()),
@@ -79,9 +82,6 @@ describe('PrepareSwapPage', () => {
       store,
     );
     expect(getByText('Select token')).toBeInTheDocument();
-    expect(
-      document.querySelector('.slippage-buttons__button-group'),
-    ).toMatchSnapshot();
   });
 
   it('switches swap from and to tokens', () => {
@@ -112,9 +112,15 @@ describe('PrepareSwapPage', () => {
   it('renders the block explorer link, only 1 verified source', () => {
     const mockStore = createSwapsMockStore();
     mockStore.swaps.toToken.occurances = 1;
-    const store = configureMockStore(middleware)(mockStore);
+    const store = configureMockStore(middleware)({
+      ...mockStore,
+      metamask: {
+        ...mockStore.metamask,
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+      },
+    });
     const props = createProps();
-    const { getByText } = renderWithProvider(
+    const { getByText, getAllByText } = renderWithProvider(
       <PrepareSwapPage {...props} />,
       store,
     );
@@ -122,16 +128,22 @@ describe('PrepareSwapPage', () => {
     expect(
       getByText('USDC is only verified on 1 source', { exact: false }),
     ).toBeInTheDocument();
-    expect(getByText('Etherscan')).toBeInTheDocument();
+    expect(getAllByText('Etherscan')[0]).toBeInTheDocument();
     expect(getByText('Continue swapping')).toBeInTheDocument();
   });
 
   it('renders the block explorer link, 0 verified sources', () => {
     const mockStore = createSwapsMockStore();
     mockStore.swaps.toToken.occurances = 0;
-    const store = configureMockStore(middleware)(mockStore);
+    const store = configureMockStore(middleware)({
+      ...mockStore,
+      metamask: {
+        ...mockStore.metamask,
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+      },
+    });
     const props = createProps();
-    const { getByText } = renderWithProvider(
+    const { getByText, getAllByText } = renderWithProvider(
       <PrepareSwapPage {...props} />,
       store,
     );
@@ -139,7 +151,7 @@ describe('PrepareSwapPage', () => {
     expect(
       getByText('Verify this token on', { exact: false }),
     ).toBeInTheDocument();
-    expect(getByText('Etherscan')).toBeInTheDocument();
+    expect(getAllByText('Etherscan')[0]).toBeInTheDocument();
     expect(getByText('Continue swapping')).toBeInTheDocument();
   });
 
@@ -147,13 +159,19 @@ describe('PrepareSwapPage', () => {
     global.platform = { openTab: jest.fn() };
     const mockStore = createSwapsMockStore();
     mockStore.swaps.toToken.occurances = 1;
-    const store = configureMockStore(middleware)(mockStore);
+    const store = configureMockStore(middleware)({
+      ...mockStore,
+      metamask: {
+        ...mockStore.metamask,
+        ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+      },
+    });
     const props = createProps();
-    const { getByText } = renderWithProvider(
+    const { getAllByText } = renderWithProvider(
       <PrepareSwapPage {...props} />,
       store,
     );
-    const blockExplorer = getByText('Etherscan');
+    const blockExplorer = getAllByText('Etherscan')[0];
     expect(blockExplorer).toBeInTheDocument();
     fireEvent.click(blockExplorer);
     expect(global.platform.openTab).toHaveBeenCalledWith({
@@ -184,5 +202,70 @@ describe('PrepareSwapPage', () => {
     const maxLink = getByText('Max');
     fireEvent.click(maxLink);
     expect(setFromTokenInputValue).toHaveBeenCalled();
+  });
+
+  it('should have the Bridge link enabled if chain id is part of supported chains and there are no quotes', () => {
+    const mockStore = createSwapsMockStore();
+    mockStore.metamask.providerConfig = {
+      chainId: '0x1',
+    };
+    mockStore.metamask.swapsState.quotes = [];
+    const store = configureMockStore(middleware)(mockStore);
+
+    const props = createProps();
+    const { queryByTestId } = renderWithProvider(
+      <PrepareSwapPage {...props} />,
+      store,
+    );
+    const bridgeButton = queryByTestId(
+      'prepare-swap-page-cross-chain-swaps-link',
+    );
+    expect(bridgeButton).toBeInTheDocument();
+    expect(bridgeButton).toBeEnabled();
+  });
+
+  it('should not have the Bridge link enabled if chain id is part of supported chains but there are quotes', () => {
+    const mockStore = createSwapsMockStore();
+    mockStore.metamask.providerConfig = {
+      chainId: '0x1',
+    };
+    expect(
+      Object.keys(mockStore.metamask.swapsState.quotes).length,
+    ).toBeDefined();
+    const store = configureMockStore(middleware)(mockStore);
+
+    const props = createProps();
+    const { queryByTestId } = renderWithProvider(
+      <PrepareSwapPage {...props} />,
+      store,
+    );
+    const bridgeButton = queryByTestId(
+      'prepare-swap-page-cross-chain-swaps-link',
+    );
+
+    expect(bridgeButton).toBeNull();
+  });
+
+  it('should not have the Bridge link enabled if there are quotes but chain id is not part of supported chains', () => {
+    const mockStore = createSwapsMockStore();
+    mockStore.metamask.providerConfig = {
+      chainId: '0x539', // swaps testnet
+    };
+    expect(
+      Object.keys(mockStore.metamask.swapsState.quotes).length,
+    ).toBeDefined();
+
+    const store = configureMockStore(middleware)(mockStore);
+
+    const props = createProps();
+    const { queryByTestId } = renderWithProvider(
+      <PrepareSwapPage {...props} />,
+      store,
+    );
+    const bridgeButton = queryByTestId(
+      'prepare-swap-page-cross-chain-swaps-link',
+    );
+
+    expect(bridgeButton).toBeNull();
   });
 });

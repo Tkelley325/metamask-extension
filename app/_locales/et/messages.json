@@ -75,9 +75,6 @@
   "asset": {
     "message": "Vara"
   },
-  "attemptingConnect": {
-    "message": "Plokiahelaga ühenduse loomise katse."
-  },
   "attributions": {
     "message": "Omistamised"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "Kopeeri aadress lõikelauale"
   },
-  "copyPrivateKey": {
-    "message": "See on teie privaatne võti (klõpsake kopeerimiseks)"
-  },
   "copyToClipboard": {
     "message": "Kopeeri lõikelauale"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "Kustuta"
   },
-  "deleteNetwork": {
-    "message": "Võrk kustutada?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Olete kindel, et soovite selle võrgu kustutada?"
-  },
   "details": {
     "message": "Üksikasjad"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "Muuda kontakti"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "ENS-i nime ei leitud praegusest võrgust. Proovige lülituda peamisele Ethereumi võrgule."
-  },
-  "ensRegistrationError": {
-    "message": "Tõrge ENS-i nime registreerimisel"
-  },
-  "enterPassword": {
-    "message": "Sisestage parool"
-  },
   "enterPasswordContinue": {
     "message": "Jätkamiseks sisestage parool"
   },
@@ -258,9 +237,6 @@
   },
   "expandView": {
     "message": "Laienda vaadet"
-  },
-  "exportPrivateKey": {
-    "message": "Ekspordi privaatvõti"
   },
   "failed": {
     "message": "Nurjus"
@@ -368,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "Saaja aadress on vale"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Kehtetu ETH-võrk, kasutage väiketähti"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Vale Block Explorer URL"
-  },
   "invalidRPC": {
     "message": "Vale RPC URL"
   },
@@ -467,9 +437,6 @@
   "next": {
     "message": "Edasi"
   },
-  "noAddressForName": {
-    "message": "Sellele nimele pole registreeritud ühtegi aadressi."
-  },
   "noConversionRateAvailable": {
     "message": "Ühtegi vahetuskurssi pole saadaval"
   },
@@ -531,12 +498,6 @@
   "prev": {
     "message": "Eelm"
   },
-  "primaryCurrencySetting": {
-    "message": "Põhivaluuta"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Valige omavääring, et prioriseerida vääringu kuvamist ahela omavääringus (nt ETH). Valige Fiat, et prioriseerida vääringu kuvamist valitud fiat-vääringus."
-  },
   "privacyMsg": {
     "message": "privaatsuspoliitika"
   },
@@ -550,14 +511,8 @@
   "privateNetwork": {
     "message": "Privaatvõrk"
   },
-  "queue": {
-    "message": "Järjekord"
-  },
   "readdToken": {
     "message": "Saate selle loa tulevikus tagasi lisada, kui lähete oma kontovalikute menüüs vahelehele „Lisa luba“."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Otsing, avalik aadress (0x) või ENS"
   },
   "reject": {
     "message": "Lükka tagasi"
@@ -617,12 +572,6 @@
   "search": {
     "message": "Otsi"
   },
-  "searchResults": {
-    "message": "Otsingutulemused"
-  },
-  "searchTokens": {
-    "message": "Lubade otsimine"
-  },
   "securityAndPrivacy": {
     "message": "Turvalisus ja privaatsus"
   },
@@ -644,9 +593,6 @@
   "send": {
     "message": "Saada"
   },
-  "sendTokens": {
-    "message": "Saada lube"
-  },
   "settings": {
     "message": "Seaded"
   },
@@ -661,9 +607,6 @@
   },
   "showHexDataDescription": {
     "message": "Valige see, et kuvada saatmisekraanil hex-andmete väli"
-  },
-  "showPrivateKeys": {
-    "message": "Kuva privaatvõtmed"
   },
   "sigRequest": {
     "message": "Allkirja taotlus"
@@ -785,9 +728,6 @@
   "tryAgain": {
     "message": "Proovi uuesti"
   },
-  "typePassword": {
-    "message": "Sisestage oma MetaMaski parool"
-  },
   "unapproved": {
     "message": "Kinnitamata"
   },
@@ -796,12 +736,6 @@
   },
   "unknown": {
     "message": "Teadmata"
-  },
-  "unknownCameraError": {
-    "message": "Kaamerale ligipääsemisel ilmnes tõrge. Proovige uuesti..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Oih! Midagi läks valesti...."
   },
   "unknownNetwork": {
     "message": "Tundmatu privaatvõrk"
@@ -814,9 +748,6 @@
   },
   "unlockMessage": {
     "message": "Detsentraliseeritud veeb ootab"
-  },
-  "updatedWithDate": {
-    "message": "Värskendatud $1"
   },
   "urlErrorMsg": {
     "message": "URI-d nõuavad sobivat HTTP/HTTPS-i prefiksit."

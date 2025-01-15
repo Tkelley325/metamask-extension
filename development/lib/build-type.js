@@ -12,13 +12,14 @@ const {
   boolean,
   coerce,
   union,
+  number,
   unknown,
   validate,
   nullable,
   never,
   literal,
 } = require('superstruct');
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 const { uniqWith } = require('lodash');
 
 const BUILDS_YML_PATH = path.resolve('./builds.yml');
@@ -62,11 +63,31 @@ const EnvArrayStruct = unique(
   },
 );
 
+/**
+ * Ensures a number is within a given range
+ *
+ * @param {number} min
+ * @param {number} max
+ */
+const isInRange = (min, max) => {
+  /**
+   *
+   * @param {number} value
+   * @returns boolean
+   */
+  function check(value) {
+    return value >= min && value <= max;
+  }
+  return refine(number(), 'range', check);
+};
+
 const BuildTypeStruct = object({
+  id: isInRange(10, 64),
   features: optional(unique(array(string()))),
   env: optional(EnvArrayStruct),
   isPrerelease: optional(boolean()),
   manifestOverrides: union([string(), literal(false)]),
+  buildNameOverride: union([string(), literal(false)]),
 });
 
 const CopyAssetStruct = object({ src: string(), dest: string() });
@@ -134,9 +155,7 @@ function loadBuildTypesConfig() {
   if (cachedBuildTypes !== null) {
     return cachedBuildTypes;
   }
-  const buildsData = yaml.load(fs.readFileSync(BUILDS_YML_PATH, 'utf8'), {
-    json: true,
-  });
+  const buildsData = yaml.parse(fs.readFileSync(BUILDS_YML_PATH, 'utf8'));
   const [err, result] = validate(buildsData, BuildTypesStruct, {
     coerce: true,
   });
@@ -146,7 +165,7 @@ function loadBuildTypesConfig() {
     });
   }
   cachedBuildTypes = result;
-  return buildsData;
+  return cachedBuildTypes;
 }
 
 /**

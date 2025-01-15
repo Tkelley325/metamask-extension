@@ -45,9 +45,6 @@
   "approved": {
     "message": "அங்கீகரிக்கப்பட்ட"
   },
-  "attemptingConnect": {
-    "message": "இணைக்க முயற்சி செய்க ப்ளாக்சைன்"
-  },
   "attributions": {
     "message": "பண்புகளும்"
   },
@@ -87,9 +84,6 @@
   "copiedExclamation": {
     "message": "நகலெடுக்கப்பட்டன!"
   },
-  "copyPrivateKey": {
-    "message": "இது உங்கள் தனிப்பட்ட விசை (நகலெடுக்க கிளிக் செய்யவும்)"
-  },
   "copyToClipboard": {
     "message": "கிளிப்போர்டுக்கு நகலெடு"
   },
@@ -126,24 +120,14 @@
   "edit": {
     "message": "திருத்து"
   },
-  "enterPassword": {
-    "message": "கடவுச்சொல்லை உள்ளிடவும்"
-  },
   "etherscanView": {
     "message": "Etherscan கணக்கைப் பார்க்கவும்"
-  },
-  "exportPrivateKey": {
-    "message": "தனியார் விசை ஐ ஏற்றுமதி செய்க"
   },
   "failed": {
     "message": "தோல்வி"
   },
   "fast": {
     "message": "வேகமான"
-  },
-  "fiat": {
-    "message": "FIAT",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "கோப்பு இறக்குமதி வேலை செய்யவில்லையா? இங்கே கிளிக் செய்யவும்!",
@@ -202,9 +186,6 @@
   },
   "invalidAddressRecipient": {
     "message": "பெறுநர் முகவரி தவறானது"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "தவறான Block Explorer URI"
   },
   "invalidRPC": {
     "message": "தவறான RPC URI"
@@ -275,9 +256,6 @@
   "next": {
     "message": "அடுத்தது"
   },
-  "noAddressForName": {
-    "message": "இந்த பெயருக்கான முகவரி அமைக்கப்படவில்லை."
-  },
   "noTransactions": {
     "message": "பரிவர்த்தனைகள் இல்லை"
   },
@@ -322,9 +300,6 @@
   "privateNetwork": {
     "message": "தனியார் நெட்வொர்க்"
   },
-  "queue": {
-    "message": "வரிசை"
-  },
   "readdToken": {
     "message": "உங்கள் கணக்கு விருப்பங்கள் மெனுவில் \"டோக்கனைச் சேர்\" என்பதன் மூலம் நீங்கள் எதிர்காலத்தில் இந்த டோக்கனை மீண்டும் சேர்க்கலாம்."
   },
@@ -362,9 +337,6 @@
   "search": {
     "message": "தேடல்"
   },
-  "searchTokens": {
-    "message": "தேடல் டோக்கன்ஸ்"
-  },
   "seedPhraseReq": {
     "message": "விதை வாக்கியங்கள் 12 வார்த்தைகள் நீண்டவை"
   },
@@ -374,14 +346,8 @@
   "send": {
     "message": "அனுப்பு"
   },
-  "sendTokens": {
-    "message": "டோக்கன்களை அனுப்பவும்"
-  },
   "settings": {
     "message": "அமைப்புகள்"
-  },
-  "showPrivateKeys": {
-    "message": "தனிப்பட்ட விசைகளைக் காண்பி"
   },
   "sigRequest": {
     "message": "கையொப்பம் கோரிக்கை"
@@ -430,9 +396,6 @@
   },
   "tryAgain": {
     "message": "மீண்டும் முயல்க"
-  },
-  "typePassword": {
-    "message": "உங்கள் கடவுச்சொல்லை தட்டச்சு செய்யவும்"
   },
   "unapproved": {
     "message": "அங்கீகரிக்கப்படாத"

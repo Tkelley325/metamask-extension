@@ -3,9 +3,15 @@ import { configureStore as baseConfigureStore } from '@reduxjs/toolkit';
 import devtoolsEnhancer from 'remote-redux-devtools';
 import { ApprovalControllerState } from '@metamask/approval-controller';
 import { GasEstimateType, GasFeeEstimates } from '@metamask/gas-fee-controller';
+import { TransactionMeta } from '@metamask/transaction-controller';
+import { InternalAccount } from '@metamask/keyring-api';
+import {
+  NftControllerState,
+  TokensControllerState,
+} from '@metamask/assets-controllers';
+import { NotificationServicesControllerState } from '@metamask/notification-services-controller/notification-services';
 import rootReducer from '../ducks';
 import { LedgerTransportTypes } from '../../shared/constants/hardware-wallets';
-import { TransactionMeta } from '../../shared/constants/transaction';
 import type { NetworkStatus } from '../../shared/constants/network';
 
 /**
@@ -16,22 +22,24 @@ import type { NetworkStatus } from '../../shared/constants/network';
  *
  * TODO: Replace this
  */
-export interface TemporaryMessageDataType {
-  id: number;
+export type TemporaryMessageDataType = {
+  id: string;
   type: string;
   msgParams: {
-    metamaskId: number;
+    metamaskId: string;
     data: string;
   };
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
-  custodyId?: string;
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
+  metadata?: {
+    custodyId?: string;
+  };
   status?: string;
-  ///: END:ONLY_INCLUDE_IN
-}
+  ///: END:ONLY_INCLUDE_IF
+};
 
-export interface MessagesIndexedById {
+export type MessagesIndexedById = {
   [id: string]: TemporaryMessageDataType;
-}
+};
 
 /**
  * This interface is a temporary interface to describe the state tree that is
@@ -42,43 +50,50 @@ export interface MessagesIndexedById {
  * state received from the background takes precedence over anything in the
  * metamask reducer.
  */
-interface TemporaryBackgroundState {
-  addressBook: {
-    [chainId: string]: {
-      name: string;
-    }[];
-  };
-  providerConfig: {
-    chainId: string;
-  };
-  currentNetworkTxList: TransactionMeta[];
-  selectedAddress: string;
-  identities: {
-    [address: string]: {
-      balance: string;
+type TemporaryBackgroundState = NftControllerState &
+  NotificationServicesControllerState &
+  TokensControllerState & {
+    addressBook: {
+      [chainId: string]: {
+        name: string;
+      }[];
     };
+    // todo: can this be deleted post network controller v20
+    providerConfig: {
+      chainId: string;
+    };
+    transactions: TransactionMeta[];
+    ledgerTransportType: LedgerTransportTypes;
+    unapprovedDecryptMsgs: MessagesIndexedById;
+    unapprovedPersonalMsgs: MessagesIndexedById;
+    unapprovedTypedMessages: MessagesIndexedById;
+    networksMetadata: {
+      [NetworkClientId: string]: {
+        EIPS: { [eip: string]: boolean };
+        status: NetworkStatus;
+      };
+    };
+    selectedNetworkClientId: string;
+    pendingApprovals: ApprovalControllerState['pendingApprovals'];
+    approvalFlows: ApprovalControllerState['approvalFlows'];
+    knownMethodData?: {
+      [fourBytePrefix: string]: Record<string, unknown>;
+    };
+    gasFeeEstimates: GasFeeEstimates;
+    gasEstimateType: GasEstimateType;
+    ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    custodyAccountDetails?: { [key: string]: any };
+    ///: END:ONLY_INCLUDE_IF
+    internalAccounts: {
+      accounts: {
+        [key: string]: InternalAccount;
+      };
+      selectedAccount: string;
+    };
+    keyrings: { type: string; accounts: string[] }[];
   };
-  ledgerTransportType: LedgerTransportTypes;
-  unapprovedDecryptMsgs: MessagesIndexedById;
-  unapprovedTxs: {
-    [transactionId: string]: TransactionMeta;
-  };
-  unapprovedMsgs: MessagesIndexedById;
-  unapprovedPersonalMsgs: MessagesIndexedById;
-  unapprovedTypedMessages: MessagesIndexedById;
-  networkId: string | null;
-  networkStatus: NetworkStatus;
-  pendingApprovals: ApprovalControllerState['pendingApprovals'];
-  approvalFlows: ApprovalControllerState['approvalFlows'];
-  knownMethodData?: {
-    [fourBytePrefix: string]: Record<string, unknown>;
-  };
-  gasFeeEstimates: GasFeeEstimates;
-  gasEstimateType: GasEstimateType;
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
-  custodyAccountDetails?: { [key: string]: any };
-  ///: END:ONLY_INCLUDE_IN
-}
 
 type RootReducerReturnType = ReturnType<typeof rootReducer>;
 
@@ -87,8 +102,20 @@ export type CombinedBackgroundAndReduxState = RootReducerReturnType & {
     origin: string;
   };
   metamask: RootReducerReturnType['metamask'] & TemporaryBackgroundState;
+  appState: RootReducerReturnType['appState'];
+  send: RootReducerReturnType['send'];
+  DNS: RootReducerReturnType['DNS'];
+  history: RootReducerReturnType['history'];
+  confirmAlerts: RootReducerReturnType['confirmAlerts'];
+  confirmTransaction: RootReducerReturnType['confirmTransaction'];
+  swaps: RootReducerReturnType['swaps'];
+  bridge: RootReducerReturnType['bridge'];
+  gas: RootReducerReturnType['gas'];
+  localeMessages: RootReducerReturnType['localeMessages'];
 };
 
+// TODO: Replace `any` with type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function configureStore(preloadedState: any) {
   const debugModeEnabled = Boolean(process.env.METAMASK_DEBUG);
   const isDev = debugModeEnabled && !process.env.IN_TEST;
@@ -121,16 +148,10 @@ export default function configureStore(preloadedState: any) {
         serializableCheck: false,
         /**
          * immutableCheck controls whether we get warnings about mutation of
-         * state, which will be true in dev. However in test lavamoat complains
-         * about something the middleware is doing. It would be good to figure
-         * that out and enable this in test environments so that mutation
-         * causes E2E failures.
+         * state, this is turned off by default for now since it heavily affects
+         * performance due to the Redux state growing larger.
          */
-        immutableCheck: isDev
-          ? {
-              warnAfter: 100,
-            }
-          : false,
+        immutableCheck: false,
       }),
     devTools: false,
     enhancers,

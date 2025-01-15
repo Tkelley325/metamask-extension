@@ -2,9 +2,9 @@ import currencyFormatter from 'currency-formatter';
 import currencies from 'currency-formatter/currencies';
 import { BigNumber } from 'bignumber.js';
 
+import { TransactionMeta } from '@metamask/transaction-controller';
 import { Numeric } from '../../../shared/modules/Numeric';
 import { EtherDenomination } from '../../../shared/constants/common';
-import { TransactionMeta } from '../../../shared/constants/transaction';
 
 export function getHexGasTotal({ gasLimit = '0x0', gasPrice = '0x0' }): string {
   return new Numeric(gasLimit, 16)
@@ -51,12 +51,17 @@ export function getTransactionFee({
   return fee.round(numberOfDecimals).toString();
 }
 
-export function formatCurrency(value: string, currencyCode: string): string {
+export function formatCurrency(
+  value: string,
+  currencyCode: string,
+  precision?: number,
+): string {
   const upperCaseCurrencyCode = currencyCode.toUpperCase();
 
   return currencies.find((currency) => currency.code === upperCaseCurrencyCode)
     ? currencyFormatter.format(Number(value), {
         code: upperCaseCurrencyCode,
+        precision,
       })
     : value;
 }

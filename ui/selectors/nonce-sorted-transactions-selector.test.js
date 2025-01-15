@@ -1,9 +1,12 @@
 import { head, last } from 'lodash';
-import { CHAIN_IDS } from '../../shared/constants/network';
+import { EthAccountType } from '@metamask/keyring-api';
 import {
   TransactionStatus,
   TransactionType,
-} from '../../shared/constants/transaction';
+} from '@metamask/transaction-controller';
+import { CHAIN_IDS } from '../../shared/constants/network';
+import { ETH_EOA_METHODS } from '../../shared/constants/eth-methods';
+import { mockNetworkState } from '../../test/stub/networks';
 import { nonceSortedTransactionsSelector } from './transactions';
 
 const RECIPIENTS = {
@@ -24,12 +27,14 @@ const INCOMING_TX = {
     from: RECIPIENTS.ONE,
     to: SENDERS.ONE,
   },
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const SIGNING_REQUEST = {
-  type: TransactionType.sign,
+  type: TransactionType.personalSign,
   id: '0-signing',
   status: TransactionStatus.unapproved,
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const SIMPLE_SEND_TX = {
@@ -39,6 +44,7 @@ const SIMPLE_SEND_TX = {
     to: RECIPIENTS.ONE,
   },
   type: TransactionType.simpleSend,
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const TOKEN_SEND_TX = {
@@ -50,12 +56,14 @@ const TOKEN_SEND_TX = {
     data: '0xdata',
   },
   type: TransactionType.tokenMethodTransfer,
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const RETRY_TX = {
   ...SIMPLE_SEND_TX,
   id: '0-retry',
   type: TransactionType.retry,
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const CANCEL_TX = {
@@ -66,25 +74,38 @@ const CANCEL_TX = {
     to: SENDERS.ONE,
   },
   type: TransactionType.cancel,
+  chainId: CHAIN_IDS.MAINNET,
 };
 
 const getStateTree = ({
   txList = [],
   incomingTxList = [],
-  unapprovedMsgs = [],
+  unapprovedTypedMessages = [],
 } = {}) => ({
   metamask: {
-    providerConfig: {
-      nickname: 'mainnet',
-      chainId: CHAIN_IDS.MAINNET,
+    ...mockNetworkState({ chainId: CHAIN_IDS.MAINNET }),
+    unapprovedTypedMessages,
+    internalAccounts: {
+      accounts: {
+        'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+          address: SENDERS.ONE,
+          id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          metadata: {
+            name: 'Test Account',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: ETH_EOA_METHODS,
+          type: EthAccountType.Eoa,
+        },
+      },
+      selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
     },
-    unapprovedMsgs,
-    selectedAddress: SENDERS.ONE,
-    featureFlags: {
-      showIncomingTransactions: true,
-    },
-    incomingTransactions: [...incomingTxList],
-    currentNetworkTxList: [...txList],
+    featureFlags: {},
+    transactions: [...incomingTxList, ...txList],
+    incomingTransactionsPreferences: {},
   },
 });
 
@@ -251,7 +272,7 @@ describe('nonceSortedTransactionsSelector', () => {
   });
 
   it('should display a signing request', () => {
-    const state = getStateTree({ unapprovedMsgs: [SIGNING_REQUEST] });
+    const state = getStateTree({ unapprovedTypedMessages: [SIGNING_REQUEST] });
 
     const result = nonceSortedTransactionsSelector(state);
 

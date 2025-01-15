@@ -1,8 +1,9 @@
 import EventEmitter from '@metamask/safe-event-emitter';
 import ExtensionPlatform from '../platforms/extension';
-
-const NOTIFICATION_HEIGHT = 620;
-const NOTIFICATION_WIDTH = 360;
+import {
+  NOTIFICATION_HEIGHT,
+  NOTIFICATION_WIDTH,
+} from '../../../shared/constants/notifications';
 
 export const NOTIFICATION_MANAGER_EVENTS = {
   POPUP_CLOSED: 'onPopupClosed',
@@ -51,7 +52,12 @@ export default class NotificationManager extends EventEmitter {
         const lastFocused = await this.platform.getLastFocusedWindow();
         // Position window in top right corner of lastFocused window.
         top = lastFocused.top;
-        left = lastFocused.left + (lastFocused.width - NOTIFICATION_WIDTH);
+        // - this is to make sure no error is triggered from polyfill
+        // error eg: Invalid value for bounds. Bounds must be at least 50% within visible screen space.
+        left = Math.max(
+          lastFocused.left + (lastFocused.width - NOTIFICATION_WIDTH),
+          0,
+        );
       } catch (_) {
         // The following properties are more than likely 0, due to being
         // opened from the background chrome process for the extension that

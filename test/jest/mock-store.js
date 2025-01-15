@@ -1,7 +1,11 @@
-import { CHAIN_IDS } from '../../shared/constants/network';
+import { EthAccountType } from '@metamask/keyring-api';
+import { CHAIN_IDS, CURRENCY_SYMBOLS } from '../../shared/constants/network';
 import { KeyringType } from '../../shared/constants/keyring';
+import { ETH_EOA_METHODS } from '../../shared/constants/eth-methods';
+import { mockNetworkState } from '../stub/networks';
+import { DEFAULT_BRIDGE_CONTROLLER_STATE } from '../../app/scripts/controllers/bridge/constants';
 
-const createGetSmartTransactionFeesApiResponse = () => {
+export const createGetSmartTransactionFeesApiResponse = () => {
   return {
     tradeTxFees: {
       // Approval tx.
@@ -132,30 +136,19 @@ export const createSwapsMockStore = () => {
       swapsSTXLoading: false,
     },
     metamask: {
-      networkDetails: {
-        EIPS: {
-          1559: false,
-        },
-      },
-      providerConfig: {
-        chainId: CHAIN_IDS.MAINNET,
-      },
-      cachedBalances: {
-        [CHAIN_IDS.MAINNET]: 5,
-      },
       preferences: {
         showFiatInTestnets: true,
+        smartTransactionsOptInStatus: true,
+        showMultiRpcModal: false,
       },
-      currentCurrency: 'ETH',
-      currentNetworkTxList: [
+      transactions: [
         {
           id: 6571648590592143,
           time: 1667403993369,
           status: 'confirmed',
-          metamaskNetworkId: '5',
           originalGasEstimate: '0x7548',
           userEditedGasLimit: false,
-          chainId: '0x5',
+          chainId: CHAIN_IDS.MAINNET,
           loadingDefaults: false,
           dappSuggestedGasFees: null,
           sendFlowHistory: null,
@@ -218,10 +211,25 @@ export const createSwapsMockStore = () => {
         },
       ],
       useCurrencyRateCheck: true,
-      conversionRate: 1,
-      contractExchangeRates: {
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 2,
-        '0x1111111111111111111111111111111111111111': 0.1,
+      currentCurrency: 'usd',
+      currencyRates: {
+        ETH: {
+          conversionRate: 1,
+        },
+      },
+      marketData: {
+        '0x1': {
+          '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': {
+            price: 2,
+            contractPercentChange1d: 0.004,
+            priceChange1d: 0.00004,
+          },
+          '0x1111111111111111111111111111111111111111': {
+            price: 0.1,
+            contractPercentChange1d: 0.01,
+            priceChange1d: 0.001,
+          },
+        },
       },
       identities: {
         '0xfdea65c8e26263f6d9a1b5de9555d2931a33b825': {
@@ -241,6 +249,80 @@ export const createSwapsMockStore = () => {
           name: 'Send Account 4',
         },
       },
+      internalAccounts: {
+        accounts: {
+          'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+            address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+            id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            metadata: {
+              name: 'Test Account',
+              keyring: {
+                type: 'HD Key Tree',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
+          },
+          '07c2cfec-36c9-46c4-8115-3836d3ac9047': {
+            address: '0xc5b8dbac4c1d3f152cdeb400e2313f309c410acb',
+            id: '07c2cfec-36c9-46c4-8115-3836d3ac9047',
+            metadata: {
+              name: 'Test Account 2',
+              keyring: {
+                type: 'HD Key Tree',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
+          },
+          '15e69915-2a1a-4019-93b3-916e11fd432f': {
+            address: '0x2f8d4a878cfa04a6e60d46362f5644deab66572d',
+            id: '15e69915-2a1a-4019-93b3-916e11fd432f',
+            metadata: {
+              name: 'Ledger Hardware 2',
+              keyring: {
+                type: 'Ledger Hardware',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
+          },
+          '784225f4-d30b-4e77-a900-c8bbce735b88': {
+            address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+            id: '784225f4-d30b-4e77-a900-c8bbce735b88',
+            metadata: {
+              name: 'Test Account 3',
+              keyring: {
+                type: 'HD Key Tree',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
+          },
+          '36eb02e0-7925-47f0-859f-076608f09b69': {
+            address: '0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe6',
+            id: '36eb02e0-7925-47f0-859f-076608f09b69',
+            metadata: {
+              name: 'Snap Account 1',
+              keyring: {
+                type: 'Snap Keyring',
+              },
+              snap: {
+                id: 'snap-id',
+                name: 'snap name',
+              },
+            },
+            options: {},
+            methods: ETH_EOA_METHODS,
+            type: EthAccountType.Eoa,
+          },
+        },
+        selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+      },
       accounts: {
         '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc': {
           address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
@@ -251,9 +333,20 @@ export const createSwapsMockStore = () => {
           balance: '0x0',
         },
       },
+      accountsByChainId: {
+        [CHAIN_IDS.MAINNET]: {
+          '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc': {
+            address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+            balance: '0x0',
+          },
+          '0xec1adf982415d2ef5ec55899b9bfb8bc0f29251b': {
+            address: '0xec1adf982415d2ef5ec55899b9bfb8bc0f29251b',
+            balance: '0x0',
+          },
+        },
+      },
       selectedAddress: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
       currentLocale: 'en',
-      keyringTypes: [KeyringType.imported, KeyringType.hdKeyTree],
       keyrings: [
         {
           type: KeyringType.hdKeyTree,
@@ -268,7 +361,14 @@ export const createSwapsMockStore = () => {
           accounts: ['0xd85a4b6a394794842887b8284293d69163007bbb'],
         },
       ],
-      networkConfigurations: {},
+      ...mockNetworkState({
+        chainId: CHAIN_IDS.MAINNET,
+        ticker: CURRENCY_SYMBOLS.ETH,
+        rpcUrl: 'https://mainnet.infura.io/v3/',
+        blockExplorerUrl: 'https://etherscan.io',
+        id: 'mainnet',
+      }),
+      selectedNetworkClientId: 'mainnet',
       tokens: [
         {
           erc20: true,
@@ -285,11 +385,16 @@ export const createSwapsMockStore = () => {
       ],
       swapsState: {
         swapsFeatureFlags: {
-          smartTransactions: {
-            mobileActive: true,
+          ethereum: {
             extensionActive: true,
+            mobileActive: false,
+            smartTransactions: {
+              expectedDeadline: 45,
+              maxDeadline: 150,
+              returnTxHashAsap: false,
+            },
           },
-          swapRedesign: {
+          smartTransactions: {
             mobileActive: true,
             extensionActive: true,
           },
@@ -361,6 +466,23 @@ export const createSwapsMockStore = () => {
               decimals: 18,
             },
             fee: 1,
+            isGasIncludedTrade: false,
+            approvalTxFees: {
+              feeEstimate: 42000000000000,
+              fees: [
+                { maxFeePerGas: 2310003200, maxPriorityFeePerGas: 513154852 },
+              ],
+              gasLimit: 21000,
+              gasUsed: 21000,
+            },
+            tradeTxFees: {
+              feeEstimate: 42000000000000,
+              fees: [
+                { maxFeePerGas: 2310003200, maxPriorityFeePerGas: 513154852 },
+              ],
+              gasLimit: 21000,
+              gasUsed: 21000,
+            },
           },
           TEST_AGG_2: {
             trade: {
@@ -395,6 +517,36 @@ export const createSwapsMockStore = () => {
               decimals: 18,
             },
             fee: 1,
+            isGasIncludedTrade: false,
+            approvalTxFees: {
+              feeEstimate: 42000000000000,
+              fees: [
+                { maxFeePerGas: 2310003200, maxPriorityFeePerGas: 513154852 },
+              ],
+              gasLimit: 21000,
+              gasUsed: 21000,
+            },
+            tradeTxFees: {
+              feeEstimate: 42000000000000,
+              fees: [
+                {
+                  maxFeePerGas: 2310003200,
+                  maxPriorityFeePerGas: 513154852,
+                  tokenFees: [
+                    {
+                      token: {
+                        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                        symbol: 'DAI',
+                        decimals: 18,
+                      },
+                      balanceNeededToken: '0x426dc933c2e5a',
+                    },
+                  ],
+                },
+              ],
+              gasLimit: 21000,
+              gasUsed: 21000,
+            },
           },
         },
         fetchParams: {
@@ -495,6 +647,7 @@ export const createSwapsMockStore = () => {
       },
       smartTransactionsState: {
         userOptIn: true,
+        userOptInV2: true,
         liveness: true,
         fees: createGetSmartTransactionFeesApiResponse(),
         smartTransactions: {
@@ -528,6 +681,7 @@ export const createSwapsMockStore = () => {
           ],
         },
       },
+      balances: {},
     },
     appState: {
       modal: {
@@ -541,6 +695,42 @@ export const createSwapsMockStore = () => {
         },
       },
       gasLoadingAnimationIsShowing: false,
+    },
+  };
+};
+
+export const createBridgeMockStore = (
+  featureFlagOverrides = {},
+  bridgeSliceOverrides = {},
+  bridgeStateOverrides = {},
+  metamaskStateOverrides = {},
+) => {
+  const swapsStore = createSwapsMockStore();
+  return {
+    ...swapsStore,
+    bridge: {
+      toChainId: null,
+      ...bridgeSliceOverrides,
+    },
+    metamask: {
+      ...swapsStore.metamask,
+      ...mockNetworkState(
+        { chainId: CHAIN_IDS.MAINNET },
+        { chainId: CHAIN_IDS.LINEA_MAINNET },
+      ),
+      ...metamaskStateOverrides,
+      bridgeState: {
+        ...(swapsStore.metamask.bridgeState ?? {}),
+        bridgeFeatureFlags: {
+          extensionSupport: false,
+          srcNetworkAllowlist: [],
+          destNetworkAllowlist: [],
+          ...featureFlagOverrides,
+        },
+        quotes: DEFAULT_BRIDGE_CONTROLLER_STATE.quotes,
+        quoteRequest: DEFAULT_BRIDGE_CONTROLLER_STATE.quoteRequest,
+        ...bridgeStateOverrides,
+      },
     },
   };
 };

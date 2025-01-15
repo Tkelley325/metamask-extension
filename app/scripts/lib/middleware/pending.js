@@ -1,4 +1,4 @@
-import { createAsyncMiddleware } from 'json-rpc-engine';
+import { createAsyncMiddleware } from '@metamask/json-rpc-engine';
 import { formatTxMetaForRpcResult } from '../util';
 
 export function createPendingNonceMiddleware({ getPendingNonce }) {
@@ -13,7 +13,7 @@ export function createPendingNonceMiddleware({ getPendingNonce }) {
       next();
       return;
     }
-    res.result = await getPendingNonce(param);
+    res.result = await getPendingNonce(param, req.networkClientId);
   });
 }
 

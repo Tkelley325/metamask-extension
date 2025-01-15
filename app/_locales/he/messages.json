@@ -75,9 +75,6 @@
   "asset": {
     "message": "נכס"
   },
-  "attemptingConnect": {
-    "message": "מנסה להתחבר לבלוקצ'יין."
-  },
   "attributions": {
     "message": "תכונות"
   },
@@ -175,9 +172,6 @@
   "copyAddress": {
     "message": "העתק כתובת ללוח"
   },
-  "copyPrivateKey": {
-    "message": "זה המפתח הפרטי שלך (נא להקיש כדי להעתיק)"
-  },
   "copyToClipboard": {
     "message": "העתק ללוח"
   },
@@ -211,12 +205,6 @@
   "delete": {
     "message": "מחיקה"
   },
-  "deleteNetwork": {
-    "message": "למחוק את הרשת?"
-  },
-  "deleteNetworkDescription": {
-    "message": "הנך בטוח/ה שברצונך למחוק רשת זו?"
-  },
   "details": {
     "message": "פרטים"
   },
@@ -238,15 +226,6 @@
   "editContact": {
     "message": "ערוך איש קשר"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "שם ENS לא נמצא ברשת הנוכחית. נסה/י לעבור לרשת אתריום הראשית."
-  },
-  "ensRegistrationError": {
-    "message": "שגיאה ברישום שם ENS"
-  },
-  "enterPassword": {
-    "message": "יש להזין ססמה"
-  },
   "enterPasswordContinue": {
     "message": "יש להזין ססמה כדי להמשיך"
   },
@@ -259,18 +238,11 @@
   "expandView": {
     "message": "הרחב תצוגה"
   },
-  "exportPrivateKey": {
-    "message": "יצא/י מפתח פרטי"
-  },
   "failed": {
     "message": "נכשל"
   },
   "fast": {
     "message": "מהיר"
-  },
-  "fiat": {
-    "message": "פיאט",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "ייבוא הקובץ לא עובד? לחצ/י כאן!",
@@ -372,12 +344,6 @@
   "invalidAddressRecipient": {
     "message": "כתובת הנמען אינה חוקית"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "לא רשת ETH, מוגדר במצב אותיות קטנות"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "כתובת URL לא חוקית של Block Explorer"
-  },
   "invalidRPC": {
     "message": "כתובת URL לא חוקית של RPC"
   },
@@ -474,9 +440,6 @@
   "next": {
     "message": "הבא"
   },
-  "noAddressForName": {
-    "message": "לא הוגדרה כתובת עבור שם זה."
-  },
   "noConversionRateAvailable": {
     "message": "אין שער המרה זמין"
   },
@@ -538,12 +501,6 @@
   "prev": {
     "message": "הקודם"
   },
-  "primaryCurrencySetting": {
-    "message": "מטבע ראשי"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "בחר/י 'מקומי' כדי לתעדף הצגת ערכים במטבע המקומי של הצ'יין (למשל ETH). בחר/י פיאט כדי לתעדף הצגת ערכים במטבע הפיאט שבחרת."
-  },
   "privacyMsg": {
     "message": "מדיניות הפרטיות"
   },
@@ -557,14 +514,8 @@
   "privateNetwork": {
     "message": "רשת פרטית"
   },
-  "queue": {
-    "message": "תור"
-  },
   "readdToken": {
     "message": "באפשרותך להוסיף טוקן זה בחזרה בעתיד על ידי מעבר אל \"הוסף טוקן\" בתפריט אפשרויות החשבונות שלך."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "חיפוש, כתובת ציבורית (0x), או ENS"
   },
   "reject": {
     "message": "דחה"
@@ -624,12 +575,6 @@
   "search": {
     "message": "חפש"
   },
-  "searchResults": {
-    "message": "תוצאות חיפוש"
-  },
-  "searchTokens": {
-    "message": "חיפוש טוקנים"
-  },
   "securityAndPrivacy": {
     "message": "אבטחה ופרטיות"
   },
@@ -651,9 +596,6 @@
   "send": {
     "message": "שלח"
   },
-  "sendTokens": {
-    "message": "שלח טוקנים"
-  },
   "settings": {
     "message": "הגדרות"
   },
@@ -668,9 +610,6 @@
   },
   "showHexDataDescription": {
     "message": "בחר/י בזה כדי להציג את שדה הנתונים ההקסדצימאלים על מסך השליחה"
-  },
-  "showPrivateKeys": {
-    "message": "הצג מפתחות פרטיים"
   },
   "sigRequest": {
     "message": "בקשת חתימה"
@@ -792,9 +731,6 @@
   "tryAgain": {
     "message": "ניסיון חוזר"
   },
-  "typePassword": {
-    "message": "נא להקליד את סיסמת MetaMask שלך"
-  },
   "unapproved": {
     "message": "לא אושר"
   },
@@ -803,12 +739,6 @@
   },
   "unknown": {
     "message": "לא ידוע"
-  },
-  "unknownCameraError": {
-    "message": "אירעה שגיאה במהלך הניסיון לקבל גישה למצלמה שלך. נא לנסות שוב..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "אופס! משהו השתבש...."
   },
   "unknownNetwork": {
     "message": "רשת פרטית לא ידועה"
@@ -821,9 +751,6 @@
   },
   "unlockMessage": {
     "message": "הרשת המבוזרת מחכה"
-  },
-  "updatedWithDate": {
-    "message": "עודכן $1"
   },
   "urlErrorMsg": {
     "message": "כתובות URI דורשות את קידומת HTTP/HTTPS המתאימה."

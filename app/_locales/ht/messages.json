@@ -60,9 +60,6 @@
   "approved": {
     "message": "Apwouve"
   },
-  "attemptingConnect": {
-    "message": "Eseye konekte nan blockchain."
-  },
   "attributions": {
     "message": "Atribisyon"
   },
@@ -108,9 +105,6 @@
   "copyAddress": {
     "message": "Kopi adrès clipboard"
   },
-  "copyPrivateKey": {
-    "message": "Sa a se kle prive ou (klike pou ou kopye)"
-  },
   "copyToClipboard": {
     "message": "Kopi clipboard"
   },
@@ -147,9 +141,6 @@
   "edit": {
     "message": "Korije"
   },
-  "enterPassword": {
-    "message": "Mete modpas"
-  },
   "enterPasswordContinue": {
     "message": "Mete modpas pou kontinye"
   },
@@ -159,15 +150,8 @@
   "expandView": {
     "message": "Elaji Wè"
   },
-  "exportPrivateKey": {
-    "message": "Voye Kòd Prive"
-  },
   "failed": {
     "message": "Tonbe"
-  },
-  "fiat": {
-    "message": "FIAT",
-    "description": "Exchange type"
   },
   "fileImportFail": {
     "message": "Enpòte dosye ki pa travay? Klike la a!",
@@ -248,9 +232,6 @@
   "invalidAddressRecipient": {
     "message": "Moun ki resevwa adrès la pa valab"
   },
-  "invalidBlockExplorerURL": {
-    "message": "Block Explorer URI pa valab"
-  },
   "invalidRPC": {
     "message": "RPC URI pa valab"
   },
@@ -329,9 +310,6 @@
   "next": {
     "message": "Aprè sa"
   },
-  "noAddressForName": {
-    "message": "Pa gen adrès ki etabli pou non sa a."
-  },
   "noConversionRateAvailable": {
     "message": "Pa gen okenn Konvèsyon Disponib"
   },
@@ -374,12 +352,6 @@
   },
   "prev": {
     "message": "Avan"
-  },
-  "primaryCurrencySetting": {
-    "message": "Lajan ou itilize pi plis la"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Chwazi ETH pou bay priyorite montre valè nan ETH. Chwazi Fiat priyorite montre valè nan lajan ou chwazi a."
   },
   "privacyMsg": {
     "message": "Règleman sou enfòmasyon prive"
@@ -449,12 +421,6 @@
   "search": {
     "message": "Rechèch"
   },
-  "searchResults": {
-    "message": "Rezilta rechèch"
-  },
-  "searchTokens": {
-    "message": "Rechèch Tokens"
-  },
   "seedPhraseReq": {
     "message": "Seed fraz yo se 12 long mo"
   },
@@ -473,9 +439,6 @@
   "send": {
     "message": "Voye"
   },
-  "sendTokens": {
-    "message": "Voye Tokens"
-  },
   "settings": {
     "message": "Paramèt"
   },
@@ -484,9 +447,6 @@
   },
   "showHexDataDescription": {
     "message": "Pran sa pouw ka montre chan entèfas hex data a"
-  },
-  "showPrivateKeys": {
-    "message": "Montre Kle Prive"
   },
   "sigRequest": {
     "message": "Demann Siyati"
@@ -557,9 +517,6 @@
   "tryAgain": {
     "message": "Eseye anko"
   },
-  "typePassword": {
-    "message": "Tape modpas ou"
-  },
   "unapproved": {
     "message": "Pa apwouve"
   },
@@ -568,12 +525,6 @@
   },
   "unknown": {
     "message": "Enkoni"
-  },
-  "unknownCameraError": {
-    "message": "Te gen yon erè pandan y ap eseye jwenn aksè nan kamera ou. Tanpri eseye ankò..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Ooops! Yon bagay te ale mal...."
   },
   "unknownNetwork": {
     "message": "Rezo Prive Enkoni"
@@ -586,9 +537,6 @@
   },
   "unlockMessage": {
     "message": "Entènèt desantralize a ap tann"
-  },
-  "updatedWithDate": {
-    "message": "Mete ajou $1"
   },
   "urlErrorMsg": {
     "message": "URIs mande pou apwopriye prefiks HTTP / HTTPS a."

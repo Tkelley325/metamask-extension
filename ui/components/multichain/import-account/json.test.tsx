@@ -3,6 +3,8 @@ import configureMockStore from 'redux-mock-store';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProvider } from '../../../../test/lib/render-helpers';
 import mockState from '../../../../test/data/mock-state.json';
+// TODO: Remove restricted import
+// eslint-disable-next-line import/no-restricted-paths
 import messages from '../../../../app/_locales/en/messages.json';
 import Json from './json';
 
@@ -63,7 +65,7 @@ describe('Json', () => {
     fireEvent.click(importButton);
 
     await waitFor(() => {
-      expect(mockImportFunc).toHaveBeenCalledWith('JSON File', ['0', '']);
+      expect(mockImportFunc).toHaveBeenCalledWith('json', ['0', '']);
     });
   });
 
@@ -102,10 +104,7 @@ describe('Json', () => {
     fireEvent.click(importButton);
 
     await waitFor(() => {
-      expect(mockImportFunc).toHaveBeenCalledWith('JSON File', [
-        '0',
-        'password',
-      ]);
+      expect(mockImportFunc).toHaveBeenCalledWith('json', ['0', 'password']);
     });
   });
 });

@@ -1,9 +1,8 @@
-import React, { forwardRef, Ref } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 
 import {
   BackgroundColor,
-  BorderColor,
   TextColor,
   Display,
   JustifyContent,
@@ -13,22 +12,26 @@ import {
   TextTransform,
 } from '../../../helpers/constants/design-system';
 
-import { Text } from '../text/deprecated';
+import type { PolymorphicRef } from '../box';
+import { Text } from '../text';
+import type { TextProps } from '../text';
+import {
+  AvatarBaseComponent,
+  AvatarBaseProps,
+  AvatarBaseSize,
+} from './avatar-base.types';
 
-import { AvatarBaseProps, AvatarBaseSize } from './avatar-base.types';
-
-export const AvatarBase = forwardRef(
-  (
+export const AvatarBase: AvatarBaseComponent = React.forwardRef(
+  <C extends React.ElementType = 'div'>(
     {
       size = AvatarBaseSize.Md,
       children,
       backgroundColor = BackgroundColor.backgroundAlternative,
-      borderColor = BorderColor.borderDefault,
       color = TextColor.textDefault,
       className = '',
       ...props
-    }: AvatarBaseProps,
-    ref: Ref<HTMLElement>,
+    }: AvatarBaseProps<C>,
+    ref?: PolymorphicRef<C>,
   ) => {
     let fallbackTextVariant;
 
@@ -54,7 +57,8 @@ export const AvatarBase = forwardRef(
         borderRadius={BorderRadius.full}
         variant={fallbackTextVariant}
         textTransform={TextTransform.Uppercase}
-        {...{ backgroundColor, borderColor, color, ...props }}
+        {...{ backgroundColor, color }}
+        {...(props as TextProps<C>)}
       >
         {children}
       </Text>

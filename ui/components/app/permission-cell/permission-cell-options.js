@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import Box from '../../ui/box';
 import { useI18nContext } from '../../../hooks/useI18nContext';
-import { IconName, ButtonIcon } from '../../component-library';
-import { Text } from '../../component-library/text/deprecated';
+import { IconName, ButtonIcon, Text } from '../../component-library';
 import { Menu, MenuItem } from '../../ui/menu';
 import {
   TextColor,
@@ -56,6 +55,7 @@ export const PermissionCellOptions = ({
         iconName={IconName.MoreVertical}
         ariaLabel={t('options')}
         onClick={handleOpen}
+        data-testid={permissionName}
       />
       {showOptions && (
         <Menu anchorElement={ref.current} onHide={handleClose}>

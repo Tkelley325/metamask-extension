@@ -15,7 +15,7 @@ import {
 import Box from '../../ui/box/box';
 import { I18nContext } from '../../../contexts/i18n';
 import { CHAIN_ID_TO_NETWORK_IMAGE_URL_MAP } from '../../../../shared/constants/network';
-import { Text } from '../../component-library/text/deprecated';
+import { Text } from '../../component-library';
 
 export default function NetworkAccountBalanceHeader({
   networkName,
@@ -68,6 +68,7 @@ export default function NetworkAccountBalanceHeader({
             variant={TextVariant.bodySm}
             as="h6"
             color={TextColor.textAlternative}
+            data-testid="signature-request-network-display"
           >
             {networkName}
           </Text>

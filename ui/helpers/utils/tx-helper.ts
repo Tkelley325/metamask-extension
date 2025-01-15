@@ -1,43 +1,46 @@
 import log from 'loglevel';
-import { transactionMatchesNetwork } from '../../../shared/modules/transaction.utils';
 import { valuesFor } from './util';
 
 export default function txHelper(
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unapprovedTxs: Record<string, any> | null,
-  unapprovedMsgs: Record<string, any> | null,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   personalMsgs: Record<string, any> | null,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   decryptMsgs: Record<string, any> | null,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   encryptionPublicKeyMsgs: Record<string, any> | null,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   typedMessages: Record<string, any> | null,
-  networkId?: string | null,
   chainId?: string,
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
   log.debug('tx-helper called with params:');
   log.debug({
     unapprovedTxs,
-    unapprovedMsgs,
     personalMsgs,
     decryptMsgs,
     encryptionPublicKeyMsgs,
     typedMessages,
-    networkId,
     chainId,
   });
 
-  const txValues = networkId
-    ? valuesFor(unapprovedTxs).filter((txMeta) =>
-        transactionMatchesNetwork(txMeta, chainId, networkId),
-      )
+  const txValues = chainId
+    ? valuesFor(unapprovedTxs).filter((txMeta) => txMeta.chainId === chainId)
     : valuesFor(unapprovedTxs);
 
-  const msgValues = valuesFor(unapprovedMsgs);
   const personalValues = valuesFor(personalMsgs);
   const decryptValues = valuesFor(decryptMsgs);
   const encryptionPublicKeyValues = valuesFor(encryptionPublicKeyMsgs);
   const typedValues = valuesFor(typedMessages);
 
   const allValues = txValues
-    .concat(msgValues)
     .concat(personalValues)
     .concat(decryptValues)
     .concat(encryptionPublicKeyValues)
@@ -47,7 +50,6 @@ export default function txHelper(
     });
 
   log.debug(`tx helper found ${txValues.length} unapproved txs`);
-  log.debug(`tx helper found ${msgValues.length} unsigned messages`);
   log.debug(
     `tx helper found ${personalValues.length} unsigned personal messages`,
   );

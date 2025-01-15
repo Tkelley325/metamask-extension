@@ -1,75 +1,70 @@
-import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import { compose } from 'redux';
+import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../../../shared/constants/preferences';
+import { getPreferences } from '../../../selectors';
 import {
-  displayWarning,
+  backupUserData,
+  setAutoLockTimeLimit,
+  setDismissSeedBackUpReminder,
+  setOverrideContentSecurityPolicyHeader,
   setFeatureFlag,
-  showModal,
+  setShowExtensionInFullSizeView,
   setShowFiatConversionOnTestnetsPreference,
   setShowTestNetworks,
-  setAutoLockTimeLimit,
+  setSmartTransactionsPreferenceEnabled,
   setUseNonceField,
-  setLedgerTransportPreference,
-  setDismissSeedBackUpReminder,
-  setDisabledRpcMethodPreference,
-  backupUserData,
-  restoreUserData,
+  showModal,
 } from '../../../store/actions';
-import { getPreferences } from '../../../selectors';
-import { doesUserHaveALedgerAccount } from '../../../ducks/metamask/metamask';
-import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../../../shared/constants/preferences';
+import { getSmartTransactionsPreferenceEnabled } from '../../../../shared/modules/selectors';
+import {
+  displayErrorInSettings,
+  hideErrorInSettings,
+} from '../../../ducks/app/app';
 import AdvancedTab from './advanced-tab.component';
 
 export const mapStateToProps = (state) => {
   const {
-    appState: { warning },
+    appState: { errorInSettings },
     metamask,
   } = state;
   const {
     featureFlags: { sendHexData } = {},
-    disabledRpcMethodPreferences,
     useNonceField,
-    ledgerTransportType,
     dismissSeedBackUpReminder,
-    ///: BEGIN:ONLY_INCLUDE_IN(desktop)
-    desktopEnabled,
-    ///: END:ONLY_INCLUDE_IN
+    overrideContentSecurityPolicyHeader,
   } = metamask;
   const {
     showFiatInTestnets,
     showTestNetworks,
+    showExtensionInFullSizeView,
     autoLockTimeLimit = DEFAULT_AUTO_LOCK_TIME_LIMIT,
   } = getPreferences(state);
 
-  const userHasALedgerAccount = doesUserHaveALedgerAccount(state);
-
   return {
-    warning,
+    errorInSettings,
     sendHexData,
     showFiatInTestnets,
     showTestNetworks,
+    showExtensionInFullSizeView,
+    smartTransactionsEnabled: getSmartTransactionsPreferenceEnabled(state),
     autoLockTimeLimit,
     useNonceField,
-    ledgerTransportType,
     dismissSeedBackUpReminder,
-    userHasALedgerAccount,
-    disabledRpcMethodPreferences,
-    ///: BEGIN:ONLY_INCLUDE_IN(desktop)
-    desktopEnabled,
-    ///: END:ONLY_INCLUDE_IN
+    overrideContentSecurityPolicyHeader,
   };
 };
 
 export const mapDispatchToProps = (dispatch) => {
   return {
     backupUserData: () => backupUserData(),
-    restoreUserData: (jsonString) => restoreUserData(jsonString),
     setHexDataFeatureFlag: (shouldShow) =>
       dispatch(setFeatureFlag('sendHexData', shouldShow)),
-    displayWarning: (warning) => dispatch(displayWarning(warning)),
+    displayErrorInSettings: (errorInSettings) =>
+      dispatch(displayErrorInSettings(errorInSettings)),
+    hideErrorInSettings: () => dispatch(hideErrorInSettings()),
     showResetAccountConfirmationModal: () =>
       dispatch(showModal({ name: 'CONFIRM_RESET_ACCOUNT' })),
-    showEthSignModal: () => dispatch(showModal({ name: 'ETH_SIGN' })),
     setUseNonceField: (value) => dispatch(setUseNonceField(value)),
     setShowFiatConversionOnTestnetsPreference: (value) => {
       return dispatch(setShowFiatConversionOnTestnetsPreference(value));
@@ -77,17 +72,20 @@ export const mapDispatchToProps = (dispatch) => {
     setShowTestNetworks: (value) => {
       return dispatch(setShowTestNetworks(value));
     },
+    setShowExtensionInFullSizeView: (value) => {
+      return dispatch(setShowExtensionInFullSizeView(value));
+    },
+    setSmartTransactionsEnabled: (value) => {
+      return dispatch(setSmartTransactionsPreferenceEnabled(value));
+    },
     setAutoLockTimeLimit: (value) => {
       return dispatch(setAutoLockTimeLimit(value));
-    },
-    setLedgerTransportPreference: (value) => {
-      return dispatch(setLedgerTransportPreference(value));
     },
     setDismissSeedBackUpReminder: (value) => {
       return dispatch(setDismissSeedBackUpReminder(value));
     },
-    setDisabledRpcMethodPreference: (methodName, isEnabled) => {
-      return dispatch(setDisabledRpcMethodPreference(methodName, isEnabled));
+    setOverrideContentSecurityPolicyHeader: (value) => {
+      return dispatch(setOverrideContentSecurityPolicyHeader(value));
     },
   };
 };

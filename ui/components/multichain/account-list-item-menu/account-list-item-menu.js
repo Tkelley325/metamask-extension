@@ -1,100 +1,78 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { getAccountLink } from '@metamask/etherscan-link';
-///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
 import { mmiActionsFactory } from '../../../store/institutional/institution-background';
-///: END:ONLY_INCLUDE_IN
+///: END:ONLY_INCLUDE_IF
 import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import {
-  getRpcPrefsForCurrentProvider,
-  getBlockExplorerLinkText,
   getCurrentChainId,
   getHardwareWalletType,
   getAccountTypeForKeyring,
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  getPinnedAccountsList,
+  getHiddenAccountsList,
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   getMetaMaskAccountsOrdered,
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 } from '../../../selectors';
-///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
 import { toChecksumHexAddress } from '../../../../shared/modules/hexstring-utils';
-///: END:ONLY_INCLUDE_IN
-import { findKeyringForAddress } from '../../../ducks/metamask/metamask';
-import { NETWORKS_ROUTE } from '../../../helpers/constants/routes';
+///: END:ONLY_INCLUDE_IF
 import { MenuItem } from '../../ui/menu';
 import {
   IconName,
+  ModalFocus,
   Popover,
   PopoverPosition,
-  ModalFocus,
   PopoverRole,
+  Text,
 } from '../../component-library';
-import { Text } from '../../component-library/text/deprecated';
 import {
   MetaMetricsEventCategory,
-  MetaMetricsEventLinkType,
   MetaMetricsEventName,
 } from '../../../../shared/constants/metametrics';
-import { getURLHostName } from '../../../helpers/utils/util';
-import { setAccountDetailsAddress, showModal } from '../../../store/actions';
+import {
+  showModal,
+  updateAccountsList,
+  updateHiddenAccountsList,
+} from '../../../store/actions';
 import { TextVariant } from '../../../helpers/constants/design-system';
 import { formatAccountType } from '../../../helpers/utils/metrics';
+import { AccountDetailsMenuItem, ViewExplorerMenuItem } from '..';
+
+const METRICS_LOCATION = 'Account Options';
 
 export const AccountListItemMenu = ({
   anchorElement,
-  blockExplorerUrlSubTitle,
   onClose,
   closeMenu,
   isRemovable,
-  identity,
+  account,
   isOpen,
+  isPinned,
+  isHidden,
 }) => {
   const t = useI18nContext();
   const trackEvent = useContext(MetaMetricsContext);
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const chainId = useSelector(getCurrentChainId);
-  const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
-  const addressLink = getAccountLink(identity.address, chainId, rpcPrefs);
 
   const deviceName = useSelector(getHardwareWalletType);
 
-  const keyring = useSelector((state) =>
-    findKeyringForAddress(state, identity.address),
-  );
+  const { keyring } = account.metadata;
   const accountType = formatAccountType(getAccountTypeForKeyring(keyring));
 
-  const blockExplorerLinkText = useSelector(getBlockExplorerLinkText);
-  const openBlockExplorer = () => {
-    trackEvent({
-      event: MetaMetricsEventName.ExternalLinkClicked,
-      category: MetaMetricsEventCategory.Navigation,
-      properties: {
-        link_type: MetaMetricsEventLinkType.AccountTracker,
-        location: 'Account Options',
-        url_domain: getURLHostName(addressLink),
-      },
-    });
+  const pinnedAccountList = useSelector(getPinnedAccountsList);
+  const hiddenAccountList = useSelector(getHiddenAccountsList);
 
-    global.platform.openTab({
-      url: addressLink,
-    });
-    onClose();
-  };
-
-  const routeToAddBlockExplorerUrl = () => {
-    history.push(`${NETWORKS_ROUTE}#blockExplorerUrl`);
-  };
-
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   const isCustodial = keyring?.type ? /Custody/u.test(keyring.type) : false;
   const accounts = useSelector(getMetaMaskAccountsOrdered);
 
   const mmiActions = mmiActionsFactory();
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   // Handle Tab key press for accessibility inside the popover and will close the popover on the last MenuItem
   const lastItemRef = useRef(null);
@@ -111,30 +89,37 @@ export const AccountListItemMenu = ({
     } else {
       lastItemRef.current = accountDetailsItemRef.current;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     removeJWTItemRef.current,
     removeAccountItemRef.current,
     accountDetailsItemRef.current,
   ]);
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'Tab' && event.target === lastItemRef.current) {
-      // If Tab is pressed at the last item to close popover and focus to next element in DOM
-      onClose();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event) => {
+      if (event.key === 'Tab' && event.target === lastItemRef.current) {
+        // If Tab is pressed at the last item to close popover and focus to next element in DOM
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
   // Handle click outside of the popover to close it
   const popoverDialogRef = useRef(null);
 
-  const handleClickOutside = (event) => {
-    if (
-      popoverDialogRef?.current &&
-      !popoverDialogRef.current.contains(event.target)
-    ) {
-      onClose();
-    }
-  };
+  const handleClickOutside = useCallback(
+    (event) => {
+      if (
+        popoverDialogRef?.current &&
+        !popoverDialogRef.current.contains(event.target)
+      ) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -142,7 +127,34 @@ export const AccountListItemMenu = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
+
+  const handlePinning = (address) => {
+    const updatedPinnedAccountList = [...pinnedAccountList, address];
+    dispatch(updateAccountsList(updatedPinnedAccountList));
+  };
+
+  const handleUnpinning = (address) => {
+    const updatedPinnedAccountList = pinnedAccountList.filter(
+      (item) => item !== address,
+    );
+    dispatch(updateAccountsList(updatedPinnedAccountList));
+  };
+
+  const handleHidding = (address) => {
+    const updatedHiddenAccountList = [...hiddenAccountList, address];
+    if (pinnedAccountList.includes(address)) {
+      handleUnpinning(address);
+    }
+    dispatch(updateHiddenAccountsList(updatedHiddenAccountList));
+  };
+
+  const handleUnhidding = (address) => {
+    const updatedHiddenAccountList = hiddenAccountList.filter(
+      (item) => item !== address,
+    );
+    dispatch(updateHiddenAccountsList(updatedHiddenAccountList));
+  };
 
   return (
     <Popover
@@ -155,48 +167,51 @@ export const AccountListItemMenu = ({
       isOpen={isOpen}
       isPortal
       preventOverflow
+      flip
     >
       <ModalFocus restoreFocus initialFocusRef={anchorElement}>
         <div onKeyDown={handleKeyDown} ref={popoverDialogRef}>
+          <AccountDetailsMenuItem
+            metricsLocation={METRICS_LOCATION}
+            closeMenu={closeMenu}
+            address={account.address}
+            textProps={{ variant: TextVariant.bodySm }}
+          />
+          <ViewExplorerMenuItem
+            metricsLocation={METRICS_LOCATION}
+            closeMenu={closeMenu}
+            textProps={{ variant: TextVariant.bodySm }}
+            account={account}
+          />
+          {isHidden ? null : (
+            <MenuItem
+              data-testid="account-list-menu-pin"
+              onClick={() => {
+                isPinned
+                  ? handleUnpinning(account.address)
+                  : handlePinning(account.address);
+                onClose();
+              }}
+              iconName={isPinned ? IconName.Unpin : IconName.Pin}
+            >
+              <Text variant={TextVariant.bodySm}>
+                {isPinned ? t('unpin') : t('pinToTop')}
+              </Text>
+            </MenuItem>
+          )}
           <MenuItem
+            data-testid="account-list-menu-hide"
             onClick={() => {
-              blockExplorerLinkText.firstPart === 'addBlockExplorer'
-                ? routeToAddBlockExplorerUrl()
-                : openBlockExplorer();
-
-              trackEvent({
-                event: MetaMetricsEventName.BlockExplorerLinkClicked,
-                category: MetaMetricsEventCategory.Accounts,
-                properties: {
-                  location: 'Account Options',
-                  chain_id: chainId,
-                },
-              });
-            }}
-            subtitle={blockExplorerUrlSubTitle || null}
-            iconName={IconName.Export}
-            data-testid="account-list-menu-open-explorer"
-          >
-            <Text variant={TextVariant.bodySm}>{t('viewOnExplorer')}</Text>
-          </MenuItem>
-          <MenuItem
-            ref={accountDetailsItemRef}
-            onClick={() => {
-              dispatch(setAccountDetailsAddress(identity.address));
-              trackEvent({
-                event: MetaMetricsEventName.NavAccountDetailsOpened,
-                category: MetaMetricsEventCategory.Navigation,
-                properties: {
-                  location: 'Account Options',
-                },
-              });
+              isHidden
+                ? handleUnhidding(account.address)
+                : handleHidding(account.address);
               onClose();
-              closeMenu?.();
             }}
-            iconName={IconName.ScanBarcode}
-            data-testid="account-list-menu-details"
+            iconName={isHidden ? IconName.Eye : IconName.EyeSlash}
           >
-            <Text variant={TextVariant.bodySm}>{t('accountDetails')}</Text>
+            <Text variant={TextVariant.bodySm}>
+              {isHidden ? t('showAccount') : t('hideAccount')}
+            </Text>
           </MenuItem>
           {isRemovable ? (
             <MenuItem
@@ -206,7 +221,7 @@ export const AccountListItemMenu = ({
                 dispatch(
                   showModal({
                     name: 'CONFIRM_REMOVE_ACCOUNT',
-                    identity,
+                    account,
                   }),
                 );
                 trackEvent({
@@ -227,26 +242,30 @@ export const AccountListItemMenu = ({
             </MenuItem>
           ) : null}
           {
-            ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+            ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
             isCustodial ? (
               <MenuItem
                 ref={removeJWTItemRef}
                 data-testid="account-options-menu__remove-jwt"
                 onClick={async () => {
-                  const token = await dispatch(mmiActions.getCustodianToken());
+                  const token = await dispatch(
+                    mmiActions.getCustodianToken(account.address),
+                  );
+
                   const custodyAccountDetails = await dispatch(
                     mmiActions.getAllCustodianAccountsWithToken(
                       keyring.type.split(' - ')[1],
                       token,
                     ),
                   );
+
                   dispatch(
                     showModal({
                       name: 'CONFIRM_REMOVE_JWT',
                       token,
                       custodyAccountDetails,
                       accounts,
-                      selectedAddress: toChecksumHexAddress(identity.address),
+                      selectedAddress: toChecksumHexAddress(account.address),
                     }),
                   );
                   onClose();
@@ -257,7 +276,7 @@ export const AccountListItemMenu = ({
                 <Text variant={TextVariant.bodySm}>{t('removeJWT')}</Text>
               </MenuItem>
             ) : null
-            ///: END:ONLY_INCLUDE_IN
+            ///: END:ONLY_INCLUDE_IF
           }
         </div>
       </ModalFocus>
@@ -285,22 +304,34 @@ AccountListItemMenu.propTypes = {
    */
   closeMenu: PropTypes.func,
   /**
-   * Domain of the block explorer
-   */
-  blockExplorerUrlSubTitle: PropTypes.string,
-  /**
    * Represents if the account should be removable
    */
   isRemovable: PropTypes.bool.isRequired,
   /**
-   * Identity of the account
+   * Represents pinned accounts
    */
+  isPinned: PropTypes.bool,
   /**
-   * Identity of the account
+   * Represents hidden accounts
    */
-  identity: PropTypes.shape({
-    name: PropTypes.string.isRequired,
+  isHidden: PropTypes.bool,
+  /**
+   * An account object that has name, address, and balance data
+   */
+  account: PropTypes.shape({
+    id: PropTypes.string.isRequired,
     address: PropTypes.string.isRequired,
     balance: PropTypes.string.isRequired,
+    metadata: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      snap: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string,
+        enabled: PropTypes.bool,
+      }),
+      keyring: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+      }).isRequired,
+    }).isRequired,
   }).isRequired,
 };

@@ -1,3 +1,5 @@
+@use "design-system";
+
 .loading-swaps-quotes {
   display: flex;
   flex-flow: column;
@@ -12,28 +14,6 @@
     align-items: center;
     justify-content: center;
     max-height: 445px;
-  }
-
-  &__quote-counter {
-    @include H7;
-
-    color: var(--color-text-alternative);
-    margin-top: 3px;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 4px;
-  }
-
-  &__quote-name-check {
-    @include H4;
-
-    font-weight: bold;
-    color: var(--color-text-default);
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    text-transform: capitalize;
   }
 
   &__background-1,

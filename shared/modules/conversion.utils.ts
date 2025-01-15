@@ -1,10 +1,10 @@
+import { Hex } from '@metamask/utils';
 import { BigNumber } from 'bignumber.js';
-
 import { addHexPrefix, BN } from 'ethereumjs-util';
 import { EtherDenomination } from '../constants/common';
 import { Numeric, NumericValue } from './Numeric';
 
-export function decGWEIToHexWEI(decGWEI: number) {
+export function decGWEIToHexWEI(decGWEI: NumericValue) {
   return new Numeric(decGWEI, 10, EtherDenomination.GWEI)
     .toBase(16)
     .toDenomination(EtherDenomination.WEI)
@@ -23,6 +23,13 @@ export function addHexes(aHexWEI: string, bHexWEI: string) {
     .add(new Numeric(bHexWEI, 16))
     .round(6, BigNumber.ROUND_HALF_DOWN)
     .toString();
+}
+
+export function multiplyHexes(aHexWEI: Hex, bHexWEI: Hex): Hex {
+  return new Numeric(aHexWEI, 16)
+    .times(new Numeric(bHexWEI, 16))
+    .round(6, BigNumber.ROUND_HALF_DOWN)
+    .toString() as Hex;
 }
 
 export function decWEIToDecETH(decWEI: string) {
@@ -154,6 +161,16 @@ export function sumHexes(first: string, ...args: string[]) {
   );
 
   return total.toPrefixedHexString();
+}
+
+export function sumDecimals(first: string, ...args: string[]) {
+  const firstValue = new Numeric(first, 10);
+  const total = args.reduce(
+    (acc, hexAmount) => acc.add(new Numeric(hexAmount, 10)),
+    firstValue,
+  );
+
+  return total;
 }
 
 export function hexWEIToDecGWEI(value: number | string | BigNumber | BN) {

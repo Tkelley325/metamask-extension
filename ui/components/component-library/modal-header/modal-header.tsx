@@ -1,10 +1,10 @@
 import React from 'react';
 import classnames from 'classnames';
-import { HeaderBase, ButtonIcon, ButtonIconSize, IconName, ValidTag } from '..';
-import { Text } from '../text/deprecated';
+import { HeaderBase, Text, ButtonIcon, ButtonIconSize, IconName } from '..';
 import {
   TextVariant,
   TextAlign,
+  BlockSize,
 } from '../../../helpers/constants/design-system';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import { ModalHeaderProps } from '.';
@@ -24,6 +24,13 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
   return (
     <HeaderBase
       className={classnames('mm-modal-header', className)}
+      as="header"
+      paddingLeft={4}
+      paddingRight={4}
+      paddingBottom={4}
+      childrenWrapperProps={{
+        width: BlockSize.Full,
+      }}
       startAccessory={
         startAccessory ||
         (onBack && (
@@ -51,11 +58,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
       {...props}
     >
       {typeof children === 'string' ? (
-        <Text
-          as={ValidTag.Header}
-          variant={TextVariant.headingSm}
-          textAlign={TextAlign.Center}
-        >
+        <Text variant={TextVariant.headingSm} textAlign={TextAlign.Center}>
           {children}
         </Text>
       ) : (

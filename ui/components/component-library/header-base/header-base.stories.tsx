@@ -1,13 +1,13 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import Box from '../../ui/box';
+import { StoryFn, Meta } from '@storybook/react';
 import {
   IconName,
   Button,
-  BUTTON_SIZES,
+  ButtonSize,
   ButtonIcon,
   ButtonIconSize,
   Text,
+  Box,
 } from '..';
 
 import {
@@ -27,11 +27,9 @@ export default {
       page: README,
     },
   },
-} as ComponentMeta<typeof HeaderBase>;
+} as Meta<typeof HeaderBase>;
 
-const Template: ComponentStory<typeof HeaderBase> = (args) => (
-  <HeaderBase {...args} />
-);
+const Template: StoryFn<typeof HeaderBase> = (args) => <HeaderBase {...args} />;
 
 export const DefaultStory = Template.bind({});
 
@@ -112,7 +110,7 @@ export const EndAccessory = (args) => {
 export const UseCaseDemos = (args) => (
   <>
     <Text>children only assigned</Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase marginBottom={4} {...args}>
         <Text
           variant={TextVariant.headingSm}
@@ -124,7 +122,7 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>children and endAccessory assigned </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         endAccessory={
@@ -147,12 +145,12 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>children and startAccessory assigned </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         startAccessory={
           <ButtonIcon
-            backgroundColor={BackgroundColor.successAlternative}
+            backgroundColor={BackgroundColor.successDefault}
             size={ButtonIconSize.Sm}
             iconName={IconName.ArrowLeft}
             ariaLabel="back"
@@ -170,12 +168,12 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>children, startAccessory, and endAccessory assigned </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         startAccessory={
           <ButtonIcon
-            backgroundColor={BackgroundColor.successAlternative}
+            backgroundColor={BackgroundColor.successDefault}
             size={ButtonIconSize.Sm}
             iconName={IconName.ArrowLeft}
             ariaLabel="back"
@@ -201,14 +199,14 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>children, startAccessory, and endAccessory assigned </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         startAccessory={
           <Button
-            backgroundColor={BackgroundColor.successAlternative}
+            backgroundColor={BackgroundColor.successDefault}
             style={{ whiteSpace: 'nowrap' }}
-            size={BUTTON_SIZES.SM}
+            size={ButtonSize.Sm}
           >
             Unlock Now
           </Button>
@@ -233,26 +231,58 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>
+      children with ellipsis, startAccessory, and endAccessory assigned{' '}
+    </Text>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
+      <HeaderBase
+        marginBottom={4}
+        startAccessory={
+          <Button
+            backgroundColor={BackgroundColor.successDefault}
+            style={{ whiteSpace: 'nowrap' }}
+            size={ButtonSize.Sm}
+          >
+            Unlock Now
+          </Button>
+        }
+        endAccessory={
+          <ButtonIcon
+            backgroundColor={BackgroundColor.goerli}
+            size={ButtonIconSize.Sm}
+            iconName={IconName.Close}
+            ariaLabel="close"
+          />
+        }
+        {...args}
+      >
+        <Text
+          variant={TextVariant.headingSm}
+          textAlign={TextAlign.Center}
+          backgroundColor={BackgroundColor.primaryAlternative}
+          ellipsis={true}
+        >
+          Title is sentence case no period
+        </Text>
+      </HeaderBase>
+    </Box>
+    <Text>
       children, startAccessory, and endAccessory assigned with prop alignItems=
       {AlignItems.center} passed at HeaderBase
     </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         alignItems={AlignItems.center}
         startAccessory={
           <ButtonIcon
-            backgroundColor={BackgroundColor.successAlternative}
+            backgroundColor={BackgroundColor.successDefault}
             size={ButtonIconSize.Sm}
             iconName={IconName.Close}
             ariaLabel="close"
           />
         }
         endAccessory={
-          <Button
-            backgroundColor={BackgroundColor.goerli}
-            size={BUTTON_SIZES.SM}
-          >
+          <Button backgroundColor={BackgroundColor.goerli} size={ButtonSize.Sm}>
             Download
           </Button>
         }
@@ -268,13 +298,13 @@ export const UseCaseDemos = (args) => (
       </HeaderBase>
     </Box>
     <Text>startAccessory and endAccessory assigned </Text>
-    <Box backgroundColor={BackgroundColor.warningAlternative}>
+    <Box backgroundColor={BackgroundColor.warningDefault}>
       <HeaderBase
         marginBottom={4}
         startAccessory={
           <Button
-            backgroundColor={BackgroundColor.successAlternative}
-            size={BUTTON_SIZES.SM}
+            backgroundColor={BackgroundColor.successDefault}
+            size={ButtonSize.Sm}
           >
             Unlock
           </Button>

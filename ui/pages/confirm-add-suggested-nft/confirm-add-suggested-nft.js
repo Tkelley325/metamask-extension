@@ -1,7 +1,7 @@
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { ethErrors, serializeError } from 'eth-rpc-errors';
+import { providerErrors, serializeError } from '@metamask/rpc-errors';
 import { getTokenTrackerLink } from '@metamask/etherscan-link';
 import classnames from 'classnames';
 import { PageContainerFooter } from '../../components/ui/page-container';
@@ -25,15 +25,19 @@ import {
   ButtonLink,
   IconName,
   Box,
+  Text,
 } from '../../components/component-library';
-import { Text } from '../../components/component-library/text/deprecated';
 import {
   getCurrentChainId,
   getRpcPrefsForCurrentProvider,
   getSuggestedNfts,
   getIpfsGateway,
+  getNetworkIdentifier,
+  getSelectedInternalAccount,
+  getSelectedAccountCachedBalance,
+  getAddressBookEntryOrAccountName,
 } from '../../selectors';
-import NftDefaultImage from '../../components/app/nft-default-image/nft-default-image';
+import NftDefaultImage from '../../components/app/assets/nfts/nft-default-image/nft-default-image';
 import { getAssetImageURL, shortenAddress } from '../../helpers/utils/util';
 import {
   AlignItems,
@@ -46,7 +50,16 @@ import {
   TextAlign,
   TextVariant,
   BlockSize,
+  TextColor,
 } from '../../helpers/constants/design-system';
+import NetworkAccountBalanceHeader from '../../components/app/network-account-balance-header/network-account-balance-header';
+import { NETWORK_TO_NAME_MAP } from '../../../shared/constants/network';
+import SiteOrigin from '../../components/ui/site-origin/site-origin';
+import { PRIMARY } from '../../helpers/constants/common';
+import { useUserPreferencedCurrency } from '../../hooks/useUserPreferencedCurrency';
+import { useCurrencyDisplay } from '../../hooks/useCurrencyDisplay';
+import { useOriginMetadata } from '../../hooks/useOriginMetadata';
+import { isEqualCaseInsensitive } from '../../../shared/modules/string-utils';
 
 const ConfirmAddSuggestedNFT = () => {
   const t = useContext(I18nContext);
@@ -54,11 +67,35 @@ const ConfirmAddSuggestedNFT = () => {
   const history = useHistory();
 
   const mostRecentOverviewPage = useSelector(getMostRecentOverviewPage);
-  const suggestedNfts = useSelector(getSuggestedNfts);
+  const suggestedNftsNotSorted = useSelector(getSuggestedNfts);
+  const suggestedNfts = suggestedNftsNotSorted.sort(
+    (a, b) => a.requestData.asset.tokenId - b.requestData.asset.tokenId,
+  );
   const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
   const chainId = useSelector(getCurrentChainId);
   const ipfsGateway = useSelector(getIpfsGateway);
   const trackEvent = useContext(MetaMetricsContext);
+  const networkIdentifier = useSelector(getNetworkIdentifier);
+  const { address: selectedAddress } = useSelector(getSelectedInternalAccount);
+  const selectedAccountBalance = useSelector(getSelectedAccountCachedBalance);
+  const accountName = useSelector((state) =>
+    getAddressBookEntryOrAccountName(state, selectedAddress),
+  );
+  const [suggestedNftsWithImages, setSuggestedNftsWithImages] = useState([]);
+
+  const networkName = NETWORK_TO_NAME_MAP[chainId] || networkIdentifier;
+
+  const {
+    currency: primaryCurrency,
+    numberOfDecimals: primaryNumberOfDecimals,
+  } = useUserPreferencedCurrency(PRIMARY, { ethNumberOfDecimals: 4 });
+
+  const [primaryCurrencyValue] = useCurrencyDisplay(selectedAccountBalance, {
+    numberOfDecimals: primaryNumberOfDecimals,
+    currency: primaryCurrency,
+  });
+
+  const originMetadata = useOriginMetadata(suggestedNfts[0]?.origin) || {};
 
   const handleAddNftsClick = useCallback(async () => {
     await Promise.all(
@@ -69,12 +106,12 @@ const ConfirmAddSuggestedNFT = () => {
           event: MetaMetricsEventName.NftAdded,
           category: MetaMetricsEventCategory.Wallet,
           sensitiveProperties: {
+            token_contract_address: asset.address,
             token_symbol: asset.symbol,
             token_id: asset.tokenId,
-            token_contract_address: asset.address,
-            source_connection_method: MetaMetricsTokenEventSource.Dapp,
             token_standard: asset.standard,
             asset_type: AssetType.NFT,
+            source: MetaMetricsTokenEventSource.Dapp,
           },
         });
       }),
@@ -88,7 +125,7 @@ const ConfirmAddSuggestedNFT = () => {
         return dispatch(
           rejectPendingApproval(
             id,
-            serializeError(ethErrors.provider.userRejectedRequest()),
+            serializeError(providerErrors.userRejectedRequest()),
           ),
         );
       }),
@@ -106,13 +143,43 @@ const ConfirmAddSuggestedNFT = () => {
   }, [history, mostRecentOverviewPage, suggestedNfts]);
 
   let origin;
+  let link;
   if (suggestedNfts.length) {
     try {
-      origin = new URL(suggestedNfts[0].origin)?.host;
+      const url = new URL(suggestedNfts[0].origin);
+      origin = url.host;
+      link = url.href;
     } catch {
       origin = 'dapp';
     }
   }
+
+  useEffect(() => {
+    const addImageUrlToSuggestedNFTs = async () => {
+      const suggestedNftWithImages = await Promise.all(
+        suggestedNfts.map(async (item) => {
+          const imgUrl = await getAssetImageURL(
+            item.requestData.asset.image,
+            ipfsGateway,
+          );
+          return {
+            ...item,
+            requestData: {
+              ...item.requestData,
+              asset: {
+                ...item.requestData.asset,
+                assetImageUrl: imgUrl,
+              },
+            },
+          };
+        }),
+      );
+      setSuggestedNftsWithImages(suggestedNftWithImages);
+    };
+
+    addImageUrlToSuggestedNFTs();
+  }, []); // Empty dependency array to run only on mount
+
   return (
     <Box
       height={BlockSize.Full}
@@ -121,6 +188,28 @@ const ConfirmAddSuggestedNFT = () => {
       flexDirection={FlexDirection.Column}
     >
       <Box paddingBottom={2} className="confirm-add-suggested-nft__header">
+        <NetworkAccountBalanceHeader
+          accountName={accountName}
+          accountBalance={primaryCurrencyValue}
+          accountAddress={selectedAddress}
+          networkName={networkName}
+          chainId={chainId}
+        />
+        <Box
+          paddingTop={4}
+          paddingRight={4}
+          paddingLeft={4}
+          display={Display.Flex}
+          justifyContent={JustifyContent.center}
+        >
+          <SiteOrigin
+            chip
+            siteOrigin={originMetadata.origin}
+            title={originMetadata.origin}
+            iconSrc={originMetadata.iconUrl}
+            iconName={originMetadata.hostname}
+          />
+        </Box>
         <Text
           variant={TextVariant.headingLg}
           textAlign={TextAlign.Center}
@@ -138,7 +227,7 @@ const ConfirmAddSuggestedNFT = () => {
               <ButtonLink
                 key={origin}
                 size={BUTTON_SIZES.INHERIT}
-                href={origin}
+                href={link}
                 target="_blank"
               >
                 {origin}
@@ -162,10 +251,22 @@ const ConfirmAddSuggestedNFT = () => {
               ({
                 id,
                 requestData: {
-                  asset: { address, tokenId, symbol, image, name },
+                  asset: { address, tokenId, symbol, name },
                 },
               }) => {
-                const nftImageURL = getAssetImageURL(image, ipfsGateway);
+                const found = suggestedNftsWithImages.find(
+                  (elm) =>
+                    elm.requestData.asset.tokenId === tokenId &&
+                    isEqualCaseInsensitive(
+                      elm.requestData.asset.address,
+                      address,
+                    ),
+                );
+
+                const nftImageURL = found
+                  ? found.requestData.asset.assetImageUrl
+                  : '';
+
                 const blockExplorerLink = getTokenTrackerLink(
                   address,
                   chainId,
@@ -180,6 +281,7 @@ const ConfirmAddSuggestedNFT = () => {
                   return (
                     <Box
                       className="confirm-add-suggested-nft__nft-single"
+                      key={`confirm-add-suggested-nft__nft-single-${id}`}
                       borderRadius={BorderRadius.MD}
                       margin={0}
                       padding={0}
@@ -233,6 +335,7 @@ const ConfirmAddSuggestedNFT = () => {
                           )}
                           <Text
                             variant={TextVariant.bodyMd}
+                            color={TextColor.textAlternative}
                             className="confirm-add-suggested-nft__nft-tokenId"
                           >
                             #{tokenId}
@@ -298,6 +401,7 @@ const ConfirmAddSuggestedNFT = () => {
                         )}
                         <Text
                           variant={TextVariant.bodySm}
+                          color={TextColor.textAlternative}
                           className="confirm-add-suggested-nft__nft-tokenId"
                         >
                           #{tokenId}
@@ -317,7 +421,7 @@ const ConfirmAddSuggestedNFT = () => {
                           rejectPendingApproval(
                             id,
                             serializeError(
-                              ethErrors.provider.userRejectedRequest(),
+                              providerErrors.userRejectedRequest(),
                             ),
                           ),
                         );

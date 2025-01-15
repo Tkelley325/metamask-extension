@@ -2,7 +2,10 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import LoadingScreen from '../../ui/loading-screen';
 import { SECOND } from '../../../../shared/constants/time';
-import { NETWORK_TYPES } from '../../../../shared/constants/network';
+import {
+  DEPRECATED_NETWORKS,
+  NETWORK_TYPES,
+} from '../../../../shared/constants/network';
 import Popover from '../../ui/popover/popover.component';
 import {
   ButtonPrimary,
@@ -10,8 +13,8 @@ import {
   Icon,
   IconName,
   IconSize,
+  Text,
 } from '../../component-library';
-import { Text } from '../../component-library/text/deprecated';
 import {
   DISPLAY,
   IconColor,
@@ -36,7 +39,7 @@ export default class LoadingNetworkScreen extends PureComponent {
     providerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     showNetworkDropdown: PropTypes.func,
     setProviderArgs: PropTypes.array,
-    setProviderType: PropTypes.func,
+    setActiveNetwork: PropTypes.func,
     rollbackToPreviousProvider: PropTypes.func,
     isNetworkLoading: PropTypes.bool,
     showDeprecatedRpcUrlWarning: PropTypes.bool,
@@ -54,8 +57,16 @@ export default class LoadingNetworkScreen extends PureComponent {
       return loadingMessage;
     }
     const { providerConfig, providerId } = this.props;
+
     const providerName = providerConfig.type;
     const { t } = this.context;
+
+    if (DEPRECATED_NETWORKS.includes(providerConfig.chainId)) {
+      const deprecatedNetworkName =
+        providerConfig.nickname || providerConfig.type;
+
+      return t('connectingToDeprecatedNetwork', [deprecatedNetworkName]);
+    }
 
     switch (providerName) {
       case NETWORK_TYPES.MAINNET:
@@ -66,6 +77,8 @@ export default class LoadingNetworkScreen extends PureComponent {
         return t('connectingToSepolia');
       case NETWORK_TYPES.LINEA_GOERLI:
         return t('connectingToLineaGoerli');
+      case NETWORK_TYPES.LINEA_SEPOLIA:
+        return t('connectingToLineaSepolia');
       case NETWORK_TYPES.LINEA_MAINNET:
         return t('connectingToLineaMainnet');
       default:
@@ -74,7 +87,7 @@ export default class LoadingNetworkScreen extends PureComponent {
   };
 
   renderConnectionFailureNotification = (message, showTryAgain = false) => {
-    const { showNetworkDropdown, setProviderArgs, setProviderType } =
+    const { showNetworkDropdown, setProviderArgs, setActiveNetwork } =
       this.props;
 
     return (
@@ -115,7 +128,7 @@ export default class LoadingNetworkScreen extends PureComponent {
             <ButtonPrimary
               onClick={() => {
                 this.setState({ showErrorScreen: false });
-                setProviderType(...setProviderArgs);
+                setActiveNetwork(...setProviderArgs);
                 window.clearTimeout(this.cancelCallTimeout);
                 this.cancelCallTimeout = setTimeout(
                   this.cancelCall,

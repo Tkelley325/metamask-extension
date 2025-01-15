@@ -18,13 +18,13 @@ export default mmiAuthenticate;
  * @typedef {object} MmiCheckIfTokenIsPresentParam
  * @property {string} service - The service to which we are authenticating, e.g. 'codefi-compliance'
  * @property {object} environment - The environment in which we are authenticating, e.g. 'saturn-dev'
- * @property {apiUrl} apiUrl - The API URL to which we are authenticating, e.g. 'https://saturn-custody.codefi.network/eth'
+ * @property {envName} envName - The environment to which we are authenticating, e.g. 'neptune-custody-prod'
  * @property {object} token - The token used to authenticate
  */
 
 /**
- * @param {import('json-rpc-engine').JsonRpcRequest<MmiCheckIfTokenIsPresentParam>} req - The JSON-RPC request object.
- * @param {import('json-rpc-engine').JsonRpcResponse<true>} res - The JSON-RPC response object.
+ * @param {import('@metamask/utils').JsonRpcRequest<MmiCheckIfTokenIsPresentParam>} req - The JSON-RPC request object.
+ * @param {import('@metamask/utils').JsonRpcResponse<true>} res - The JSON-RPC response object.
  * @param {Function} _next - The json-rpc-engine 'next' callback.
  * @param {Function} end - The json-rpc-engine 'end' callback.
  * @param options0

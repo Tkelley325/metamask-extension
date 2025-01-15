@@ -2,7 +2,7 @@ import React from 'react';
 import {
   TransactionStatus,
   TransactionType,
-} from '../../../../shared/constants/transaction';
+} from '@metamask/transaction-controller';
 import { MOCK_TRANSACTION_BY_TYPE } from '../../../../.storybook/initial-states/transactions';
 import TransactionListItem from '.';
 
@@ -135,13 +135,6 @@ PersonalSign.args = {
   },
 };
 
-Sign.storyName = 'eth_sign';
-Sign.args = {
-  'transactionGroup.primaryTransaction': {
-    ...MOCK_TRANSACTION_BY_TYPE[TransactionType.sign],
-  },
-};
-
 SignTypeData.storyName = 'eth_signTypedData';
 SignTypeData.args = {
   'transactionGroup.primaryTransaction': {
@@ -153,13 +146,6 @@ SimpleSend.storyName = 'simpleSend';
 SimpleSend.args = {
   'transactionGroup.primaryTransaction': {
     ...MOCK_TRANSACTION_BY_TYPE[TransactionType.simpleSend],
-  },
-};
-
-Smart.storyName = 'smart';
-Smart.args = {
-  'transactionGroup.primaryTransaction': {
-    ...MOCK_TRANSACTION_BY_TYPE[TransactionType.smart],
   },
 };
 

@@ -1,87 +1,122 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { getSnapPrefix } from '@metamask/snaps-utils';
 import { useSelector } from 'react-redux';
-import Box from '../../../ui/box';
 import {
   BackgroundColor,
   TextColor,
-  FLEX_DIRECTION,
   TextVariant,
   AlignItems,
-  DISPLAY,
-  BLOCK_SIZES,
-  FontWeight,
+  Display,
+  BlockSize,
+  IconColor,
+  JustifyContent,
 } from '../../../../helpers/constants/design-system';
-import {
-  getSnapName,
-  removeSnapIdPrefix,
-} from '../../../../helpers/utils/util';
+import { getSnapMetadata } from '../../../../selectors';
 
-import { Text } from '../../../component-library/text/deprecated';
-import { getTargetSubjectMetadata } from '../../../../selectors';
-import SnapAvatar from '../snap-avatar';
-import SnapVersion from '../snap-version/snap-version';
+import {
+  Text,
+  Box,
+  AvatarIcon,
+  IconName,
+  IconSize,
+  ButtonIconSize,
+  ButtonIcon,
+} from '../../../component-library';
+import { SnapMetadataModal } from '../snap-metadata-modal';
+import { useI18nContext } from '../../../../hooks/useI18nContext';
+import { SnapIcon } from '../snap-icon';
 
 const SnapAuthorshipHeader = ({
   snapId,
   className,
-  boxShadow = 'var(--shadow-size-lg) var(--color-shadow-default)',
+  boxShadow = 'var(--shadow-size-md) var(--color-shadow-default)',
+  showInfo = true,
+  startAccessory,
+  endAccessory,
+  onCancel,
 }) => {
-  // We're using optional chaining with snapId, because with the current implementation
-  // of snap update in the snap controller, we do not have reference to snapId when an
-  // update request is rejected because the reference comes from the request itself and not subject metadata
-  // like it is done with snap install
-  const snapPrefix = snapId && getSnapPrefix(snapId);
-  const packageName = snapId && removeSnapIdPrefix(snapId);
-  const isNPM = snapPrefix === 'npm:';
-  const url = isNPM
-    ? `https://www.npmjs.com/package/${packageName}`
-    : packageName;
+  const t = useI18nContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const subjectMetadata = useSelector((state) =>
-    getTargetSubjectMetadata(state, snapId),
+  const { name: snapName, hidden } = useSelector((state) =>
+    getSnapMetadata(state, snapId),
   );
 
-  const friendlyName = snapId && getSnapName(snapId, subjectMetadata);
+  const openModal = () => setIsModalOpen(true);
+
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <Box
       className={classnames('snaps-authorship-header', className)}
       backgroundColor={BackgroundColor.backgroundDefault}
-      width={BLOCK_SIZES.FULL}
+      width={BlockSize.Full}
       alignItems={AlignItems.center}
-      display={DISPLAY.FLEX}
+      display={Display.Flex}
       padding={4}
       style={{
         boxShadow,
+        minHeight: '64px',
+        zIndex: 1,
       }}
     >
-      <Box>
-        <SnapAvatar snapId={snapId} />
-      </Box>
+      {snapId && (
+        <SnapMetadataModal
+          snapId={snapId}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
+      )}
+      {onCancel && (
+        <ButtonIcon
+          iconName={IconName.Close}
+          ariaLabel={t('close')}
+          size={ButtonIconSize.Md}
+          onClick={onCancel}
+          color={IconColor.iconDefault}
+        />
+      )}
+      {startAccessory && startAccessory}
       <Box
         marginLeft={4}
         marginRight={4}
-        display={DISPLAY.FLEX}
-        flexDirection={FLEX_DIRECTION.COLUMN}
+        display={Display.Flex}
+        justifyContent={JustifyContent.center}
+        alignItems={AlignItems.center}
         style={{ overflow: 'hidden' }}
+        width={BlockSize.Full}
       >
-        <Text ellipsis fontWeight={FontWeight.Medium}>
-          {friendlyName}
-        </Text>
-        <Text
-          ellipsis
-          variant={TextVariant.bodySm}
-          color={TextColor.textAlternative}
+        <Box
+          display={Display.Flex}
+          justifyContent={JustifyContent.center}
+          alignItems={AlignItems.center}
+          style={{ overflow: 'hidden' }}
         >
-          {packageName}
-        </Text>
+          <SnapIcon snapId={snapId} avatarSize={IconSize.Sm} />
+          <Text
+            color={TextColor.textDefault}
+            variant={TextVariant.bodyMdMedium}
+            marginLeft={2}
+            title={snapName}
+            ellipsis
+          >
+            {snapName}
+          </Text>
+        </Box>
       </Box>
-      <Box marginLeft="auto">
-        <SnapVersion version={subjectMetadata?.version} url={url} />
-      </Box>
+      {showInfo && !hidden && (
+        <Box marginLeft="auto">
+          <AvatarIcon
+            className="snaps-authorship-header__button"
+            iconName={IconName.Info}
+            onClick={openModal}
+            color={IconColor.iconDefault}
+            backgroundColor={BackgroundColor.backgroundAlternative}
+          />
+        </Box>
+      )}
+      {endAccessory && endAccessory}
     </Box>
   );
 };
@@ -96,6 +131,10 @@ SnapAuthorshipHeader.propTypes = {
    */
   className: PropTypes.string,
   boxShadow: PropTypes.string,
+  showInfo: PropTypes.bool,
+  startAccessory: PropTypes.element,
+  endAccessory: PropTypes.element,
+  onCancel: PropTypes.func,
 };
 
 export default SnapAuthorshipHeader;

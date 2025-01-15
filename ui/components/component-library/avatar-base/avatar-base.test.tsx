@@ -79,10 +79,10 @@ describe('AvatarBase', () => {
       </>,
     );
     expect(getByTestId(TextColor.successDefault)).toHaveClass(
-      `box--color-${TextColor.successDefault}`,
+      `mm-box--color-${TextColor.successDefault}`,
     );
     expect(getByTestId(TextColor.errorDefault)).toHaveClass(
-      `box--color-${TextColor.errorDefault}`,
+      `mm-box--color-${TextColor.errorDefault}`,
     );
   });
   // background color
@@ -100,10 +100,10 @@ describe('AvatarBase', () => {
       </>,
     );
     expect(getByTestId(Color.successDefault)).toHaveClass(
-      `box--background-color-${Color.successDefault}`,
+      `mm-box--background-color-${Color.successDefault}`,
     );
     expect(getByTestId(Color.errorDefault)).toHaveClass(
-      `box--background-color-${Color.errorDefault}`,
+      `mm-box--background-color-${Color.errorDefault}`,
     );
   });
   // border color
@@ -121,16 +121,17 @@ describe('AvatarBase', () => {
       </>,
     );
     expect(getByTestId(Color.successDefault)).toHaveClass(
-      `box--border-color-${Color.successDefault}`,
+      `mm-box--border-color-${Color.successDefault}`,
     );
     expect(getByTestId(Color.errorDefault)).toHaveClass(
-      `box--border-color-${Color.errorDefault}`,
+      `mm-box--border-color-${Color.errorDefault}`,
     );
   });
   it('should forward a ref to the root html element', () => {
-    const ref = React.createRef();
+    const ref = React.createRef<HTMLSpanElement>();
     render(<AvatarBase ref={ref}>A</AvatarBase>);
     expect(ref.current).not.toBeNull();
-    expect(ref.current.nodeName).toBe('DIV');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(ref.current!.nodeName).toBe('DIV');
   });
 });

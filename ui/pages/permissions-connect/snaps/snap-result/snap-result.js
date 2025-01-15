@@ -1,33 +1,33 @@
 import PropTypes from 'prop-types';
 import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { PageContainerFooter } from '../../../../components/ui/page-container';
 import { useI18nContext } from '../../../../hooks/useI18nContext';
 
 import Box from '../../../../components/ui/box/box';
 import {
   AlignItems,
-  BLOCK_SIZES,
+  BlockSize,
   BorderStyle,
-  FLEX_DIRECTION,
-  FONT_WEIGHT,
+  FlexDirection,
+  FontWeight,
   JustifyContent,
   TextVariant,
   BackgroundColor,
   IconColor,
   TextAlign,
-  FontWeight,
+  Display,
 } from '../../../../helpers/constants/design-system';
 import {
   AvatarIcon,
+  AvatarIconSize,
   IconName,
-  IconSize,
-  ValidTag,
+  Text,
 } from '../../../../components/component-library';
-import { Text } from '../../../../components/component-library/text/deprecated';
 import PulseLoader from '../../../../components/ui/pulse-loader/pulse-loader';
 import InstallError from '../../../../components/app/snaps/install-error/install-error';
 import SnapAuthorshipHeader from '../../../../components/app/snaps/snap-authorship-header';
-import { getSnapName } from '../../../../helpers/utils/util';
+import { getSnapMetadata } from '../../../../selectors';
 
 export default function SnapResult({
   request,
@@ -44,9 +44,8 @@ export default function SnapResult({
 
   const hasError = !requestState.loading && requestState.error;
   const isLoading = requestState.loading;
-  const snapName = getSnapName(
-    targetSubjectMetadata.origin,
-    targetSubjectMetadata,
+  const { name: snapName } = useSelector((state) =>
+    getSnapMetadata(state, targetSubjectMetadata.origin),
   );
 
   function getSuccessScreen(requestType, snapNameToRender) {
@@ -64,25 +63,23 @@ export default function SnapResult({
 
     return (
       <Box
-        flexDirection={FLEX_DIRECTION.COLUMN}
+        flexDirection={FlexDirection.Column}
         alignItems={AlignItems.center}
         justifyContent={JustifyContent.center}
-        height={BLOCK_SIZES.FULL}
+        height={BlockSize.Full}
         paddingTop={2}
         paddingBottom={2}
+        backgroundColor={BackgroundColor.backgroundAlternative}
       >
         <AvatarIcon
           className="snap-result__header__icon"
           iconName={IconName.Confirmation}
-          size={IconSize.Xl}
-          iconProps={{
-            size: IconSize.Xl,
-          }}
+          size={AvatarIconSize.Xl}
           color={IconColor.successDefault}
           backgroundColor={BackgroundColor.successMuted}
         />
         <Text
-          fontWeight={FONT_WEIGHT.BOLD}
+          fontWeight={FontWeight.Bold}
           variant={TextVariant.headingLg}
           paddingBottom={2}
           marginTop={4}
@@ -91,7 +88,7 @@ export default function SnapResult({
         </Text>
         <Text textAlign={TextAlign.Center}>
           {t('snapResultSuccessDescription', [
-            <Text as={ValidTag.Span} key="1" fontWeight={FontWeight.Medium}>
+            <Text as="span" key="1" fontWeight={FontWeight.Medium}>
               {snapNameToRender}
             </Text>,
           ])}
@@ -108,7 +105,7 @@ export default function SnapResult({
       case 'wallet_installSnap':
         failedScreenTitle = t('snapInstallationErrorTitle');
         failedScreenDescription = t('snapInstallationErrorDescription', [
-          <Text as={ValidTag.Span} key="1" fontWeight={FontWeight.Medium}>
+          <Text as="span" key="1" fontWeight={FontWeight.Medium}>
             {snapNameToRender}
           </Text>,
         ]);
@@ -116,7 +113,7 @@ export default function SnapResult({
       case 'wallet_updateSnap':
         failedScreenTitle = t('snapUpdateErrorTitle');
         failedScreenDescription = t('snapUpdateErrorDescription', [
-          <Text as={ValidTag.Span} key="1" fontWeight={FontWeight.Medium}>
+          <Text as="span" key="1" fontWeight={FontWeight.Medium}>
             {snapNameToRender}
           </Text>,
         ]);
@@ -139,27 +136,35 @@ export default function SnapResult({
     <Box
       className="page-container snap-result"
       justifyContent={JustifyContent.spaceBetween}
-      height={BLOCK_SIZES.FULL}
+      height={BlockSize.Full}
       borderStyle={BorderStyle.none}
-      flexDirection={FLEX_DIRECTION.COLUMN}
+      flexDirection={FlexDirection.Column}
+      backgroundColor={BackgroundColor.backgroundAlternative}
     >
-      <SnapAuthorshipHeader snapId={targetSubjectMetadata.origin} />
+      <SnapAuthorshipHeader
+        snapId={targetSubjectMetadata.origin}
+        onCancel={onSubmit}
+      />
       <Box
         className="snap-result__content"
         paddingLeft={4}
         paddingRight={4}
         alignItems={AlignItems.center}
-        flexDirection={FLEX_DIRECTION.COLUMN}
+        flexDirection={FlexDirection.Column}
         style={{
           overflowY: 'auto',
         }}
+        backgroundColor={BackgroundColor.backgroundAlternative}
+        height={BlockSize.Full}
       >
         {isLoading && (
           <Box
             className="snap-result__content__loader-container"
-            flexDirection={FLEX_DIRECTION.COLUMN}
+            display={Display.Flex}
+            flexDirection={FlexDirection.Column}
             alignItems={AlignItems.center}
             justifyContent={JustifyContent.center}
+            height={BlockSize.Full}
           >
             <PulseLoader />
           </Box>
@@ -172,10 +177,8 @@ export default function SnapResult({
       <Box
         className="snap-result__footer"
         alignItems={AlignItems.center}
-        flexDirection={FLEX_DIRECTION.COLUMN}
-        style={{
-          boxShadow: 'var(--shadow-size-lg) var(--color-shadow-default)',
-        }}
+        flexDirection={FlexDirection.Column}
+        backgroundColor={BackgroundColor.backgroundAlternative}
       >
         <PageContainerFooter
           hideCancel

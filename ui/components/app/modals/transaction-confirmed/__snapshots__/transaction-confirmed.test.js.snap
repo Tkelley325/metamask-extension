@@ -12,19 +12,19 @@ exports[`Transaction Confirmed should match snapshot 1`] = `
         class="transaction-confirmed__content"
       >
         <span
-          class="box mm-icon mm-icon--size-xl box--display-inline-block box--flex-direction-row box--color-success-default"
+          class="mm-box mm-icon mm-icon--size-xl mm-box--display-inline-block mm-box--color-success-default"
           style="mask-image: url('./images/icons/check.svg');"
         />
-        <div
-          class="transaction-confirmed__title"
+        <h3
+          class="mm-box mm-text mm-text--heading-md mm-text--font-weight-medium mm-text--text-align-center mm-box--color-text-default"
         >
           [confirmed]!
-        </div>
-        <div
-          class="transaction-confirmed__description"
+        </h3>
+        <p
+          class="mm-box mm-text mm-text--body-md mm-text--text-align-center mm-box--color-text-default"
         >
           [initialTransactionConfirmed]
-        </div>
+        </p>
       </div>
     </div>
     <div
@@ -32,8 +32,6 @@ exports[`Transaction Confirmed should match snapshot 1`] = `
     >
       <button
         class="button btn--rounded btn-primary modal-container__footer-button"
-        role="button"
-        tabindex="0"
       >
         [ok]
       </button>

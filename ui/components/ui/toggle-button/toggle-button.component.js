@@ -2,13 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactToggleButton from 'react-toggle-button';
 import classnames from 'classnames';
+import { lightTheme, darkTheme } from '@metamask/design-tokens';
+import { useTheme } from '../../../hooks/useTheme';
 
 const trackStyle = {
   width: '40px',
   height: '24px',
   padding: '0px',
   borderRadius: '26px',
-  border: '2px solid var(--color-primary-default)',
+  border: 'none',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -16,40 +18,67 @@ const trackStyle = {
 
 const offTrackStyle = {
   ...trackStyle,
-  border: '2px solid var(--color-border-default)',
+  border: 'none',
 };
 
 const thumbStyle = {
   width: '18px',
   height: '18px',
   display: 'flex',
-  boxShadow: 'none',
+  boxShadow: 'var(--shadow-size-xs) var(--color-shadow-default)',
   alignSelf: 'center',
   borderRadius: '50%',
   position: 'relative',
 };
 
-const colors = {
+const colorsLight = {
   activeThumb: {
-    base: '#037DD6',
+    base: lightTheme.colors.primary.inverse,
   },
   inactiveThumb: {
-    base: '#6A737D',
+    base: lightTheme.colors.primary.inverse,
   },
   active: {
-    base: '#F2F4F6',
-    hover: '#F2F4F6',
+    base: lightTheme.colors.primary.default,
+    hover: lightTheme.colors.primary.defaultHover,
   },
   inactive: {
-    base: '#F2F4F6',
-    hover: '#F2F4F6',
+    base: lightTheme.colors.icon.muted,
+    hover: lightTheme.colors.icon.muted,
+  },
+};
+
+const colorsDark = {
+  activeThumb: {
+    base: lightTheme.colors.primary.inverse,
+  },
+  inactiveThumb: {
+    base: lightTheme.colors.primary.inverse,
+  },
+  active: {
+    base: darkTheme.colors.primary.default,
+    hover: darkTheme.colors.primary.defaultHover,
+  },
+  inactive: {
+    base: darkTheme.colors.icon.muted,
+    hover: darkTheme.colors.icon.muted,
   },
 };
 
 const ToggleButton = (props) => {
-  const { value, onToggle, offLabel, onLabel, disabled, className } = props;
+  const {
+    value,
+    onToggle,
+    offLabel,
+    onLabel,
+    disabled,
+    className,
+    dataTestId,
+  } = props;
 
   const modifier = value ? 'on' : 'off';
+
+  const theme = useTheme();
 
   return (
     <label
@@ -76,7 +105,10 @@ const ToggleButton = (props) => {
         trackStyle={value ? trackStyle : offTrackStyle}
         thumbStyle={thumbStyle}
         thumbAnimateRange={[3, 18]}
-        colors={colors}
+        colors={theme === 'light' ? colorsLight : colorsDark}
+        passThroughInputProps={{
+          'data-testid': dataTestId,
+        }}
       />
       <div className="toggle-button__status">
         <span className="toggle-button__label-off">{offLabel}</span>
@@ -111,6 +143,10 @@ ToggleButton.propTypes = {
    * Additional className to add to the ToggleButton
    */
   className: PropTypes.string,
+  /**
+   * A test id for the toggle button
+   */
+  dataTestId: PropTypes.string,
 };
 
 export default ToggleButton;

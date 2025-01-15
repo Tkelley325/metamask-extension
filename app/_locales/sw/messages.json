@@ -75,9 +75,6 @@
   "asset": {
     "message": "Rasilimali"
   },
-  "attemptingConnect": {
-    "message": "Inajaribu kuunganisha kwenye blockchain."
-  },
   "attributions": {
     "message": "Sifa"
   },
@@ -169,9 +166,6 @@
   "copyAddress": {
     "message": "Nakili anwani kwenye ubao wa kunakilia"
   },
-  "copyPrivateKey": {
-    "message": "Huu ni ufunguo wako wa kibinafsi (bofya ili unakili)"
-  },
   "copyToClipboard": {
     "message": "Nakili kwenye ubao wa kunakili"
   },
@@ -205,12 +199,6 @@
   "delete": {
     "message": "Futa"
   },
-  "deleteNetwork": {
-    "message": "Futa Mtandao?"
-  },
-  "deleteNetworkDescription": {
-    "message": "Una uhakika unataka kufuta mtandao huu?"
-  },
   "details": {
     "message": "Maelezo"
   },
@@ -232,15 +220,6 @@
   "editContact": {
     "message": "Hariri Mawasiliano"
   },
-  "ensNotFoundOnCurrentNetwork": {
-    "message": "Jina la ENS halipatikani kwenye mtandao wa sasa. Jaribu kuhamia kwenye Mtandao Mkuu wa Ethereum."
-  },
-  "ensRegistrationError": {
-    "message": "Hitilafu imetokea kwenye usajili wa jina la ENS"
-  },
-  "enterPassword": {
-    "message": "Ingiza nenosiri"
-  },
   "enterPasswordContinue": {
     "message": "Ingiza nenosiri ili uendelee"
   },
@@ -251,9 +230,6 @@
     "message": "Tazama akaunti kwenye Etherscan"
   },
   "expandView": {
-    "message": "Panua Mwonekano"
-  },
-  "exportPrivateKey": {
     "message": "Panua Mwonekano"
   },
   "failed": {
@@ -359,12 +335,6 @@
   "invalidAddressRecipient": {
     "message": "Anwani ya mpokeaji si halali"
   },
-  "invalidAddressRecipientNotEthNetwork": {
-    "message": "Kwa mtandao wa ETH, weka herufi ndogo"
-  },
-  "invalidBlockExplorerURL": {
-    "message": "Block Explorer URL batili"
-  },
   "invalidRPC": {
     "message": "RPC URL batili"
   },
@@ -455,9 +425,6 @@
   "next": {
     "message": "Inayofuata"
   },
-  "noAddressForName": {
-    "message": "Hakuna anwani iliyoundwa kwa jina hili."
-  },
   "noConversionRateAvailable": {
     "message": "Hakuna Kiwango cha Ubadilishaji"
   },
@@ -519,12 +486,6 @@
   "prev": {
     "message": "Hakiki"
   },
-  "primaryCurrencySetting": {
-    "message": "Sarafu ya Msingi"
-  },
-  "primaryCurrencySettingDescription": {
-    "message": "Chagua mzawa ili kuweka kipaumbele kuonyesha thamani kwenye sarafu mzawa ya mnyororo (k.m ETH). Chagua Fiat ili uwelke kipaumbale kuonyesha thamani kwenye sarafu yako ya fiat uliyoichagua."
-  },
   "privacyMsg": {
     "message": "Sera ya Faragha"
   },
@@ -538,14 +499,8 @@
   "privateNetwork": {
     "message": "Mtandao Binafsi"
   },
-  "queue": {
-    "message": "Foleni"
-  },
   "readdToken": {
     "message": "Unaweza kuongeza tena kianzio hiki hapo baadaye kwa kwenda kwenye \"Ongeza kianzio\" kwenye machaguo yako ya menyu ya akaunti."
-  },
-  "recipientAddressPlaceholder": {
-    "message": "Tafuta, anwani za umma (0x), au ENS"
   },
   "reject": {
     "message": "Kataa"
@@ -605,12 +560,6 @@
   "search": {
     "message": "Tafuta"
   },
-  "searchResults": {
-    "message": "Matokeo ya Utafutaji"
-  },
-  "searchTokens": {
-    "message": "Tafuta Vianzio"
-  },
   "securityAndPrivacy": {
     "message": "Ulinzi na Faragha"
   },
@@ -632,9 +581,6 @@
   "send": {
     "message": "Tuma"
   },
-  "sendTokens": {
-    "message": "Tuma Vianzio"
-  },
   "settings": {
     "message": "Mipangilio"
   },
@@ -649,9 +595,6 @@
   },
   "showHexDataDescription": {
     "message": "Chagua hii ili uonyeshe sehemu ya data ya hex kwenye skrini ya tuma"
-  },
-  "showPrivateKeys": {
-    "message": "Onyesha Fungo Binafsi"
   },
   "sigRequest": {
     "message": "Ombi la Saini"
@@ -773,9 +716,6 @@
   "tryAgain": {
     "message": "Jaribu tena"
   },
-  "typePassword": {
-    "message": "Andika nenosiri lako la MetaMask"
-  },
   "unapproved": {
     "message": "Haijaidhinishwa"
   },
@@ -784,12 +724,6 @@
   },
   "unknown": {
     "message": "Haijulikani"
-  },
-  "unknownCameraError": {
-    "message": "Kulikuwa na hitilafu wakati wa kujaribu kufikia kamera yako. Tafadhali jaribu tena..."
-  },
-  "unknownCameraErrorTitle": {
-    "message": "Ayaa! Hitilafu fulani imetokea..."
   },
   "unknownNetwork": {
     "message": "Mtandao Binafsi Usiojulikana"
@@ -802,9 +736,6 @@
   },
   "unlockMessage": {
     "message": "Wavuti uliotenganishwa unasubiri"
-  },
-  "updatedWithDate": {
-    "message": "Imesasishwa $1"
   },
   "urlErrorMsg": {
     "message": "URI huhitaji kiambishi sahihi cha  HTTP/HTTPS."

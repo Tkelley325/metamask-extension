@@ -1,16 +1,20 @@
 const { promises: fs } = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
-const { mergeWith, cloneDeep, capitalize } = require('lodash');
+const { mergeWith, cloneDeep } = require('lodash');
+const { isManifestV3 } = require('../../shared/modules/mv3.utils');
 
-const baseManifest = process.env.ENABLE_MV3
+const baseManifest = isManifestV3
   ? require('../../app/manifest/v3/_base.json')
   : require('../../app/manifest/v2/_base.json');
+const baradDurManifest = isManifestV3
+  ? require('../../app/manifest/v3/_barad_dur.json')
+  : require('../../app/manifest/v2/_barad_dur.json');
 const { loadBuildTypesConfig } = require('../lib/build-type');
 
 const { TASKS, ENVIRONMENT } = require('./constants');
 const { createTask, composeSeries } = require('./task');
-const { getEnvironment } = require('./utils');
+const { getEnvironment, getBuildName } = require('./utils');
 
 module.exports = createManifestTasks;
 
@@ -32,12 +36,13 @@ function createManifestTasks({
             '..',
             '..',
             'app',
-            process.env.ENABLE_MV3 ? 'manifest/v3' : 'manifest/v2',
+            isManifestV3 ? 'manifest/v3' : 'manifest/v2',
             `${platform}.json`,
           ),
         );
         const result = mergeWith(
           cloneDeep(baseManifest),
+          process.env.BARAD_DUR ? cloneDeep(baradDurManifest) : {},
           platformModifications,
           browserVersionMap[platform],
           await getBuildModifications(buildType, platform),
@@ -64,6 +69,7 @@ function createManifestTasks({
       ...manifest.permissions,
       'webRequestBlocking',
       'http://localhost/*',
+      'tabs', // test builds need tabs permission for switchToWindowWithTitle
     ];
   });
 
@@ -73,6 +79,7 @@ function createManifestTasks({
       ...manifest.permissions,
       'webRequestBlocking',
       'http://localhost/*',
+      'tabs', // test builds need tabs permission for switchToWindowWithTitle
     ];
   });
 
@@ -124,10 +131,6 @@ function createManifestTasks({
       return;
     }
 
-    const mv3Str = process.env.ENABLE_MV3 ? ' MV3' : '';
-    const lavamoatStr = applyLavaMoat ? ' lavamoat' : '';
-    const snowStr = shouldIncludeSnow ? ' snow' : '';
-
     // Get the first 8 characters of the git revision id
     const gitRevisionStr = childProcess
       .execSync('git rev-parse HEAD')
@@ -135,12 +138,13 @@ function createManifestTasks({
       .trim()
       .substring(0, 8);
 
-    const buildName =
-      buildType === 'mmi'
-        ? `MetaMask Institutional ${mv3Str}${lavamoatStr}${snowStr}`
-        : `MetaMask ${capitalize(buildType)}${mv3Str}${lavamoatStr}${snowStr}`;
-
-    manifest.name = buildName;
+    manifest.name = getBuildName({
+      environment,
+      buildType,
+      applyLavaMoat,
+      shouldIncludeSnow,
+      isManifestV3,
+    });
 
     manifest.description = `${environment} build from git id: ${gitRevisionStr}`;
   }

@@ -1,19 +1,16 @@
-import { SubjectType } from '@metamask/subject-metadata-controller';
-///: BEGIN:ONLY_INCLUDE_IN(snaps)
-import { WALLET_SNAP_PERMISSION_KEY } from '@metamask/rpc-methods';
-///: END:ONLY_INCLUDE_IN
+import { SubjectType } from '@metamask/permission-controller';
+import { WALLET_SNAP_PERMISSION_KEY } from '@metamask/snaps-rpc-methods';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { isEvmAccountType } from '@metamask/keyring-api';
 import {
   getAccountsWithLabels,
   getLastConnectedInfo,
   getPermissionsRequests,
-  getSelectedAddress,
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+  getSelectedInternalAccount,
   getSnapInstallOrUpdateRequests,
   getRequestState,
   getSnapsInstallPrivacyWarningShown,
-  ///: END:ONLY_INCLUDE_IN
   getRequestType,
   getTargetSubjectMetadata,
 } from '../../selectors';
@@ -25,21 +22,17 @@ import {
   rejectPermissionsRequest,
   showModal,
   getRequestAccountTabIds,
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   resolvePendingApproval,
   rejectPendingApproval,
   setSnapsInstallPrivacyWarningShownStatus,
-  ///: END:ONLY_INCLUDE_IN
 } from '../../store/actions';
 import {
   CONNECT_ROUTE,
   CONNECT_CONFIRM_PERMISSIONS_ROUTE,
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   CONNECT_SNAPS_CONNECT_ROUTE,
   CONNECT_SNAP_INSTALL_ROUTE,
   CONNECT_SNAP_UPDATE_ROUTE,
   CONNECT_SNAP_RESULT_ROUTE,
-  ///: END:ONLY_INCLUDE_IN
 } from '../../helpers/constants/routes';
 import PermissionApproval from './permissions-connect.component';
 
@@ -51,13 +44,11 @@ const mapStateToProps = (state, ownProps) => {
     location: { pathname },
   } = ownProps;
   let permissionsRequests = getPermissionsRequests(state);
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   permissionsRequests = [
     ...permissionsRequests,
     ...getSnapInstallOrUpdateRequests(state),
   ];
-  ///: END:ONLY_INCLUDE_IN
-  const currentAddress = getSelectedAddress(state);
+  const { address: currentAddress } = getSelectedInternalAccount(state);
 
   const permissionsRequest = permissionsRequests.find(
     (req) => req.metadata.id === permissionsRequestId,
@@ -81,7 +72,6 @@ const mapStateToProps = (state, ownProps) => {
 
   let requestType = getRequestType(state, permissionsRequestId);
 
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   // We want to only assign the wallet_connectSnaps request type (i.e. only show
   // SnapsConnect) if and only if we get a singular wallet_snap permission request.
   // Any other request gets pushed to the normal permission connect flow.
@@ -94,9 +84,12 @@ const mapStateToProps = (state, ownProps) => {
   }
 
   const requestState = getRequestState(state, permissionsRequestId) || {};
-  ///: END:ONLY_INCLUDE_IN
 
-  const accountsWithLabels = getAccountsWithLabels(state);
+  // We only consider EVM accounts.
+  // Connections with non-EVM accounts (Bitcoin only for now) are used implicitly and handled by the Bitcoin Snap itself.
+  const accountsWithLabels = getAccountsWithLabels(state).filter((account) =>
+    isEvmAccountType(account.type),
+  );
 
   const lastConnectedInfo = getLastConnectedInfo(state) || {};
   const addressLastConnectedMap = lastConnectedInfo[origin]?.accounts || {};
@@ -110,7 +103,6 @@ const mapStateToProps = (state, ownProps) => {
 
   const connectPath = `${CONNECT_ROUTE}/${permissionsRequestId}`;
   const confirmPermissionPath = `${CONNECT_ROUTE}/${permissionsRequestId}${CONNECT_CONFIRM_PERMISSIONS_ROUTE}`;
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   const snapsConnectPath = `${CONNECT_ROUTE}/${permissionsRequestId}${CONNECT_SNAPS_CONNECT_ROUTE}`;
   const snapInstallPath = `${CONNECT_ROUTE}/${permissionsRequestId}${CONNECT_SNAP_INSTALL_ROUTE}`;
   const snapUpdatePath = `${CONNECT_ROUTE}/${permissionsRequestId}${CONNECT_SNAP_UPDATE_ROUTE}`;
@@ -119,12 +111,9 @@ const mapStateToProps = (state, ownProps) => {
     pathname === snapInstallPath ||
     pathname === snapUpdatePath ||
     pathname === snapResultPath;
-  ///: END:ONLY_INCLUDE_IN
 
   let totalPages = 1 + isRequestingAccounts;
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   totalPages += isSnapInstallOrUpdateOrResult;
-  ///: END:ONLY_INCLUDE_IN
   totalPages = totalPages.toString();
 
   let page = '';
@@ -132,12 +121,10 @@ const mapStateToProps = (state, ownProps) => {
     page = '1';
   } else if (pathname === confirmPermissionPath) {
     page = isRequestingAccounts ? '2' : '1';
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
   } else if (isSnapInstallOrUpdateOrResult) {
     page = isRequestingAccounts ? '3' : '2';
   } else if (pathname === snapsConnectPath) {
     page = 1;
-    ///: END:ONLY_INCLUDE_IN
   } else {
     throw new Error('Incorrect path for permissions-connect component');
   }
@@ -145,7 +132,6 @@ const mapStateToProps = (state, ownProps) => {
   return {
     isRequestingAccounts,
     requestType,
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
     snapsConnectPath,
     snapInstallPath,
     snapUpdatePath,
@@ -153,7 +139,6 @@ const mapStateToProps = (state, ownProps) => {
     requestState,
     hideTopBar: isSnapInstallOrUpdateOrResult,
     snapsInstallPrivacyWarningShown: getSnapsInstallPrivacyWarningShown(state),
-    ///: END:ONLY_INCLUDE_IN
     permissionsRequest,
     permissionsRequestId,
     accounts: accountsWithLabels,
@@ -177,7 +162,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(approvePermissionsRequest(request)),
     rejectPermissionsRequest: (requestId) =>
       dispatch(rejectPermissionsRequest(requestId)),
-    ///: BEGIN:ONLY_INCLUDE_IN(snaps)
     approvePendingApproval: (id, value) =>
       dispatch(resolvePendingApproval(id, value)),
     rejectPendingApproval: (id, error) =>
@@ -185,7 +169,6 @@ const mapDispatchToProps = (dispatch) => {
     setSnapsInstallPrivacyWarningShownStatus: (shown) => {
       dispatch(setSnapsInstallPrivacyWarningShownStatus(shown));
     },
-    ///: END:ONLY_INCLUDE_IN
     showNewAccountModal: ({ onCreateNewAccount, newAccountNumber }) => {
       return dispatch(
         showModal({

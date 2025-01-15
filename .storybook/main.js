@@ -1,6 +1,9 @@
 const path = require('path');
 const { ProvidePlugin } = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.resolve(__dirname, '../.metamaskrc') });
+
 module.exports = {
   core: {
     disableTelemetry: true,
@@ -23,8 +26,14 @@ module.exports = {
     'storybook-dark-mode',
     '@whitespace/storybook-addon-html',
     '@storybook/addon-mdx-gfm',
+    '@storybook/addon-designs',
   ],
   staticDirs: ['../app', './images'],
+  env: (config) => ({
+    ...config,
+    ENABLE_CONFIRMATION_REDESIGN: true,
+    INFURA_PROJECT_ID: process.env.INFURA_STORYBOOK_PROJECT_ID || '',
+  }),
   // Uses babel.config.js settings and prevents "Missing class properties transform" error
   babel: async (options) => ({
     overrides: options.overrides,
@@ -36,6 +45,22 @@ module.exports = {
     };
     config.resolve.alias['webextension-polyfill'] = require.resolve(
       '../ui/__mocks__/webextension-polyfill.js',
+    );
+    config.resolve.alias['../../../../store/actions'] = require.resolve(
+      '../ui/__mocks__/actions.js',
+    );
+    config.resolve.alias['../../../../../../store/actions'] = require.resolve(
+      '../ui/__mocks__/actions.js',
+    );
+    config.resolve.alias['../../../store/actions'] = require.resolve(
+      '../ui/__mocks__/actions.js',
+    );
+    // Import within controller-utils crashes storybook.
+    config.resolve.alias['@ethereumjs/util'] = require.resolve(
+      '../ui/__mocks__/ethereumjs-util.js',
+    );
+    config.resolve.alias['./useNftCollectionsMetadata'] = require.resolve(
+      '../ui/__mocks__/useNftCollectionsMetadata.js',
     );
     config.resolve.fallback = {
       child_process: false,
@@ -60,6 +85,7 @@ module.exports = {
         {
           loader: 'css-loader',
           options: {
+            esModule: false,
             import: false,
             url: false,
           },
@@ -68,9 +94,9 @@ module.exports = {
           loader: 'sass-loader',
           options: {
             sourceMap: true,
-            implementation: require('sass'),
+            implementation: require('sass-embedded'),
             sassOptions: {
-              includePaths: ['ui/css/'],
+              includePaths: ['ui/css/', 'node_modules/'],
             },
           },
         },
@@ -79,6 +105,10 @@ module.exports = {
     config.plugins.push(
       new CopyWebpackPlugin({
         patterns: [
+          {
+            from: path.join('ui', 'css', 'utilities', 'fonts/'),
+            to: 'fonts',
+          },
           {
             from: path.join(
               'node_modules',
@@ -103,6 +133,10 @@ module.exports = {
   },
   framework: {
     name: '@storybook/react-webpack5',
-    options: {},
+    options: {
+      builder: {
+        useSWC: true,
+      },
+    },
   },
 };

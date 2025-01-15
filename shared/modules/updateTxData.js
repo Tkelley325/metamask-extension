@@ -1,4 +1,4 @@
-import { TransactionType } from '../constants/transaction';
+import { TransactionType } from '@metamask/transaction-controller';
 
 export default function updateTxData({
   txData,
@@ -13,7 +13,11 @@ export default function updateTxData({
   toAddress,
   name,
 }) {
-  if (txData.type === TransactionType.simpleSend) {
+  if (
+    [TransactionType.simpleSend, TransactionType.swapAndSend].includes(
+      txData.type,
+    )
+  ) {
     addToAddressBookIfNew(toAddress, toAccounts);
   }
 
